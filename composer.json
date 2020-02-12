@@ -1,0 +1,60 @@
+{
+    "name": "sylius/api-bundle",
+    "type": "symfony-bundle",
+    "description": "APIs management for Symfony projects.",
+    "keywords": ["api", "rest"],
+    "homepage": "http://sylius.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Paweł Jędrzejewski",
+            "homepage": "http://pjedrzejewski.com"
+        },
+        {
+            "name": "Sylius project",
+            "homepage": "http://sylius.com"
+        },
+        {
+            "name": "Community contributions",
+            "homepage": "http://github.com/Sylius/Sylius/contributors"
+        }
+    ],
+    "require": {
+        "php": "^7.3",
+
+        "api-platform/core": "^2.5",
+        "sylius/core-bundle": "^1.7"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "^5.0",
+        "phpunit/phpunit": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sylius\\Bundle\\ApiBundle\\": ""
+        },
+        "exclude-from-classmap": [
+            "spec/",
+            "Tests/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Sylius\\Bundle\\ApiBundle\\spec\\": "spec/",
+            "Sylius\\Bundle\\ApiBundle\\Tests\\": "Tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../*/*"
+        }
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.7-dev"
+        }
+    }
+}
