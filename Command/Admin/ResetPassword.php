@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Sylius package.
+ *  This file is part of the Sylius package.
  *
  * (c) Paweł Jędrzejewski
  *
@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Command\Account;
+namespace Sylius\Bundle\ApiBundle\Command\Admin;
 
 /** @experimental */
 class ResetPassword

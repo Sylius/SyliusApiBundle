@@ -11,12 +11,12 @@
 
 declare(strict_types=1);
 
-namespace spec\Sylius\Bundle\ApiBundle\CommandHandler\Account;
+namespace spec\Sylius\Bundle\ApiBundle\CommandHandler\Admin;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Sylius\Bundle\ApiBundle\Command\Account\ResetPassword;
-use Sylius\Component\Core\Model\ShopUserInterface;
+use Sylius\Bundle\ApiBundle\Command\Admin\ResetPassword;
+use Sylius\Component\Core\Model\AdminUserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
 use Sylius\Component\User\Security\PasswordUpdaterInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
@@ -37,21 +37,21 @@ final class ResetPasswordHandlerSpec extends ObjectBehavior
 
     function it_resets_password(
         UserRepositoryInterface $userRepository,
-        ShopUserInterface $shopUser,
+        AdminUserInterface $adminUser,
         PasswordUpdaterInterface $passwordUpdater
     ): void {
-        $userRepository->findOneBy(['passwordResetToken' => 'TOKEN'])->willReturn($shopUser);
+        $userRepository->findOneBy(['passwordResetToken' => 'TOKEN'])->willReturn($adminUser);
 
-        $shopUser->isPasswordRequestNonExpired(Argument::that(function (\DateInterval $dateInterval) {
-            return $dateInterval->format('%d') === '5';
-        }))->willReturn(true);
+        $adminUser->isPasswordRequestNonExpired(
+            Argument::that(fn (\DateInterval $dateInterval) => $dateInterval->format('%d') === '5'
+        ))->willReturn(true);
 
-        $shopUser->getPasswordResetToken()->willReturn('TOKEN');
+        $adminUser->getPasswordResetToken()->willReturn('TOKEN');
 
-        $shopUser->setPlainPassword('newPassword')->shouldBeCalled();
-        $passwordUpdater->updatePassword($shopUser)->shouldBeCalled();
-        $shopUser->setPasswordResetToken(null)->shouldBeCalled();
-        $shopUser->setPasswordRequestedAt(null)->shouldBeCalled();
+        $adminUser->setPlainPassword('newPassword')->shouldBeCalled();
+        $passwordUpdater->updatePassword($adminUser)->shouldBeCalled();
+        $adminUser->setPasswordResetToken(null)->shouldBeCalled();
+        $adminUser->setPasswordRequestedAt(null)->shouldBeCalled();
 
         $command = new ResetPassword('TOKEN');
         $command->newPassword = 'newPassword';
@@ -62,19 +62,19 @@ final class ResetPasswordHandlerSpec extends ObjectBehavior
 
     function it_throws_exception_if_token_is_expired(
         UserRepositoryInterface $userRepository,
-        ShopUserInterface $shopUser,
+        AdminUserInterface $adminUser,
         PasswordUpdaterInterface $passwordUpdater
     ): void {
-        $userRepository->findOneBy(['passwordResetToken' => 'TOKEN'])->willReturn($shopUser);
+        $userRepository->findOneBy(['passwordResetToken' => 'TOKEN'])->willReturn($adminUser);
 
-        $shopUser->isPasswordRequestNonExpired(Argument::that(function (\DateInterval $dateInterval) {
-            return $dateInterval->format('%d') === '5';
-        }))->willReturn(false);
+        $adminUser->isPasswordRequestNonExpired(
+            Argument::that(fn (\DateInterval $dateInterval) => $dateInterval->format('%d') === '5'
+        ))->willReturn(false);
 
-        $shopUser->getPasswordResetToken()->willReturn('TOKEN');
-        $shopUser->setPlainPassword('newPassword')->shouldNotBeCalled();
-        $passwordUpdater->updatePassword($shopUser)->shouldNotBeCalled();
-        $shopUser->setPasswordRequestedAt(null)->shouldNotBeCalled();
+        $adminUser->getPasswordResetToken()->willReturn('TOKEN');
+        $adminUser->setPlainPassword('newPassword')->shouldNotBeCalled();
+        $passwordUpdater->updatePassword($adminUser)->shouldNotBeCalled();
+        $adminUser->setPasswordRequestedAt(null)->shouldNotBeCalled();
 
         $command = new ResetPassword('TOKEN');
         $command->newPassword = 'newPassword';
@@ -88,19 +88,19 @@ final class ResetPasswordHandlerSpec extends ObjectBehavior
 
     function it_throws_exception_if_tokens_are_not_exact(
         UserRepositoryInterface $userRepository,
-        ShopUserInterface $shopUser,
+        AdminUserInterface $adminUser,
         PasswordUpdaterInterface $passwordUpdater
     ): void {
-        $userRepository->findOneBy(['passwordResetToken' => 'TOKEN'])->willReturn($shopUser);
+        $userRepository->findOneBy(['passwordResetToken' => 'TOKEN'])->willReturn($adminUser);
 
-        $shopUser->isPasswordRequestNonExpired(Argument::that(function (\DateInterval $dateInterval) {
-            return $dateInterval->format('%d') === '5';
-        }))->willReturn(false);
+        $adminUser->isPasswordRequestNonExpired(
+            Argument::that(fn (\DateInterval $dateInterval) => $dateInterval->format('%d') === '5'
+        ))->willReturn(false);
 
-        $shopUser->getPasswordResetToken()->willReturn('BADTOKEN');
-        $shopUser->setPlainPassword('newPassword')->shouldNotBeCalled();
-        $passwordUpdater->updatePassword($shopUser)->shouldNotBeCalled();
-        $shopUser->setPasswordRequestedAt(null)->shouldNotBeCalled();
+        $adminUser->getPasswordResetToken()->willReturn('BADTOKEN');
+        $adminUser->setPlainPassword('newPassword')->shouldNotBeCalled();
+        $passwordUpdater->updatePassword($adminUser)->shouldNotBeCalled();
+        $adminUser->setPasswordRequestedAt(null)->shouldNotBeCalled();
 
         $command = new ResetPassword('TOKEN');
         $command->newPassword = 'newPassword';
