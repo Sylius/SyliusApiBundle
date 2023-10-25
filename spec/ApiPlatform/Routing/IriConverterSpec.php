@@ -17,15 +17,19 @@ use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Api\UrlGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use PhpSpec\ObjectBehavior;
+use Sylius\Bundle\ApiBundle\Provider\PathPrefixProviderInterface;
 use Sylius\Bundle\ApiBundle\Resolver\OperationResolverInterface;
 use Sylius\Component\Addressing\Model\Country;
 use Sylius\Component\Addressing\Model\CountryInterface;
 
 final class IriConverterSpec extends ObjectBehavior
 {
-    function let(IriConverterInterface $decoratedIriConverter, OperationResolverInterface $operationResolver): void
-    {
-        $this->beConstructedWith($decoratedIriConverter, $operationResolver);
+    function let(
+        IriConverterInterface $decoratedIriConverter,
+        PathPrefixProviderInterface $pathPrefixProvider,
+        OperationResolverInterface $operationResolver,
+    ): void {
+        $this->beConstructedWith($decoratedIriConverter, $pathPrefixProvider, $operationResolver);
     }
 
     function it_implements_the_iri_converter_interface(): void
@@ -44,12 +48,15 @@ final class IriConverterSpec extends ObjectBehavior
 
     function it_uses_operation_resolver_to_get_proper_iri_from_resource(
         IriConverterInterface $decoratedIriConverter,
+        PathPrefixProviderInterface $pathPrefixProvider,
         OperationResolverInterface $operationResolver,
         CountryInterface $country,
         Operation $operation,
     ): void {
+        $pathPrefixProvider->getPathPrefix('api/v2/admin/countries')->willReturn('admin');
+
         $operationResolver
-            ->resolve(Country::class, 'api/v2/admin/countries', null)
+            ->resolve(Country::class, 'admin', null)
             ->willReturn($operation)
         ;
 
