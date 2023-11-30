@@ -14,10 +14,10 @@ declare(strict_types=1);
 namespace Sylius\Bundle\ApiBundle\Exception;
 
 /** @experimental */
-final class TranslationLocaleMismatchException extends \RuntimeException
+final class PaymentMethodCannotBeRemoved extends \RuntimeException
 {
     public function __construct(
-        string $message = 'The locale of translation does not match the key.',
+        string $message = 'Cannot remove, the payment method is in use.',
         int $code = 0,
         \Throwable $previous = null,
     ) {

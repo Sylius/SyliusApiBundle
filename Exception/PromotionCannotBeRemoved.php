@@ -14,10 +14,10 @@ declare(strict_types=1);
 namespace Sylius\Bundle\ApiBundle\Exception;
 
 /** @experimental */
-final class TranslationLocaleMismatchException extends \RuntimeException
+final class PromotionCannotBeRemoved extends \RuntimeException
 {
     public function __construct(
-        string $message = 'The locale of translation does not match the key.',
+        string $message = 'Cannot delete, the promotion is in use.',
         int $code = 0,
         \Throwable $previous = null,
     ) {

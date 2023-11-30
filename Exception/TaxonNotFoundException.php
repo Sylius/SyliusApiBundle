@@ -13,14 +13,18 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Exception;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 /** @experimental */
-final class TranslationLocaleMismatchException extends \RuntimeException
+final class TaxonNotFoundException extends NotFoundHttpException
 {
+    /** @param array<array-key, mixed> $headers */
     public function __construct(
-        string $message = 'The locale of translation does not match the key.',
-        int $code = 0,
+        string $message = 'Taxon not found.',
         \Throwable $previous = null,
+        int $code = 0,
+        array $headers = [],
     ) {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous, $code, $headers);
     }
 }
