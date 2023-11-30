@@ -13,14 +13,14 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Exception;
 
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /** @experimental */
-final class NoFileUploadedException extends BadRequestHttpException
+final class TaxonNotFoundException extends NotFoundHttpException
 {
     /** @param array<array-key, mixed> $headers */
     public function __construct(
-        string $message = 'No file was uploaded.',
+        string $message = 'Taxon not found.',
         \Throwable $previous = null,
         int $code = 0,
         array $headers = [],

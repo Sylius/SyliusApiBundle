@@ -13,18 +13,14 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Exception;
 
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-
 /** @experimental */
-final class NoFileUploadedException extends BadRequestHttpException
+final class PromotionCannotBeRemoved extends \RuntimeException
 {
-    /** @param array<array-key, mixed> $headers */
     public function __construct(
-        string $message = 'No file was uploaded.',
-        \Throwable $previous = null,
+        string $message = 'Cannot delete, the promotion is in use.',
         int $code = 0,
-        array $headers = [],
+        \Throwable $previous = null,
     ) {
-        parent::__construct($message, $previous, $code, $headers);
+        parent::__construct($message, $code, $previous);
     }
 }
