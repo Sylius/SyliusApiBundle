@@ -13,18 +13,21 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Filter\Doctrine;
 
-use ApiPlatform\Core\Api\IriConverterInterface;
+use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\AbstractContextAwareFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
-/** @experimental */
-final class CatalogPromotionChannelFilter extends AbstractContextAwareFilter
+final class PromotionCouponPromotionFilter extends AbstractContextAwareFilter
 {
+    public const PROPERTY = 'promotion';
+
+    /** @param array<array-key, mixed> $properties */
     public function __construct(
         private IriConverterInterface $iriConverter,
         ManagerRegistry $managerRegistry,
@@ -44,26 +47,36 @@ final class CatalogPromotionChannelFilter extends AbstractContextAwareFilter
         string $resourceClass,
         string $operationName = null,
     ): void {
-        if ('channel' !== $property) {
+        if (self::PROPERTY !== $property) {
             return;
         }
 
-        $channel = $this->iriConverter->getItemFromIri($value);
-        $parameterName = $queryNameGenerator->generateParameterName($property);
+        $promotion = $this->iriConverter->getResourceFromIri($value);
+
+        $parameterName = $queryNameGenerator->generateParameterName(':promotion');
+        $promotionJoinAlias = $queryNameGenerator->generateJoinAlias('promotion');
         $rootAlias = $queryBuilder->getRootAliases()[0];
+
         $queryBuilder
-            ->andWhere(sprintf(':%s MEMBER OF %s.channels', $parameterName, $rootAlias))
-            ->setParameter($parameterName, $channel)
+            ->innerJoin(
+                sprintf('%s.promotion', $rootAlias),
+                $promotionJoinAlias,
+                Join::WITH,
+                $queryBuilder->expr()->eq(sprintf('%s.id', $promotionJoinAlias), $parameterName),
+            )
+            ->setParameter($parameterName, $promotion)
         ;
     }
 
+    /** @return array<string, mixed> */
     public function getDescription(string $resourceClass): array
     {
         return [
-            'channel' => [
+            self::PROPERTY => [
                 'type' => 'string',
                 'required' => false,
-                'property' => 'channels',
+                'property' => null,
+                'description' => 'Get a collection of promotion coupons for promotion',
                 'schema' => [
                     'type' => 'string',
                 ],
