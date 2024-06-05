@@ -16,7 +16,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://api-platform.com/schema/metadata/resources-3.0 https://api-platform.com/schema/metadata/resources-3.0.xsd"
 >
-    <resource class="Sylius\Component\Core\Model\ProductVariant" shortName="ProductVariant">
+    <resource class="Sylius\Component\Product\Model\ProductAssociationType">
         <validationContext>
             <values>
                 <value name="groups">
@@ -28,29 +28,27 @@
         </validationContext>
 
         <operations>
-            <operation class="ApiPlatform\Metadata\GetCollection" uriTemplate="/admin/product-variants">
+            <operation class="ApiPlatform\Metadata\GetCollection" uriTemplate="/admin/product-association-types">
                 <normalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:admin:product_variant:index</value>
+                                <value>sylius:admin:product_association_type:index</value>
                             </values>
                         </value>
                     </values>
                 </normalizationContext>
                 <filters>
-                    <filter>sylius.api.product_variant_position_filter</filter>
-                    <filter>sylius.api.product_variant_product_filter</filter>
-                    <filter>Sylius\Bundle\ApiBundle\Filter\Doctrine\ProductVariantCatalogPromotionFilter</filter>
+                    <filter>sylius.api.product_association_type_filter</filter>
                 </filters>
             </operation>
 
-            <operation class="ApiPlatform\Metadata\Post" uriTemplate="/admin/product-variants">
+            <operation class="ApiPlatform\Metadata\Post" uriTemplate="/admin/product-association-types">
                 <denormalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:admin:product_variant:create</value>
+                                <value>sylius:admin:product_association_type:create</value>
                             </values>
                         </value>
                     </values>
@@ -59,75 +57,61 @@
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:admin:product_variant:show</value>
+                                <value>sylius:admin:product_association_type:show</value>
                             </values>
                         </value>
                     </values>
                 </normalizationContext>
             </operation>
 
-            <operation class="ApiPlatform\Metadata\Get" uriTemplate="/admin/product-variants/{code}">
+            <operation class="ApiPlatform\Metadata\Get" uriTemplate="/admin/product-association-types/{code}">
                 <normalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:admin:product_variant:show</value>
+                                <value>sylius:admin:product_association_type:show</value>
                             </values>
                         </value>
                     </values>
                 </normalizationContext>
             </operation>
 
-            <operation class="ApiPlatform\Metadata\Put" uriTemplate="/admin/product-variants/{code}">
-                <normalizationContext>
-                    <values>
-                        <value name="groups">
-                            <values>
-                                <value>sylius:admin:product_variant:show</value>
-                            </values>
-                        </value>
-                    </values>
-                </normalizationContext>
+            <operation class="ApiPlatform\Metadata\Put" uriTemplate="/admin/product-association-types/{code}">
                 <denormalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:admin:product_variant:update</value>
+                                <value>sylius:admin:product_association_type:update</value>
                             </values>
                         </value>
                     </values>
                 </denormalizationContext>
-            </operation>
-
-            <operation class="ApiPlatform\Metadata\Delete" uriTemplate="/admin/product-variants/{code}" />
-
-            <operation class="ApiPlatform\Metadata\Get" uriTemplate="/shop/product-variants/{code}">
                 <normalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:shop:product_variant:show</value>
+                                <value>sylius:admin:product_association_type:show</value>
                             </values>
                         </value>
                     </values>
                 </normalizationContext>
             </operation>
 
-            <operation class="ApiPlatform\Metadata\GetCollection" uriTemplate="/shop/product-variants">
+            <operation class="ApiPlatform\Metadata\Delete" uriTemplate="/admin/product-association-types/{code}" />
+
+            <operation class="ApiPlatform\Metadata\Get" uriTemplate="/shop/product-association-types/{code}">
                 <normalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:shop:product_variant:index</value>
+                                <value>sylius:shop:product_association_type:show</value>
                             </values>
                         </value>
                     </values>
                 </normalizationContext>
-                <filters>
-                    <filter>sylius.api.product_variant_product_filter</filter>
-                    <filter>Sylius\Bundle\ApiBundle\Filter\Doctrine\ProductVariantCatalogPromotionFilter</filter>
-                </filters>
             </operation>
+
         </operations>
     </resource>
+
 </resources>

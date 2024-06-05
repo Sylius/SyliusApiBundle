@@ -16,7 +16,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://api-platform.com/schema/metadata/resources-3.0 https://api-platform.com/schema/metadata/resources-3.0.xsd"
 >
-    <resource class="Sylius\Component\Core\Model\AdminUser" shortName="Administrator">
+    <resource class="Sylius\Component\Product\Model\ProductAttributeValue">
         <validationContext>
             <values>
                 <value name="groups">
@@ -27,41 +27,39 @@
             </values>
         </validationContext>
 
+        <order>
+            <values>
+                <value name="attribute.position">ASC</value>
+            </values>
+        </order>
+
         <operations>
-            <operation
-                class="ApiPlatform\Metadata\Get"
-                uriTemplate="admin/administrators/{id}.{_format}"
-            >
+
+            <operation class="ApiPlatform\Metadata\Get" uriTemplate="/admin/product-attribute-values/{id}">
                 <normalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:admin:admin_user:show</value>
+                                <value>sylius:admin:product_attribute_value:show</value>
                             </values>
                         </value>
                     </values>
                 </normalizationContext>
             </operation>
-            <operation class="ApiPlatform\Metadata\Put" uriTemplate="admin/administrators/{id}.{_format}">
-                <denormalizationContext>
-                    <values>
-                        <value name="groups">
-                            <values>
-                                <value>sylius:admin:admin_user:update</value>
-                            </values>
-                        </value>
-                    </values>
-                </denormalizationContext>
+
+            <operation class="ApiPlatform\Metadata\Get" uriTemplate="/shop/product-attribute-values/{id}">
                 <normalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:admin:admin_user:show</value>
+                                <value>sylius:shop:product_attribute_value:show</value>
                             </values>
                         </value>
                     </values>
                 </normalizationContext>
             </operation>
+
         </operations>
     </resource>
+
 </resources>

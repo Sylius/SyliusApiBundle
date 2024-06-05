@@ -15,11 +15,15 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="https://api-platform.com/schema/metadata/properties-3.0 https://api-platform.com/schema/metadata/properties-3.0.xsd"
 >
-    <property resource="Sylius\Component\Core\Model\ProductVariant" name="id" identifier="false"/>
-    <property resource="Sylius\Component\Core\Model\ProductVariant" name="code" identifier="true"/>
-    <property resource="Sylius\Component\Core\Model\ProductVariant" name="name" required="true"/>
-    <property resource="Sylius\Component\Core\Model\ProductVariant" name="product" />
-    <property resource="Sylius\Component\Core\Model\ProductVariant" name="translations" readable="true" writable="true">
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="id" identifier="false" writable="false"/>
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="code" identifier="true" required="true" />
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="name" />
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="type" />
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="configuration" />
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="storageType" />
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="translatable" />
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="position" />
+    <property resource="Sylius\Component\Product\Model\ProductAttribute" name="translations" readable="true" writable="true">
         <openapiContext>
             <values>
                 <value name="type">object</value>
@@ -35,6 +39,4 @@
             </values>
         </openapiContext>
     </property>
-    <property resource="Sylius\Component\Core\Model\ProductVariant" name="channelPricings" />
-    <property resource="Sylius\Component\Core\Model\ProductVariant" name="optionValues" readable="true" />
 </properties>
