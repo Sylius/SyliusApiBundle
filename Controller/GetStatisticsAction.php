@@ -90,19 +90,21 @@ final class GetStatisticsAction
     private function createInputDataConstraints(): array
     {
         return [
-            new SymfonyConstraints\Collection([
-                'channelCode' => new Constraints\Code(),
-                'startDate' => [
-                    new SymfonyConstraints\NotBlank(),
-                    new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
-                ],
-                'interval' => new SymfonyConstraints\Choice(choices: array_keys($this->intervalsMap), multiple: false),
-                'endDate' => [
-                    new SymfonyConstraints\NotBlank(),
-                    new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
-                ],
+            new SymfonyConstraints\Sequentially([
+                new SymfonyConstraints\Collection([
+                    'channelCode' => new Constraints\Code(),
+                    'startDate' => [
+                        new SymfonyConstraints\NotBlank(),
+                        new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
+                    ],
+                    'interval' => new SymfonyConstraints\Choice(choices: array_keys($this->intervalsMap), multiple: false),
+                    'endDate' => [
+                        new SymfonyConstraints\NotBlank(),
+                        new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
+                    ],
+                ]),
+                new SymfonyConstraints\Expression(expression: 'value["startDate"] < value["endDate"]', message: 'sylius.statistics.end_date.invalid'),
             ]),
-            new SymfonyConstraints\Expression(expression: 'value["startDate"] < value["endDate"]', message: 'sylius.statistics.end_date.invalid'),
         ];
     }
 
