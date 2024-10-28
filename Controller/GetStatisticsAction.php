@@ -15,7 +15,7 @@ namespace Sylius\Bundle\ApiBundle\Controller;
 
 use ApiPlatform\Symfony\Validator\Exception\ValidationException;
 use Sylius\Bundle\ApiBundle\Query\GetStatistics;
-use Sylius\Bundle\ApiBundle\Validator\Constraints;
+use Sylius\Bundle\ApiBundle\Validator\Constraints\Code;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +25,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints as SymfonyConstraints;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class GetStatisticsAction
@@ -90,22 +91,30 @@ final class GetStatisticsAction
     private function createInputDataConstraints(): array
     {
         return [
-            new SymfonyConstraints\Sequentially([
-                new SymfonyConstraints\Collection([
-                    'channelCode' => new Constraints\Code(),
-                    'startDate' => [
-                        new SymfonyConstraints\NotBlank(),
-                        new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
-                    ],
-                    'interval' => new SymfonyConstraints\Choice(choices: array_keys($this->intervalsMap), multiple: false),
-                    'endDate' => [
-                        new SymfonyConstraints\NotBlank(),
-                        new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
-                    ],
-                ]),
-                new SymfonyConstraints\Expression(expression: 'value["startDate"] < value["endDate"]', message: 'sylius.statistics.end_date.invalid'),
+            new SymfonyConstraints\Collection([
+                'channelCode' => new Code(),
+                'startDate' => [
+                    new SymfonyConstraints\NotBlank(),
+                    new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
+                ],
+                'interval' => new SymfonyConstraints\Choice(choices: array_keys($this->intervalsMap), multiple: false),
+                'endDate' => [
+                    new SymfonyConstraints\NotBlank(),
+                    new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
+                ],
             ]),
+            new SymfonyConstraints\Callback(function (array $data, ExecutionContextInterface $context) {
+                $this->validateDateRange($data, $context);
+            }),
         ];
+    }
+
+    /** @param array<array-key, mixed> $data */
+    private function validateDateRange(array $data, ExecutionContextInterface $context): void
+    {
+        if (isset($data['startDate'], $data['endDate']) && $data['startDate'] >= $data['endDate']) {
+            $context->buildViolation('sylius.statistics.end_date.invalid')->addViolation();
+        }
     }
 
     /**
