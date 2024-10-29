@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Sylius\Bundle\ApiBundle\Controller;
 
 use Sylius\Bundle\ApiBundle\Query\GetStatistics;
-use Sylius\Bundle\ApiBundle\Validator\Constraints;
+use Sylius\Bundle\ApiBundle\Validator\Constraints\Code;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -92,7 +92,7 @@ final class GetStatisticsAction
     {
         return [
             new SymfonyConstraints\Collection([
-                'channelCode' => new Constraints\Code(),
+                'channelCode' => new Code(),
                 'startDate' => [
                     new SymfonyConstraints\NotBlank(),
                     new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
@@ -103,10 +103,18 @@ final class GetStatisticsAction
                     new SymfonyConstraints\DateTime('Y-m-d\TH:i:s', message: 'sylius.date_time.invalid'),
                 ],
             ]),
-            new SymfonyConstraints\Callback(function ($data, ExecutionContextInterface $context) {
+            new SymfonyConstraints\Callback(function (array $data, ExecutionContextInterface $context) {
                 $this->validateDateRange($data, $context);
             }),
         ];
+    }
+
+    /** @param array<array-key, mixed> $data */
+    private function validateDateRange(array $data, ExecutionContextInterface $context): void
+    {
+        if (isset($data['startDate'], $data['endDate']) && $data['startDate'] >= $data['endDate']) {
+            $context->buildViolation('sylius.statistics.end_date.invalid')->addViolation();
+        }
     }
 
     /**
@@ -122,14 +130,6 @@ final class GetStatisticsAction
         }
 
         return $intervals;
-    }
-
-    private function validateDateRange($data, ExecutionContextInterface $context): void
-    {
-        if ((isset($data['startDate'], $data['endDate'])) && $data['startDate'] >= $data['endDate']) {
-            $context->buildViolation('sylius.statistics.end_date.invalid')
-                ->addViolation();
-        }
     }
 
     private function createValidationErrorResponse(ConstraintViolationListInterface $violations): JsonResponse
