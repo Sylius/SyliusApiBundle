@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace spec\Sylius\Bundle\ApiBundle\ApiPlatform\Routing;
 
 use ApiPlatform\Metadata\IriConverterInterface;
-use ApiPlatform\Metadata\UrlGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\UrlGeneratorInterface;
 use PhpSpec\ObjectBehavior;
 use Sylius\Bundle\ApiBundle\Provider\PathPrefixProviderInterface;
 use Sylius\Bundle\ApiBundle\Resolver\OperationResolverInterface;
