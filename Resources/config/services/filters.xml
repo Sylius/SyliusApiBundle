@@ -60,6 +60,7 @@
 
         <service id="Sylius\Bundle\ApiBundle\Filter\ShippingMethodFilter" public="true">
             <tag name="api_platform.filter" />
+            <deprecated package="sylius/api-bundle" version="1.14">The "%service_id%" service is deprecated since 1.14 and will be removed in 2.0.</deprecated>
         </service>
 
         <service id="sylius.api.product_image_product_variants_filter" parent="api_platform.doctrine.orm.search_filter" public="true">
@@ -219,6 +220,7 @@
 
         <service id="Sylius\Bundle\ApiBundle\Filter\PaymentMethodFilter" public="true">
             <tag name="api_platform.filter" />
+            <deprecated package="sylius/api-bundle" version="1.14">The "%service_id%" service is deprecated since 1.14 and will be removed in 2.0.</deprecated>
         </service>
 
         <service id="sylius.api.catalog_promotion_search_filter" parent="api_platform.doctrine.orm.search_filter" public="true">
@@ -343,6 +345,7 @@
             <argument type="service" id="api_platform.symfony.iri_converter" />
             <argument type="service" id="doctrine" />
             <tag name="api_platform.filter" />
+            <deprecated package="sylius/api-bundle" version="1.14">The "%service_id%" service is deprecated since 1.14 and will be removed in 2.0.</deprecated>
         </service>
 
         <service id="sylius.api.search_filter.product.code" parent="api_platform.doctrine.orm.search_filter" public="true">

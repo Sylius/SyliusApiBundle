@@ -32,8 +32,11 @@
 
         <service id="Sylius\Bundle\ApiBundle\PropertyInfo\Extractor\EmptyPropertyListExtractor">
             <tag name="property_info.list_extractor" priority="-2000" />
+            <deprecated package="sylius/api-bundle" version="1.14">The "%service_id%" service is deprecated since 1.14 and will be removed in 2.0.</deprecated>
         </service>
-        <service id="sylius_api.extractor.property_info.empty_property_list" alias="Sylius\Bundle\ApiBundle\PropertyInfo\Extractor\EmptyPropertyListExtractor" />
+        <service id="sylius_api.extractor.property_info.empty_property_list" alias="Sylius\Bundle\ApiBundle\PropertyInfo\Extractor\EmptyPropertyListExtractor">
+            <deprecated package="sylius/api-bundle" version="1.14">The "%alias_id%" service is deprecated since 1.14 and will be removed in 2.0.</deprecated>
+        </service>
 
         <service id="Sylius\Bundle\ApiBundle\DataTransformer\OrderTokenValueAwareInputCommandDataTransformer">
             <tag name="sylius.api.command_data_transformer" priority="1000" />

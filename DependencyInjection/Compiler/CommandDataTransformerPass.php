@@ -37,6 +37,12 @@ final class CommandDataTransformerPass implements CompilerPassInterface
 
         $commandDataTransformersChainDefinition->addTag('api_platform.data_transformer');
 
+        $commandDataTransformersChainDefinition->setDeprecated(
+            'sylius/api-bundle',
+            '1.14',
+            'The "%service_id%" service is deprecated since 1.14 and will be removed in 2.0.',
+        );
+
         $container->setDefinition(
             'sylius.api.data_transformer.command_aware_input_data_transformer',
             $commandDataTransformersChainDefinition,
