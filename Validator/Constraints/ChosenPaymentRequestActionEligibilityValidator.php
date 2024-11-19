@@ -52,6 +52,10 @@ final class ChosenPaymentRequestActionEligibilityValidator extends ConstraintVal
             return;
         }
 
+        if (null === $value->action) {
+            return;
+        }
+
         $actionsCommandProvider = $gatewayFactoryCommandProvider->getCommandProvider($value->action);
         if (null !== $actionsCommandProvider) {
             return;
