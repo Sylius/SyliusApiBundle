@@ -14,17 +14,14 @@ declare(strict_types=1);
 namespace spec\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
 use PhpSpec\ObjectBehavior;
-use \Sylius\Bundle\ApiBundle\Command\Payment\AddPaymentRequest;
+use Sylius\Bundle\ApiBundle\Command\Payment\AddPaymentRequest;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\ChosenPaymentRequestActionEligibility;
 use Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface;
 use Sylius\Bundle\PaymentBundle\CommandProvider\ServiceProviderAwareCommandProviderInterface;
 use Sylius\Bundle\PaymentBundle\Provider\GatewayFactoryNameProviderInterface;
-use Sylius\Component\Core\Model\PaymentInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
 use Sylius\Component\Core\Repository\PaymentMethodRepositoryInterface;
-use Sylius\Component\Core\Repository\PaymentRepositoryInterface;
 use Sylius\Component\Payment\Model\GatewayConfigInterface;
-use Sylius\Component\Payment\Resolver\PaymentMethodsResolverInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -61,7 +58,8 @@ final class ChosenPaymentRequestActionEligibilityValidatorSpec extends ObjectBeh
             ->shouldThrow(\InvalidArgumentException::class)
             ->during('validate', [
                 new AddPaymentRequest('ORDER_TOKEN', 123, 'PAYMENT_METHOD_CODE'),
-                new class() extends Constraint {}
+                new class() extends Constraint {
+                },
             ])
         ;
     }

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Sylius\Bundle\ApiBundle\Validator\Constraints;
 
 use Sylius\Bundle\ApiBundle\Command\Payment\AddPaymentRequest;
-use Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface;
 use Sylius\Bundle\PaymentBundle\CommandProvider\ServiceProviderAwareCommandProviderInterface;
 use Sylius\Bundle\PaymentBundle\Provider\GatewayFactoryNameProviderInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
@@ -51,6 +50,7 @@ final class ChosenPaymentRequestActionEligibilityValidator extends ConstraintVal
         $paymentMethod = $this->paymentMethodRepository->findOneBy(['code' => $value->paymentMethodCode]);
         if ($paymentMethod?->getGatewayConfig() === null) {
             $this->context->addViolation($constraint->notExist, ['%code%' => $value->paymentMethodCode]);
+
             return;
         }
 
