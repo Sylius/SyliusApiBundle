@@ -26,6 +26,9 @@ use Webmozart\Assert\Assert;
 /** @experimental */
 final class ChosenPaymentRequestActionEligibilityValidator extends ConstraintValidator
 {
+    /**
+     * @param PaymentMethodRepositoryInterface<PaymentMethodInterface> $paymentMethodRepository
+     */
     public function __construct(
         private PaymentMethodRepositoryInterface $paymentMethodRepository,
         private ServiceProviderAwareCommandProviderInterface $gatewayFactoryCommandProvider,
@@ -40,7 +43,19 @@ final class ChosenPaymentRequestActionEligibilityValidator extends ConstraintVal
         /** @var ChosenPaymentRequestActionEligibility $constraint */
         Assert::isInstanceOf($constraint, ChosenPaymentRequestActionEligibility::class);
 
-        $gatewayFactoryCommandProvider = $this->getCommandProvider($value);
+        if (null === $value->action) {
+            return;
+        }
+
+        /** @var PaymentMethodInterface|null $paymentMethod */
+        $paymentMethod = $this->paymentMethodRepository->findOneBy(['code' => $value->paymentMethodCode]);
+        if ($paymentMethod?->getGatewayConfig() === null) {
+            $this->context->addViolation($constraint->notExist, ['%code%' => $value->paymentMethodCode]);
+            return;
+        }
+
+        $factoryName = $this->gatewayFactoryNameProvider->provide($paymentMethod);
+        $gatewayFactoryCommandProvider = $this->gatewayFactoryCommandProvider->getCommandProvider($factoryName);
         if (null === $gatewayFactoryCommandProvider) {
             $this->context->addViolation($constraint->notAvailable, [
                 '%code%' => $value->paymentMethodCode,
@@ -49,10 +64,6 @@ final class ChosenPaymentRequestActionEligibilityValidator extends ConstraintVal
         }
 
         if (false === $gatewayFactoryCommandProvider instanceof ServiceProviderAwareCommandProviderInterface) {
-            return;
-        }
-
-        if (null === $value->action) {
             return;
         }
 
@@ -65,18 +76,5 @@ final class ChosenPaymentRequestActionEligibilityValidator extends ConstraintVal
             '%code%' => $value->paymentMethodCode,
             '%id%' => $value->paymentId,
         ]);
-    }
-
-    private function getCommandProvider(AddPaymentRequest $addPaymentRequest): ?PaymentRequestCommandProviderInterface
-    {
-        /** @var PaymentMethodInterface|null $paymentMethod */
-        $paymentMethod = $this->paymentMethodRepository->findOneBy(['code' => $addPaymentRequest->paymentMethodCode]);
-        if ($paymentMethod?->getGatewayConfig() === null) {
-            return null;
-        }
-
-        $factoryName = $this->gatewayFactoryNameProvider->provide($paymentMethod);
-
-        return $this->gatewayFactoryCommandProvider->getCommandProvider($factoryName);
     }
 }
