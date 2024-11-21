@@ -65,7 +65,7 @@ final class ChosenPaymentRequestActionEligibilityValidatorSpec extends ObjectBeh
     }
 
     function it_does_nothing_if_there_is_no_action_given(
-        ExecutionContextInterface $executionContext,
+        PaymentMethodRepositoryInterface $paymentMethodRepository,
     ): void {
         $command = new AddPaymentRequest(
             orderTokenValue: 'ORDER_TOKEN',
@@ -73,7 +73,7 @@ final class ChosenPaymentRequestActionEligibilityValidatorSpec extends ObjectBeh
             paymentMethodCode: 'PAYMENT_METHOD_CODE',
         );
 
-        $paymentMethodRepository->findOneBy(Argument::any())->shouldNotBeCalled();
+        $paymentMethodRepository->findOneBy(['code' => 'PAYMENT_METHOD_CODE'])->shouldNotBeCalled();
 
         $this->validate($command, new ChosenPaymentRequestActionEligibility());
     }
