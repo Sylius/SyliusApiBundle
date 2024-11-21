@@ -73,10 +73,7 @@ final class ChosenPaymentRequestActionEligibilityValidatorSpec extends ObjectBeh
             paymentMethodCode: 'PAYMENT_METHOD_CODE',
         );
 
-        $executionContext
-            ->addViolation('sylius.payment_method.not_exist', ['%code%' => 'PAYMENT_METHOD_CODE'])
-            ->shouldNotBeCalled()
-        ;
+        $paymentMethodRepository->findOneBy(Argument::any())->shouldNotBeCalled();
 
         $this->validate($command, new ChosenPaymentRequestActionEligibility());
     }
