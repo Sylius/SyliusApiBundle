@@ -44,7 +44,7 @@ final class ChosenPaymentRequestActionEligibilityValidatorSpec extends ObjectBeh
         $this->shouldImplement(ConstraintValidatorInterface::class);
     }
 
-    function it_throws_an_exception_if_value_is_not_a_add_payment_request(): void
+    function it_throws_an_exception_if_value_is_not_an_add_payment_request(): void
     {
         $this
             ->shouldThrow(\InvalidArgumentException::class)
