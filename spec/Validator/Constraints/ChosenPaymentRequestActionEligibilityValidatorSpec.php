@@ -64,7 +64,7 @@ final class ChosenPaymentRequestActionEligibilityValidatorSpec extends ObjectBeh
         ;
     }
 
-    function it_does_nothing_if_there_no_action_given(
+    function it_does_nothing_if_there_is_no_action_given(
         ExecutionContextInterface $executionContext,
     ): void {
         $command = new AddPaymentRequest(
