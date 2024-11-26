@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 final class PaymentRequestActionAwareContextBuilderTest extends TestCase
 {
-    private SerializerContextBuilderInterface|MockObject $decoratedContextBuilderMock;
+    private MockObject|SerializerContextBuilderInterface $decoratedContextBuilderMock;
 
     private DefaultActionProviderInterface|MockObject $defaultActionProviderMock;
 
@@ -52,7 +52,7 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
             ->with($requestMock, true, [])
             ->willReturn([
                 ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery',
-                'input' => ['class' => AddPaymentRequest::class]
+                'input' => ['class' => AddPaymentRequest::class],
             ])
         ;
 
@@ -86,7 +86,7 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
             ->with($requestMock, true, [])
             ->willReturn([
                 ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery',
-                'input' => ['class' => AddPaymentRequest::class]
+                'input' => ['class' => AddPaymentRequest::class],
             ])
         ;
 
@@ -106,7 +106,7 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
         ], $this->paymentRequestActionAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
-    function test_it_does_nothing_if_there_is_no_input_class_or_no_existing_context_having_payment_method_code(): void
+    public function test_it_does_nothing_if_there_is_no_input_class_or_no_existing_context_having_payment_method_code(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
@@ -117,7 +117,7 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
         $this->assertSame([], $this->paymentRequestActionAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
-    function test_it_does_nothing_if_input_class_is_not_payment_request_action_aware(): void
+    public function test_it_does_nothing_if_input_class_is_not_payment_request_action_aware(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);

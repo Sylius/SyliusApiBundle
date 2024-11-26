@@ -22,7 +22,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class PaymentMethodCodeContextBuilderTest extends TestCase
 {
-    private SerializerContextBuilderInterface|MockObject $decoratedSerializerContextBuilderMock;
+    private MockObject|SerializerContextBuilderInterface $decoratedSerializerContextBuilderMock;
+
     private PaymentMethodCodeContextBuilder $paymentMethodCodeContextBuilder;
 
     protected function setUp(): void
@@ -61,7 +62,7 @@ final class PaymentMethodCodeContextBuilderTest extends TestCase
         ;
 
         $this->assertEquals([
-            ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery'
+            ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery',
         ], $this->paymentMethodCodeContextBuilder->createFromRequest($requestMock, true, []));
     }
 }

@@ -21,7 +21,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class PaymentRequestActionAwareContextBuilder extends AbstractInputContextBuilder
 {
-
     public function __construct(
         SerializerContextBuilderInterface $decoratedContextBuilder,
         string $attributeClass,
@@ -34,6 +33,7 @@ final class PaymentRequestActionAwareContextBuilder extends AbstractInputContext
     protected function supports(Request $request, array $context, ?array $extractedAttributes): bool
     {
         $data = $request->toArray();
+
         return null === ($data[PaymentRequestActionAware::DEFAULT_ARGUMENT_NAME] ?? null) && isset($context[ContextKeys::PAYMENT_METHOD_CODE]);
     }
 

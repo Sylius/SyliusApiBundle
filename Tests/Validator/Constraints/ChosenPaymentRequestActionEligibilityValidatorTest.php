@@ -29,15 +29,16 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ChosenPaymentRequestActionEligibilityValidatorTest extends TestCase
 {
-    private PaymentMethodRepositoryInterface|MockObject $paymentMethodRepositoryMock;
+    private MockObject|PaymentMethodRepositoryInterface $paymentMethodRepositoryMock;
 
-    private ServiceProviderAwareCommandProviderInterface|MockObject $gatewayFactoryCommandProviderMock;
+    private MockObject|ServiceProviderAwareCommandProviderInterface $gatewayFactoryCommandProviderMock;
 
     private GatewayFactoryNameProviderInterface|MockObject $gatewayFactoryNameProviderMock;
 
     private ExecutionContextInterface|MockObject $executionContextMock;
 
     private ChosenPaymentRequestActionEligibilityValidator $chosenPaymentRequestActionEligibilityValidator;
+
     protected function setUp(): void
     {
         $this->paymentMethodRepositoryMock = $this->createMock(PaymentMethodRepositoryInterface::class);
@@ -64,7 +65,8 @@ final class ChosenPaymentRequestActionEligibilityValidatorTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->chosenPaymentRequestActionEligibilityValidator->validate(
             new AddPaymentRequest('ORDER_TOKEN', 123, 'PAYMENT_METHOD_CODE'),
-            new class() extends Constraint {}
+            new class() extends Constraint {
+            },
         );
     }
 
