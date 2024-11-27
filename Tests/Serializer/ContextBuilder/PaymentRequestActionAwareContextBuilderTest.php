@@ -19,7 +19,6 @@ use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Attribute\PaymentRequestActionAware;
 use Sylius\Bundle\ApiBundle\Command\Payment\AddPaymentRequest;
 use Sylius\Bundle\ApiBundle\Serializer\ContextBuilder\PaymentRequestActionAwareContextBuilder;
-use Sylius\Bundle\ApiBundle\Serializer\ContextKeys;
 use Sylius\Bundle\PaymentBundle\Provider\DefaultActionProviderInterface;
 use Sylius\Component\Payment\Model\PaymentRequestInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,14 +43,15 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $requestMock->expects($this->once())->method('toArray')->willReturn([]);
+        $requestMock->expects($this->exactly(2))->method('toArray')->willReturn([
+            'paymentMethodCode' => 'cash_on_delivery',
+        ]);
 
         $this->decoratedContextBuilderMock
             ->expects($this->once())
             ->method('createFromRequest')
             ->with($requestMock, true, [])
             ->willReturn([
-                ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery',
                 'input' => ['class' => AddPaymentRequest::class],
             ])
         ;
@@ -64,7 +64,6 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
         ;
 
         $this->assertSame([
-            ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery',
             'input' => ['class' => AddPaymentRequest::class],
             AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS => [
                 AddPaymentRequest::class => ['action' => PaymentRequestInterface::ACTION_CAPTURE],
@@ -76,7 +75,8 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $requestMock->expects($this->once())->method('toArray')->willReturn([
+        $requestMock->expects($this->exactly(2))->method('toArray')->willReturn([
+            'paymentMethodCode' => 'cash_on_delivery',
             PaymentRequestActionAware::DEFAULT_ARGUMENT_NAME => null,
         ]);
 
@@ -85,7 +85,6 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
             ->method('createFromRequest')
             ->with($requestMock, true, [])
             ->willReturn([
-                ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery',
                 'input' => ['class' => AddPaymentRequest::class],
             ])
         ;
@@ -98,7 +97,6 @@ final class PaymentRequestActionAwareContextBuilderTest extends TestCase
         ;
 
         $this->assertSame([
-            ContextKeys::PAYMENT_METHOD_CODE => 'cash_on_delivery',
             'input' => ['class' => AddPaymentRequest::class],
             AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS => [
                 AddPaymentRequest::class => ['action' => PaymentRequestInterface::ACTION_CAPTURE],

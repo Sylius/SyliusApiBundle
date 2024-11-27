@@ -15,12 +15,13 @@ namespace Sylius\Bundle\ApiBundle\Serializer\ContextBuilder;
 
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use Sylius\Bundle\ApiBundle\Attribute\PaymentRequestActionAware;
-use Sylius\Bundle\ApiBundle\Serializer\ContextKeys;
 use Sylius\Bundle\PaymentBundle\Provider\DefaultActionProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 final class PaymentRequestActionAwareContextBuilder extends AbstractInputContextBuilder
 {
+    private ?Request $request = null;
+
     public function __construct(
         SerializerContextBuilderInterface $decoratedContextBuilder,
         string $attributeClass,
@@ -30,15 +31,24 @@ final class PaymentRequestActionAwareContextBuilder extends AbstractInputContext
         parent::__construct($decoratedContextBuilder, $attributeClass, $defaultConstructorArgumentName);
     }
 
+    public function createFromRequest(Request $request, bool $normalization, ?array $extractedAttributes = null): array
+    {
+        $this->request = $request;
+
+        return parent::createFromRequest($request, $normalization, $extractedAttributes);
+    }
+
     protected function supports(Request $request, array $context, ?array $extractedAttributes): bool
     {
         $data = $request->toArray();
 
-        return null === ($data[PaymentRequestActionAware::DEFAULT_ARGUMENT_NAME] ?? null) && isset($context[ContextKeys::PAYMENT_METHOD_CODE]);
+        return null === ($data[PaymentRequestActionAware::DEFAULT_ARGUMENT_NAME] ?? null) && null !== ($data['paymentMethodCode'] ?? null);
     }
 
     protected function resolveValue(array $context, ?array $extractedAttributes): mixed
     {
-        return $this->defaultActionProvider->getActionFromPaymentMethodCode($context[ContextKeys::PAYMENT_METHOD_CODE]);
+        $data = $this->request->toArray();
+
+        return $this->defaultActionProvider->getActionFromPaymentMethodCode($data['paymentMethodCode']);
     }
 }
