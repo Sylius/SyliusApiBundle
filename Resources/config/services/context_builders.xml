@@ -203,15 +203,6 @@
         </service>
 
         <service
-            id="sylius_api.context_builder.payment_request_payment_method_code"
-            class="Sylius\Bundle\ApiBundle\Serializer\ContextBuilder\PaymentMethodCodeContextBuilder"
-            decorates="api_platform.serializer.context_builder"
-            decoration-priority="128"
-        >
-            <argument type="service" id=".inner" />
-        </service>
-
-        <service
             id="sylius_api.context_builder.payment_request_action_aware"
             class="Sylius\Bundle\ApiBundle\Serializer\ContextBuilder\PaymentRequestActionAwareContextBuilder"
             decorates="api_platform.serializer.context_builder"

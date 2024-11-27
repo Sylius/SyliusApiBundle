@@ -21,8 +21,6 @@ class ContextKeys
 
     public const HTTP_REQUEST_METHOD_TYPE = 'sylius_api_http_method_request_type';
 
-    public const PAYMENT_METHOD_CODE = 'sylius_api_payment_method_code';
-
     private function __construct()
     {
     }
