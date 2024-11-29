@@ -36,13 +36,13 @@
 
         <service id="sylius_api.state_processor.admin.channel.remove" class="Sylius\Bundle\ApiBundle\StateProcessor\Admin\Channel\RemoveProcessor">
             <argument type="service" id="api_platform.doctrine.orm.state.remove_processor" />
-            <argument type="service" id="Sylius\Component\Channel\Checker\ChannelDeletionCheckerInterface" />
+            <argument type="service" id="sylius.checker.channel_deletion" />
             <tag name="api_platform.state_processor" />
         </service>
 
         <service id="sylius_api.state_processor.admin.locale.remove" class="Sylius\Bundle\ApiBundle\StateProcessor\Admin\Locale\RemoveProcessor">
             <argument type="service" id="api_platform.doctrine.orm.state.remove_processor" />
-            <argument type="service" id="Sylius\Bundle\LocaleBundle\Checker\LocaleUsageCheckerInterface" />
+            <argument type="service" id="sylius.checker.locale_usage" />
             <tag name="api_platform.state_processor" />
         </service>
 

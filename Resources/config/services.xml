@@ -89,7 +89,7 @@
         >
             <argument type="service" id=".inner" />
             <argument type="service" id="sylius_api.provider.path_prefix" />
-            <argument type="service" id="Sylius\Bundle\ApiBundle\Resolver\OperationResolverInterface" />
+            <argument type="service" id="sylius_api.operation_resolver.path_prefix_based" />
             <argument type="service" id="api_platform.router" />
         </service>
 

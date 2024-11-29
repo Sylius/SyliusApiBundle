@@ -63,7 +63,7 @@
         </service>
 
         <service id="sylius_api.normalizer.product_option_value" class="Sylius\Bundle\ApiBundle\Serializer\Normalizer\ProductOptionValueNormalizer">
-            <argument type="service" id="Sylius\Component\Resource\Translation\TranslatableEntityLocaleAssignerInterface"/>
+            <argument type="service" id="sylius.translatable_entity_locale_assigner"/>
             <tag name="serializer.normalizer" priority="64" />
         </service>
 

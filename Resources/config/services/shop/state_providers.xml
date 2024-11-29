@@ -24,18 +24,18 @@
 
         <service id="sylius_api.state_provider.shop.order.order_item.adjustment.collection" class="Sylius\Bundle\ApiBundle\StateProvider\Shop\Order\OrderItem\Adjustment\CollectionProvider">
             <argument type="service" id="sylius.repository.order_item" />
-            <argument type="service" id="Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface" />
+            <argument type="service" id="sylius.section_resolver.uri_based" />
             <tag name="api_platform.state_provider" priority="10"/>
         </service>
 
         <service id="sylius_api.state_provider.shop.channel.collection" class="Sylius\Bundle\ApiBundle\StateProvider\Shop\Channel\CollectionProvider" >
-            <argument type="service" id="Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface" />
+            <argument type="service" id="sylius.section_resolver.uri_based" />
             <tag name="api_platform.state_provider" priority="10" />
         </service>
 
         <service id="sylius_api.state_provider.shop.product.product_attribute_value.collection" class="Sylius\Bundle\ApiBundle\StateProvider\Shop\Product\ProductAttributeValue\CollectionProvider">
             <argument type="tagged_iterator" tag="api_platform.doctrine.orm.query_extension.collection" />
-            <argument type="service" id="Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface" />
+            <argument type="service" id="sylius.section_resolver.uri_based" />
             <argument type="service" id="sylius.repository.product_attribute_value" />
             <argument type="service" id="sylius.context.locale" />
             <argument type="service" id="sylius.provider.locale.channel_based" />
@@ -59,21 +59,21 @@
         </service>
 
         <service id="sylius_api.state_provider.shop.shipment.item" class="Sylius\Bundle\ApiBundle\StateProvider\Shop\Shipment\ItemProvider">
-            <argument type="service" id="Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface" />
+            <argument type="service" id="sylius.section_resolver.uri_based" />
             <argument type="service" id="sylius_api.context.user.token_based" />
             <argument type="service" id="sylius.repository.shipment"/>
             <tag name="api_platform.state_provider" priority="10"/>
         </service>
 
         <service id="sylius_api.state_provider.shop.payment.item" class="Sylius\Bundle\ApiBundle\StateProvider\Shop\Payment\ItemProvider">
-            <argument type="service" id="Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface" />
+            <argument type="service" id="sylius.section_resolver.uri_based" />
             <argument type="service" id="sylius_api.context.user.token_based" />
             <argument type="service" id="sylius.repository.payment"/>
             <tag name="api_platform.state_provider" priority="10"/>
         </service>
 
         <service id="sylius_api.state_provider.shop.payment.payment_request.item" class="Sylius\Bundle\ApiBundle\StateProvider\Shop\Payment\PaymentRequest\ItemProvider">
-            <argument type="service" id="Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface" />
+            <argument type="service" id="sylius.section_resolver.uri_based" />
             <argument type="service" id="sylius.repository.payment_request"/>
             <argument type="service" id="sylius.checker.finalized_payment_request"/>
             <tag name="api_platform.state_provider" priority="10"/>
