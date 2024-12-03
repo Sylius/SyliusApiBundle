@@ -18,6 +18,7 @@ use Sylius\Bundle\ApiBundle\Attribute\PaymentRequestActionAware;
 use Sylius\Bundle\PaymentBundle\Provider\DefaultActionProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 
+/** @experimental */
 final class PaymentRequestActionAwareContextBuilder extends AbstractInputContextBuilder
 {
     private ?Request $request = null;
