@@ -40,7 +40,10 @@ final class ApiScenarioEventDispatchingScenarioTester implements ScenarioTester
         }
 
         $tags = $scenario->getTags();
-        if (($key = array_search('javascript', $tags)) !== false) {
+        if (
+            ($key = array_search('javascript', $tags)) !== false ||
+            ($key = array_search('mink:chromedriver', $tags)) !== false
+        ) {
             unset($tags[$key]);
         }
 
