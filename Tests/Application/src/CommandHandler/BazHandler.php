@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\CommandHandler;
 
-use Bar;
 use Sylius\Bundle\ApiBundle\Application\Command\BazCommand;
+use Sylius\Bundle\ApiBundle\Application\Entity\Bar;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
