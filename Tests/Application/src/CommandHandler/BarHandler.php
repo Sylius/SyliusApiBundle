@@ -22,6 +22,6 @@ final readonly class BarHandler
 {
     public function __invoke(BarCommand $command): Bar
     {
-       return new Bar();
+        return new Bar();
     }
 }
