@@ -1,5 +1,5 @@
 resources:
-    '%sylius.model.customer.class%':
+    'Sylius\Bundle\ApiBundle\Application\Entity\Bar':
         operations:
             ApiPlatform\Metadata\Post:
                 name: foo_api_shop_bar_post
