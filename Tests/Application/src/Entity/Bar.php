@@ -29,7 +29,7 @@ class Bar
         $this->id = $id;
     }
 
-    public function getFoo(): string
+    public function getFoo(): ?string
     {
         return $this->foo;
     }
