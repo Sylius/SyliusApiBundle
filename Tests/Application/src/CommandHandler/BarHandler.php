@@ -15,7 +15,6 @@ namespace Sylius\Bundle\ApiBundle\Application\CommandHandler;
 
 use Bar;
 use Sylius\Bundle\ApiBundle\Application\Command\BarCommand;
-use Sylius\Component\Core\Model\ShopUserInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
