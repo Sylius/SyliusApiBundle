@@ -13,11 +13,10 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Command;
 
-class BarCommand
+class BazCommand
 {
     public function __construct(
         public readonly string $foo,
-        public readonly string $bar,
     ) {
     }
 }

@@ -23,14 +23,14 @@
                 class="ApiPlatform\Metadata\Post"
                 uriTemplate="/shop/bar"
                 messenger="input"
-                input="Sylius\Bundle\ApiBundle\Command\Account\RegisterShopUser"
+                input="Sylius\Bundle\ApiBundle\Application\Command\BarCommand"
                 output="false"
             >
                 <denormalizationContext>
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:shop:customer:create</value>
+                                <value>sylius:shop:bar:create</value>
                             </values>
                         </value>
                     </values>

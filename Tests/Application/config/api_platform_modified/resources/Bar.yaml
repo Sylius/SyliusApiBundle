@@ -3,13 +3,13 @@ resources:
         operations:
             ApiPlatform\Metadata\Post:
                 name: foo_api_shop_bar_post
-                input: Sylius\Bundle\ApiBundle\Application\Command\BarCommand
+                input: Sylius\Bundle\ApiBundle\Application\Command\BazCommand
                 uriTemplate: '/shop/bar'
                 messenger: input
                 output: false
                 denormalizationContext:
                     groups:
-                        - sylius:shop:bar:create
+                        - sylius:shop:baz:create
                 validationContext:
                     groups:
                         - sylius
