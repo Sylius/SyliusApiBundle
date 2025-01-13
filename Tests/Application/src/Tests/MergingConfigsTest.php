@@ -73,6 +73,17 @@ final class MergingConfigsTest extends ApiTestCase
     {
         static::createClient()->request('POST', '/api/v2/shop/bar', [
             'json' => [
+                'firstName' => 'test',
+                'lastName' => 'test',
+                'email' => 'test@test.tld',
+                'password' => 'test',
+            ],
+        ]);
+
+        self::assertResponseStatusCodeSame(400);
+
+        static::createClient()->request('POST', '/api/v2/shop/bar', [
+            'json' => [
                 'foo' => 'test',
             ],
         ]);

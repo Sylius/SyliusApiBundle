@@ -30,7 +30,7 @@
                     <values>
                         <value name="groups">
                             <values>
-                                <value>sylius:shop:bar:create</value>
+                                <value>sylius:shop:customer:create</value>
                             </values>
                         </value>
                     </values>
