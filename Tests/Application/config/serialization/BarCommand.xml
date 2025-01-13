@@ -24,5 +24,9 @@
         <attribute name="foo">
 			<group>sylius:shop:bar:create</group>
         </attribute>
+
+        <attribute name="bar">
+			<group>sylius:shop:bar:create</group>
+        </attribute>
     </class>
 </serializer>
