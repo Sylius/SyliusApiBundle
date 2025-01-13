@@ -13,15 +13,10 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Command;
 
-use Symfony\Component\Serializer\Attribute\Groups;
-
 class BarCommand
 {
     public function __construct(
-        #[Groups('sylius:shop:bar:create')]
-        public readonly string $email,
-        #[Groups('sylius:shop:bar:create')]
-        public readonly string $password,
+        public readonly string $foo,
     ) {
     }
 }
