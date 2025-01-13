@@ -18,5 +18,6 @@
         </id>
 
         <field name="foo" column="foo" type="string" />
+        <field name="bar" column="bar" type="string" />
     </entity>
 </doctrine-mapping>

@@ -19,6 +19,8 @@ class Bar
 
     private ?string $foo = null;
 
+    private ?string $bar = null;
+
     public function getId(): int
     {
         return $this->id;
@@ -37,5 +39,15 @@ class Bar
     public function setFoo(?string $foo): void
     {
         $this->foo = $foo;
+    }
+
+    public function getBar(): ?string
+    {
+        return $this->bar;
+    }
+
+    public function setBar(?string $bar): void
+    {
+        $this->bar = $bar;
     }
 }
