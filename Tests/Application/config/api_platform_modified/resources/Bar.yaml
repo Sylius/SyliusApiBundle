@@ -1,0 +1,15 @@
+resources:
+    '%sylius.model.customer.class%':
+        operations:
+            ApiPlatform\Metadata\Post:
+                name: foo_api_shop_bar_post
+                input: Sylius\Bundle\ApiBundle\Application\Command\BarCommand
+                uriTemplate: '/shop/bar'
+                messenger: input
+                output: false
+                denormalizationContext:
+                    groups:
+                        - sylius:shop:bar:create
+                validationContext:
+                    groups:
+                        - sylius
