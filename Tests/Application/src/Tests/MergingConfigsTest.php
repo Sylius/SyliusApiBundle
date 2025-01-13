@@ -45,7 +45,7 @@ final class MergingConfigsTest extends ApiTestCase
     }
 
     /** @test */
-    public function it_allows_to_overwrite_an_existing_endpoint_with_xml(): void
+    public function it_allows_to_overwrite_the_path_of_an_existing_endpoint_with_xml(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/channels/WEB');
 
@@ -57,13 +57,25 @@ final class MergingConfigsTest extends ApiTestCase
     }
 
     /** @test */
-    public function it_allows_to_overwrite_an_existing_endpoint_with_yaml(): void
+    public function it_allows_to_overwrite_the_path_of_an_existing_endpoint_with_yaml(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/currencies/USD');
 
         self::assertResponseStatusCodeSame(404);
 
         static::createClient()->request('GET', '/api/v2/shop/currencies/new-yaml/USD');
+
+        self::assertResponseIsSuccessful();
+    }
+
+    /** @test */
+    public function it_allows_to_overwrite_the_input_class_of_an_existing_endpoint_with_yaml(): void
+    {
+        static::createClient()->request('POST', '/api/v2/shop/bar', [
+            'json' => [
+                'foo' => 'test',
+            ],
+        ]);
 
         self::assertResponseIsSuccessful();
     }
