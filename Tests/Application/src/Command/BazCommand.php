@@ -16,7 +16,7 @@ namespace Sylius\Bundle\ApiBundle\Application\Command;
 class BazCommand
 {
     public function __construct(
-        public readonly string $foo,
+        public readonly string $baz,
     ) {
     }
 }

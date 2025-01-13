@@ -23,7 +23,7 @@ final readonly class BazHandler
     public function __invoke(BazCommand $command): Bar
     {
         $bar = new Bar();
-        $bar->setFoo($command->foo);
+        $bar->setFoo($command->baz);
 
         return $bar;
     }

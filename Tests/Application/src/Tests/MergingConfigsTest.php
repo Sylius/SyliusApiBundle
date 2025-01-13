@@ -82,7 +82,7 @@ final class MergingConfigsTest extends ApiTestCase
 
         static::createClient()->request('POST', '/api/v2/shop/bar', [
             'json' => [
-                'foo' => 'test',
+                'baz' => 'test',
             ],
         ]);
 

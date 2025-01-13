@@ -21,7 +21,7 @@
 			<group>sylius:shop:baz:create</group>
         </attribute>
 
-        <attribute name="foo">
+        <attribute name="baz">
 			<group>sylius:shop:baz:create</group>
         </attribute>
     </class>
