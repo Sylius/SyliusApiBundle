@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Operations;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
 
+/** @internal */
 final class DuplicateOperationReplacerResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
 {
     public function __construct(
