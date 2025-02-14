@@ -17,8 +17,33 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Operations;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
+use ApiPlatform\Metadata\WithResourceTrait;
 
-/** @internal */
+/**
+ * @internal
+ *
+ * This class is used to merge duplicated operations with the same name in the resource metadata collection
+ * and then delete the extra ones, which have been merged.
+ *
+ * Exemple with an input class replaced:
+ * Before entering this class:
+ *     ResourceMetadataCollection
+ *     ├── ResourceMetadata (XML file defining an API resource in Sylius vendors)
+ *     │   ├── Operations
+ *     │   │   ├── Operation sylius_shop_foo_post (POST /api/v2/shop/foo with input: FooInput)
+ *     ├── ResourceMetadata (another XML file defining the same API resource in the app directory)
+ *     │   ├── Operations
+ *     │   │   ├── Operation sylius_shop_foo_post (POST /api/v2/shop/foo with input: BarInput)
+ *     │   │   ├── Operation app_shop_custom_get (GET /api/v2/shop/custom)
+ * After entering this class:
+ *    ResourceMetadataCollection
+ *      ├── ResourceMetadata (XML file defining an API resource in Sylius vendors)
+ *      │   ├── Operations
+ *      │   │   ├── Operation sylius_shop_foo_post (POST /api/v2/shop/foo with input: BarInput)
+ *      ├── ResourceMetadata (another XML file defining the same API resource in the app directory)
+ *      │   ├── Operations
+ *      │   │   ├── Operation app_shop_custom_get (GET /api/v2/shop/custom)
+ */
 final class DuplicateOperationReplacerResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
 {
     public function __construct(
@@ -73,19 +98,30 @@ final class DuplicateOperationReplacerResourceMetadataCollectionFactory implemen
     ): array|Operations {
         foreach ($operations as $name => $operation) {
             if (isset($duplicatedOperationNames[$name])) {
+                if ($operations instanceof Operations) {
+                    $operations->remove($name);
+                } else {
+                    unset($operations[$name]);
+                }
+
                 continue;
             }
 
             $duplicatedOperationNames[$name] = true;
 
-            foreach ($this->findOperations($name, $resourceMetadataCollection) as $duplicatedOperation) {
+            foreach ($this->findOperations(
+                $resourceMetadataCollection,
+                $name,
+                $operation,
+                false === $operations instanceof Operations,
+            ) as $duplicatedOperation) {
+                $operation = $this->copyFrom($operation, $duplicatedOperation);
+
                 if ($operations instanceof Operations) {
-                    $operations->add($name, $duplicatedOperation);
-
-                    continue;
+                    $operations->add($name, $operation);
+                } else {
+                    $operations[$name] = $operation;
                 }
-
-                $operations[$name] = $duplicatedOperation;
             }
         }
 
@@ -95,14 +131,47 @@ final class DuplicateOperationReplacerResourceMetadataCollectionFactory implemen
     /**
      * @return iterable<Operation>
      */
-    private function findOperations(string $key, ResourceMetadataCollection $resourceMetadataCollection): iterable
-    {
+    private function findOperations(
+        ResourceMetadataCollection $resourceMetadataCollection,
+        string $key,
+        Operation $currentOperation,
+        bool $isGraphQl,
+    ): iterable {
         foreach ($resourceMetadataCollection as $resourceMetadata) {
-            foreach ($resourceMetadata->getOperations() as $name => $operation) {
-                if ($name === $key) {
-                    yield $operation;
+            $method = $isGraphQl ? 'getGraphQlOperations' : 'getOperations';
+            foreach ($resourceMetadata->$method() as $name => $operation) {
+                if ($name !== $key) {
+                    continue;
                 }
+
+                if ($currentOperation === $operation) {
+                    continue;
+                }
+
+                yield $operation;
             }
         }
+    }
+
+    /**
+     * This method copy properties from $newOperation to $operation by replicating what is done in:
+     * @see WithResourceTrait::copyFrom
+     * Changes applied:
+     *   - The null test on the $operation has been removed.
+     */
+    private function copyFrom(Operation $operation, Operation $newOperation): Operation
+    {
+        $self = clone $operation;
+        foreach (get_class_methods($newOperation) as $method) {
+            if (
+                method_exists($self, $method) &&
+                preg_match('/^(?:get|is|can)(.*)/', (string) $method, $matches) &&
+                null !== $val = $newOperation->{$method}()
+            ) {
+                $self = $self->{"with{$matches[1]}"}($val);
+            }
+        }
+
+        return $self->withExtraProperties(array_merge($newOperation->getExtraProperties(), $self->getExtraProperties()));
     }
 }
