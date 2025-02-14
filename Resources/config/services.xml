@@ -102,7 +102,7 @@
             <argument>%sylius_api.operations_to_remove%</argument>
         </service>
 
-        <service id="sylius_api.api_platform.metadata.resource.metadata_collection_factory.merger"
+        <service id="sylius_api.api_platform.metadata.resource.metadata_collection_factory.duplicate_operation_replacer"
                  class="Sylius\Bundle\ApiBundle\ApiPlatform\Metadata\Resource\Factory\DuplicateOperationReplacerResourceMetadataCollectionFactory"
                  decorates="api_platform.metadata.resource.metadata_collection_factory"
                  decoration-priority="300"
