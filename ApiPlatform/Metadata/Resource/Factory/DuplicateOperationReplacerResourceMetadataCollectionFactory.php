@@ -98,6 +98,12 @@ final class DuplicateOperationReplacerResourceMetadataCollectionFactory implemen
     ): array|Operations {
         foreach ($operations as $name => $operation) {
             if (isset($duplicatedOperationNames[$name])) {
+                if ($operations instanceof Operations) {
+                    $operations->remove($name);
+                } else {
+                    unset($operations[$name]);
+                }
+
                 continue;
             }
 
