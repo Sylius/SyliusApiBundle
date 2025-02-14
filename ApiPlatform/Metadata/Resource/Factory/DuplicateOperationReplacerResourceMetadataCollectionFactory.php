@@ -22,8 +22,7 @@ use ApiPlatform\Metadata\WithResourceTrait;
 /**
  * @internal
  *
- * This class is used to merge duplicated operations with the same name in the resource metadata collection
- * and then delete the extra ones, which have been merged.
+ * This class is used to merge duplicated operations with the same name in the resource metadata collection.
  *
  * Exemple with an input class replaced:
  * Before entering this class:
@@ -42,6 +41,7 @@ use ApiPlatform\Metadata\WithResourceTrait;
  *      │   │   ├── Operation sylius_shop_foo_post (POST /api/v2/shop/foo with input: BarInput)
  *      ├── ResourceMetadata (another XML file defining the same API resource in the app directory)
  *      │   ├── Operations
+ *      │   │   ├── Operation sylius_shop_foo_post (POST /api/v2/shop/foo with input: BarInput)
  *      │   │   ├── Operation app_shop_custom_get (GET /api/v2/shop/custom)
  */
 final class DuplicateOperationReplacerResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
@@ -98,12 +98,6 @@ final class DuplicateOperationReplacerResourceMetadataCollectionFactory implemen
     ): array|Operations {
         foreach ($operations as $name => $operation) {
             if (isset($duplicatedOperationNames[$name])) {
-                if ($operations instanceof Operations) {
-                    $operations->remove($name);
-                } else {
-                    unset($operations[$name]);
-                }
-
                 continue;
             }
 
