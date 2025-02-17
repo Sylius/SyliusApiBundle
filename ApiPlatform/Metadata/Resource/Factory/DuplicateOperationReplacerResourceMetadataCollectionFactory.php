@@ -41,7 +41,6 @@ use ApiPlatform\Metadata\WithResourceTrait;
  *      │   │   ├── Operation sylius_shop_foo_post (POST /api/v2/shop/foo with input: BarInput)
  *      ├── ResourceMetadata (another XML file defining the same API resource in the app directory)
  *      │   ├── Operations
- *      │   │   ├── Operation sylius_shop_foo_post (POST /api/v2/shop/foo with input: BarInput)
  *      │   │   ├── Operation app_shop_custom_get (GET /api/v2/shop/custom)
  */
 final class DuplicateOperationReplacerResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
