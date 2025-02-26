@@ -154,6 +154,7 @@ final class DuplicateOperationReplacerResourceMetadataCollectionFactory implemen
 
     /**
      * This method copy properties from $newOperation to $operation by replicating what is done in:
+     *
      * @see WithResourceTrait::copyFrom
      * Changes applied:
      *   - The null test on the $operation has been removed.
