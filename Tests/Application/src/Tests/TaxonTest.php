@@ -28,6 +28,7 @@ final class TaxonTest extends ApiTestCase
     /** @test */
     public function it_gets_collection_with_shop_iris_as_a_visitor(): void
     {
+        static::$booted = false;
         static::createClient()->request('GET', '/api/v2/shop/taxons');
 
         $this->assertResponseIsSuccessful();
