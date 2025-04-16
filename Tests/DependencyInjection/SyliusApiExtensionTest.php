@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Definition;
 
 final class SyliusApiExtensionTest extends AbstractExtensionTestCase
 {
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_loads_swagger_integration_if_it_is_turned_on(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -35,7 +35,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasService('sylius_api.open_api.documentation_modifier.accept_language_header');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_does_not_load_swagger_integration_if_it_is_turned_off(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -45,7 +45,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderNotHasService('sylius_api.open_api.documentation_modifier.accept_language_header');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_loads_filter_eager_loading_extension_restricted_operations_configuration_properly(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -86,7 +86,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_loads_order_states_to_filter_out_parameter_properly(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -104,7 +104,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_loads_operations_to_remove_properly(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -125,7 +125,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_loads_default_filter_eager_loading_extension_restricted_operations_configuration_properly(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -135,7 +135,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasParameter('sylius_api.filter_eager_loading_extension.restricted_resources', []);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_prepends_configuration_with_api_platform_mapping(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -149,7 +149,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_autoconfigures_documentation_modifier_with_attribute(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);
@@ -170,7 +170,7 @@ final class SyliusApiExtensionTest extends AbstractExtensionTestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_autoconfigures_payment_configuration_provider_with_attribute(): void
     {
         $this->container->setParameter('kernel.bundles_metadata', ['SyliusApiBundle' => ['path' => __DIR__ . '../..']]);

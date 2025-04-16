@@ -27,7 +27,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class ChangeAddressOrderHandlerTest extends KernelTestCase
 {
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_changes_address_order_without_duplication_in_database(): void
     {
         $container = self::bootKernel()->getContainer();

@@ -25,7 +25,7 @@ final class PromotionTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_gets_resource_collection_as_a_guest_by_custom_path(): void
     {
         static::createClient()->request('GET', '/api/v2/custom/admin/promotions');
@@ -47,7 +47,7 @@ final class PromotionTest extends ApiTestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_gets_resource_collection_as_an_admin_by_custom_path(): void
     {
         static::createClient()->request(

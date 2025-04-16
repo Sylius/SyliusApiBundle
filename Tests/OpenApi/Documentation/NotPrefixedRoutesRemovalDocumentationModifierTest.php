@@ -30,13 +30,13 @@ final class NotPrefixedRoutesRemovalDocumentationModifierTest extends TestCase
         $this->notApiRoutesRemovalDocumentationModifier = new NotPrefixedRoutesRemovalDocumentationModifier(['/api/v2', '/custom-api']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_implements_the_documentation_modifier_interface(): void
     {
         $this->assertInstanceOf(DocumentationModifierInterface::class, $this->notApiRoutesRemovalDocumentationModifier);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_removes_operations_without_api_route_prefix(): void
     {
         $paths = new Paths();

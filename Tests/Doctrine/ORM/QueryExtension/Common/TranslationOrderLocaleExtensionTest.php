@@ -46,7 +46,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_does_nothing_when_resource_class_is_not_translatable(): void
     {
         $this->queryBuilder
@@ -57,7 +57,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         $this->doApplyToCollection(\stdClass::class);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_does_nothing_when_the_resource_is_not_sorted_by_translation_name(): void
     {
         $this->queryBuilder
@@ -68,7 +68,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         $this->doApplyToCollection(ProductInterface::class);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_does_nothing_when_the_resource_does_not_have_a_translations_association(): void
     {
         $this->queryBuilder
@@ -105,7 +105,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_joins_all_translations_if_no_locale_code_has_been_resolved_from_filters(): void
     {
         $this->queryBuilder
@@ -157,7 +157,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_does_nothing_when_no_locale_code_has_been_resolved_from_filters_and_it_is_shop_section(): void
     {
         $this->queryBuilder
@@ -207,11 +207,9 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider getLocaleCodeContexts
-     */
+    
+    #[\PHPUnit\Framework\Attributes\DataProvider('getLocaleCodeContexts')]
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_joins_on_a_specific_translation_when_locale_code_has_been_resolved_from_filters(
         array $contextWithLocaleCode,
     ): void {
@@ -289,7 +287,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
     }
 
     /** @return iterable<array<string, mixed>> */
-    private function getLocaleCodeContexts(): iterable
+    public static function getLocaleCodeContexts(): iterable
     {
         yield 'locale code in documentation filter' => [[
             'filters' => [

@@ -26,7 +26,7 @@ final class FooApiCommandTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_returns_information_about_missing_arguments_for_command(): void
     {
         static::createClient()->request(
@@ -45,7 +45,7 @@ final class FooApiCommandTest extends ApiTestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_allows_using_command_if_every_required_parameter_is_provided(): void
     {
         static::createClient()->request(

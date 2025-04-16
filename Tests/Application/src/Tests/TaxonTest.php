@@ -25,7 +25,7 @@ final class TaxonTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_gets_collection_with_shop_iris_as_a_visitor(): void
     {
         static::$booted = false;
@@ -54,7 +54,7 @@ final class TaxonTest extends ApiTestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_gets_collection_with_admin_iris_as_a_logged_in_administrator(): void
     {
         static::createClient()->request(

@@ -26,7 +26,7 @@ final class RemovingOperationsTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_allows_to_remove_an_existing_operation(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/currencies');
