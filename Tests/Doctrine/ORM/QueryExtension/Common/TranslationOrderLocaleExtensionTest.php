@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Tests\Doctrine\ORM\QueryExtension\Common;
 
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -46,7 +48,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_does_nothing_when_resource_class_is_not_translatable(): void
     {
         $this->queryBuilder
@@ -57,7 +59,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         $this->doApplyToCollection(\stdClass::class);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_does_nothing_when_the_resource_is_not_sorted_by_translation_name(): void
     {
         $this->queryBuilder
@@ -68,7 +70,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         $this->doApplyToCollection(ProductInterface::class);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_does_nothing_when_the_resource_does_not_have_a_translations_association(): void
     {
         $this->queryBuilder
@@ -105,7 +107,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_joins_all_translations_if_no_locale_code_has_been_resolved_from_filters(): void
     {
         $this->queryBuilder
@@ -157,7 +159,7 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_does_nothing_when_no_locale_code_has_been_resolved_from_filters_and_it_is_shop_section(): void
     {
         $this->queryBuilder
@@ -208,8 +210,8 @@ final class TranslationOrderLocaleExtensionTest extends TestCase
     }
 
     
-    #[\PHPUnit\Framework\Attributes\DataProvider('getLocaleCodeContexts')]
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[DataProvider('getLocaleCodeContexts')]
+    #[Test]
     public function it_joins_on_a_specific_translation_when_locale_code_has_been_resolved_from_filters(
         array $contextWithLocaleCode,
     ): void {

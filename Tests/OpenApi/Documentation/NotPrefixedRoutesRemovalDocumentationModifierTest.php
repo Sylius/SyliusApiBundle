@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Tests\ApiPlatform\OpenApi\Documentation;
 
+use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\OpenApi\Model\Info;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
@@ -30,13 +31,13 @@ final class NotPrefixedRoutesRemovalDocumentationModifierTest extends TestCase
         $this->notApiRoutesRemovalDocumentationModifier = new NotPrefixedRoutesRemovalDocumentationModifier(['/api/v2', '/custom-api']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_implements_the_documentation_modifier_interface(): void
     {
         $this->assertInstanceOf(DocumentationModifierInterface::class, $this->notApiRoutesRemovalDocumentationModifier);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_removes_operations_without_api_route_prefix(): void
     {
         $paths = new Paths();

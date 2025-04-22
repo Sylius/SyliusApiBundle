@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,7 +27,7 @@ final class RemovingOperationsTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_allows_to_remove_an_existing_operation(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/currencies');

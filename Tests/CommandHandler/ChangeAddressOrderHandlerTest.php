@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler;
 
+use PHPUnit\Framework\Attributes\Test;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\Persistence\ObjectManager;
 use Fidry\AliceDataFixtures\LoaderInterface;
@@ -27,7 +28,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class ChangeAddressOrderHandlerTest extends KernelTestCase
 {
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_changes_address_order_without_duplication_in_database(): void
     {
         $container = self::bootKernel()->getContainer();

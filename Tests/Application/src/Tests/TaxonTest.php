@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 final class TaxonTest extends ApiTestCase
@@ -25,7 +26,7 @@ final class TaxonTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_gets_collection_with_shop_iris_as_a_visitor(): void
     {
         static::$booted = false;
@@ -54,7 +55,7 @@ final class TaxonTest extends ApiTestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_gets_collection_with_admin_iris_as_a_logged_in_administrator(): void
     {
         static::createClient()->request(

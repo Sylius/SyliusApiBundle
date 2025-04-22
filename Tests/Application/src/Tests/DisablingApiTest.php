@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -27,7 +28,7 @@ final class DisablingApiTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_gets_collection_if_api_is_enabled(): void
     {
         $this->enableApi();
@@ -40,7 +41,7 @@ final class DisablingApiTest extends ApiTestCase
         self::assertResponseIsSuccessful();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_returns_route_not_found_if_api_is_disabled(): void
     {
         $this->disableApi();
@@ -55,7 +56,7 @@ final class DisablingApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_throws_not_found_exception_for_any_api_endpoint(): void
     {
         $this->disableApi();

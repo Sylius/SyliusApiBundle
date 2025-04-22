@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 final class MergingConfigsTest extends ApiTestCase
@@ -26,7 +27,7 @@ final class MergingConfigsTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_allows_to_add_a_new_operation_with_xml(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/channels-new-path-xml');
@@ -35,7 +36,7 @@ final class MergingConfigsTest extends ApiTestCase
         self::assertJsonContains(['@type' => 'hydra:Collection']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_allows_to_add_a_new_operation_with_yaml(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/currencies-new-path-yaml');
@@ -44,7 +45,7 @@ final class MergingConfigsTest extends ApiTestCase
         self::assertJsonContains(['@type' => 'hydra:Collection']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_allows_to_overwrite_the_path_of_an_existing_endpoint_with_xml(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/channels/WEB');
@@ -56,7 +57,7 @@ final class MergingConfigsTest extends ApiTestCase
         self::assertResponseIsSuccessful();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_allows_to_overwrite_the_path_of_an_existing_endpoint_with_yaml(): void
     {
         static::createClient()->request('GET', '/api/v2/shop/currencies/USD');
@@ -68,7 +69,7 @@ final class MergingConfigsTest extends ApiTestCase
         self::assertResponseIsSuccessful();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_allows_to_overwrite_the_input_class_of_an_existing_endpoint_with_yaml(): void
     {
         static::createClient()->request('POST', '/api/v2/shop/bar', [

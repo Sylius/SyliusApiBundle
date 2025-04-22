@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,7 +27,7 @@ final class FooApiCommandTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_returns_information_about_missing_arguments_for_command(): void
     {
         static::createClient()->request(
@@ -45,7 +46,7 @@ final class FooApiCommandTest extends ApiTestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_allows_using_command_if_every_required_parameter_is_provided(): void
     {
         static::createClient()->request(

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Application\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 final class PromotionTest extends ApiTestCase
@@ -25,7 +26,7 @@ final class PromotionTest extends ApiTestCase
         $this->setUpTest();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_gets_resource_collection_as_a_guest_by_custom_path(): void
     {
         static::createClient()->request('GET', '/api/v2/custom/admin/promotions');
@@ -47,7 +48,7 @@ final class PromotionTest extends ApiTestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_gets_resource_collection_as_an_admin_by_custom_path(): void
     {
         static::createClient()->request(
