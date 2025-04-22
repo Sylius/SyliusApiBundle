@@ -92,6 +92,63 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertTrue($this->converter->isIdentifier('test'));
     }
 
+    /**
+     * @test
+     *
+     * @dataProvider unicodeUrlValues
+     */
+    public function it_sanitizes_url_before_matching_for_various_characters(string $rawUrl): void
+    {
+        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+        $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
+            ->willReturn(['_api_resource_class' => 'test'])
+            ->shouldBeCalled();
+
+        $this->assertTrue($this->converter->isIdentifier($rawUrl));
+    }
+
+    /**
+     * @test
+     *
+     * @dataProvider invalidUrlValues
+     */
+    public function it_treats_sanitized_invalid_strings_as_not_identifiers(string $rawUrl): void
+    {
+        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+
+        $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
+            ->willThrow(new SymfonyRouteNotFoundException())
+            ->shouldBeCalled();
+
+        $this->assertFalse($this->converter->isIdentifier($rawUrl));
+    }
+
+    /** @test */
+    public function it_accepts_url_sanitized_to_a_valid_route(): void
+    {
+        $rawUrl = "api/v2/produc\nts/2";
+        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+
+        $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
+            ->willReturn(['_api_resource_class' => 'test'])
+            ->shouldBeCalled();
+
+        $this->assertTrue($this->converter->isIdentifier($rawUrl));
+    }
+
+    /** @test */
+    public function it_rejects_url_sanitized_but_not_matched(): void
+    {
+        $rawUrl = "api/v2/produc\nts/3";
+        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+
+        $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
+            ->willThrow(new SymfonyRouteNotFoundException())
+            ->shouldBeCalled();
+
+        $this->assertFalse($this->converter->isIdentifier($rawUrl));
+    }
+
     /** @test */
     public function it_throws_invalid_argument_exception_if_no_route_matches(): void
     {
@@ -188,5 +245,33 @@ final class IriToIdentifierConverterTest extends TestCase
         yield [0.1];
         yield [null];
         yield [new \stdClass()];
+    }
+
+    private function unicodeUrlValues(): array
+    {
+        return [
+            ['/resource/zażółć'],
+            ['/ресурс/кириллица'],
+            ['/πόρος/ελληνικά'],
+            ['/자원/한국어'],
+            ['/tài-nguyên/việt'],
+            ['/kaynak/türkçe'],
+            ['/مصدر/عربي'],
+            ['/资源/中文'],
+            ['/リソース/日本語'],
+        ];
+    }
+
+    private function invalidUrlValues(): array
+    {
+        return [
+            ['/resource/line\nbreak'],
+            ['/resource/\r\tcontrol'],
+            ['<script>alert("x")</script>'],
+            ['lorem ipsum doros sit amet \n dolor sit amet \r\t lorem ipsum \r\n lorem ipsum \0'],
+            ['javascript:alert("x")'],
+            ['http://example.com/ bad space'],
+            ['/incomplete/%zz'],
+        ];
     }
 }
