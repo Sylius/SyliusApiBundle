@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Tests\Resolver;
 
-use PHPUnit\Framework\Attributes\Test;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use PHPUnit\Framework\Attributes\Test;
 use Sylius\Bundle\ApiBundle\Provider\PathPrefixes;
 use Sylius\Bundle\ApiBundle\Resolver\OperationResolverInterface;
 use Sylius\Bundle\ApiBundle\Resolver\PathPrefixBasedOperationResolver;
