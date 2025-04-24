@@ -61,7 +61,7 @@ final class AcceptLanguageHeaderDocumentationModifier implements DocumentationMo
                 }
 
                 $operation = $operation->withParameters($parameters);
-                $pathItems[$path] = $pathItems[$path]->{'with'.ucfirst($method)}($operation);
+                $pathItems[$path] = $pathItems[$path]->{'with' . ucfirst($method)}($operation);
             }
         }
 
