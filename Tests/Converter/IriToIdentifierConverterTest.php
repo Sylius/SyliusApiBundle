@@ -99,7 +99,7 @@ final class IriToIdentifierConverterTest extends TestCase
      */
     public function it_sanitizes_url_before_matching_for_various_characters(string $rawUrl): void
     {
-        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+        $sanitized = filter_var($rawUrl, \FILTER_SANITIZE_URL);
         $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
             ->willReturn(['_api_resource_class' => 'test'])
             ->shouldBeCalled();
@@ -114,7 +114,7 @@ final class IriToIdentifierConverterTest extends TestCase
      */
     public function it_treats_sanitized_invalid_strings_as_not_identifiers(string $rawUrl): void
     {
-        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+        $sanitized = filter_var($rawUrl, \FILTER_SANITIZE_URL);
 
         $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
             ->willThrow(new SymfonyRouteNotFoundException())
@@ -127,7 +127,7 @@ final class IriToIdentifierConverterTest extends TestCase
     public function it_accepts_url_sanitized_to_a_valid_route(): void
     {
         $rawUrl = "api/v2/produc\nts/2";
-        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+        $sanitized = filter_var($rawUrl, \FILTER_SANITIZE_URL);
 
         $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
             ->willReturn(['_api_resource_class' => 'test'])
@@ -140,7 +140,7 @@ final class IriToIdentifierConverterTest extends TestCase
     public function it_rejects_url_sanitized_but_not_matched(): void
     {
         $rawUrl = "api/v2/produc\nts/3";
-        $sanitized = filter_var($rawUrl, FILTER_SANITIZE_URL);
+        $sanitized = filter_var($rawUrl, \FILTER_SANITIZE_URL);
 
         $this->router->match(Argument::that(fn ($arg) => $arg === $sanitized))
             ->willThrow(new SymfonyRouteNotFoundException())
