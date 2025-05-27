@@ -11,11 +11,11 @@
 
 declare(strict_types=1);
 
-namespace spec\Sylius\Bundle\ApiBundle\Validator\Constraints;
+namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use SM\StateMachine\StateMachine;
+use PHPUnit\Framework\TestCase;
 
-class WinzouStateMachineStub extends StateMachine
+final class WinzouStateMachineStubTest extends TestCase
 {
     public $config = [];
 }
