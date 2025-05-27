@@ -23,33 +23,60 @@ use Sylius\Component\Order\OrderTransitions;
 
 final class OrderStateMachineTransitionApplicatorTest extends TestCase
 {
-    /** @var StateMachineInterface|MockObject */
-    private MockObject $stateMachineMock;
+    private StateMachineInterface&MockObject $stateMachine;
 
     private OrderStateMachineTransitionApplicator $orderStateMachineTransitionApplicator;
 
+    private OrderInterface&MockObject $order;
+
     protected function setUp(): void
     {
-        $this->stateMachineMock = $this->createMock(StateMachineInterface::class);
-        $this->orderStateMachineTransitionApplicator = new OrderStateMachineTransitionApplicator($this->stateMachineMock);
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->orderStateMachineTransitionApplicator = new OrderStateMachineTransitionApplicator($this->stateMachine);
+        $this->order = $this->createMock(OrderInterface::class);
     }
 
     public function testCancelsOrder(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderTransitions::GRAPH, OrderTransitions::TRANSITION_CANCEL)->willReturn(true);
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($orderMock, OrderTransitions::GRAPH, OrderTransitions::TRANSITION_CANCEL);
-        $this->orderStateMachineTransitionApplicator->cancel($orderMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->order,
+                OrderTransitions::GRAPH,
+                OrderTransitions::TRANSITION_CANCEL
+            )->willReturn(true);
+
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with(
+                $this->order,
+                OrderTransitions::GRAPH,
+                OrderTransitions::TRANSITION_CANCEL
+            );
+
+        $this->orderStateMachineTransitionApplicator->cancel($this->order);
     }
 
     public function testThrowExceptionIfCannotCancelOrder(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderTransitions::GRAPH, OrderTransitions::TRANSITION_CANCEL)->willReturn(false);
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($orderMock, OrderTransitions::GRAPH, OrderTransitions::TRANSITION_CANCEL);
-        $this->expectException(StateMachineTransitionFailedException::class);
-        $this->orderStateMachineTransitionApplicator->cancel($orderMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->order,
+                OrderTransitions::GRAPH,
+                OrderTransitions::TRANSITION_CANCEL
+            )->willReturn(false);
+
+        $this->stateMachine->expects(self::never())
+            ->method('apply')
+            ->with(
+                $this->order,
+                OrderTransitions::GRAPH,
+                OrderTransitions::TRANSITION_CANCEL
+            );
+
+        self::expectException(StateMachineTransitionFailedException::class);
+
+        $this->orderStateMachineTransitionApplicator->cancel($this->order);
     }
 }

@@ -23,52 +23,107 @@ use Sylius\Component\Review\Model\ReviewInterface;
 
 final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
 {
-    /** @var StateMachineInterface|MockObject */
-    private MockObject $stateMachineMock;
+    private StateMachineInterface&MockObject $stateMachine;
 
     private ProductReviewStateMachineTransitionApplicator $productReviewStateMachineTransitionApplicator;
 
+    private ReviewInterface&MockObject $review;
+
     protected function setUp(): void
     {
-        $this->stateMachineMock = $this->createMock(StateMachineInterface::class);
-        $this->productReviewStateMachineTransitionApplicator = new ProductReviewStateMachineTransitionApplicator($this->stateMachineMock);
+        parent::setUp();
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->productReviewStateMachineTransitionApplicator = new ProductReviewStateMachineTransitionApplicator(
+            $this->stateMachine
+        );
+        $this->review = $this->createMock(ReviewInterface::class);
     }
 
     public function testAcceptsProductReview(): void
     {
-        /** @var ReviewInterface|MockObject $reviewMock */
-        $reviewMock = $this->createMock(ReviewInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_ACCEPT)->willReturn(true);
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_ACCEPT);
-        $this->productReviewStateMachineTransitionApplicator->accept($reviewMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_ACCEPT
+            )->willReturn(true);
+
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_ACCEPT
+            );
+
+        $this->productReviewStateMachineTransitionApplicator->accept($this->review);
     }
 
     public function testThrowsExceptionIfCannotAcceptProductReview(): void
     {
-        /** @var ReviewInterface|MockObject $reviewMock */
-        $reviewMock = $this->createMock(ReviewInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_ACCEPT)->willReturn(false);
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_ACCEPT);
-        $this->expectException(StateMachineTransitionFailedException::class);
-        $this->productReviewStateMachineTransitionApplicator->accept($reviewMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_ACCEPT
+            )->willReturn(false);
+
+        $this->stateMachine->expects(self::never())
+            ->method('apply')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_ACCEPT
+            );
+
+        self::expectException(StateMachineTransitionFailedException::class);
+
+        $this->productReviewStateMachineTransitionApplicator->accept($this->review);
     }
 
     public function testRejectsProductReview(): void
     {
-        /** @var ReviewInterface|MockObject $reviewMock */
-        $reviewMock = $this->createMock(ReviewInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_REJECT)->willReturn(true);
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_REJECT);
-        $this->productReviewStateMachineTransitionApplicator->reject($reviewMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_REJECT
+            )->willReturn(true);
+
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_REJECT
+            );
+
+        $this->productReviewStateMachineTransitionApplicator->reject($this->review);
     }
 
     public function testThrowsExceptionIfCannotRejectProductReview(): void
     {
-        /** @var ReviewInterface|MockObject $reviewMock */
-        $reviewMock = $this->createMock(ReviewInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_REJECT)->willReturn(false);
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($reviewMock, ProductReviewTransitions::GRAPH, ProductReviewTransitions::TRANSITION_REJECT);
-        $this->expectException(StateMachineTransitionFailedException::class);
-        $this->productReviewStateMachineTransitionApplicator->reject($reviewMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_REJECT
+            )->willReturn(false);
+
+        $this->stateMachine->expects(self::never())
+            ->method('apply')
+            ->with(
+                $this->review,
+                ProductReviewTransitions::GRAPH,
+                ProductReviewTransitions::TRANSITION_REJECT
+            );
+
+        self::expectException(StateMachineTransitionFailedException::class);
+
+        $this->productReviewStateMachineTransitionApplicator->reject($this->review);
     }
 }

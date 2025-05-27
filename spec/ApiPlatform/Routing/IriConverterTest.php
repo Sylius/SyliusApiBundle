@@ -27,61 +27,75 @@ use Symfony\Component\Routing\RouterInterface;
 
 final class IriConverterTest extends TestCase
 {
-    /** @var IriConverterInterface|MockObject */
-    private MockObject $decoratedIriConverterMock;
+    private IriConverterInterface&MockObject $decoratedIriConverter;
 
-    /** @var PathPrefixProviderInterface|MockObject */
-    private MockObject $pathPrefixProviderMock;
+    private MockObject&PathPrefixProviderInterface $pathPrefixProvider;
 
-    /** @var OperationResolverInterface|MockObject */
-    private MockObject $operationResolverMock;
+    private MockObject&OperationResolverInterface $operationResolver;
 
-    /** @var RouterInterface|MockObject */
-    private MockObject $routerMock;
+    private MockObject&RouterInterface $router;
 
     private IriConverter $iriConverter;
 
+    private CountryInterface&MockObject $country;
+
     protected function setUp(): void
     {
-        $this->decoratedIriConverterMock = $this->createMock(IriConverterInterface::class);
-        $this->pathPrefixProviderMock = $this->createMock(PathPrefixProviderInterface::class);
-        $this->operationResolverMock = $this->createMock(OperationResolverInterface::class);
-        $this->routerMock = $this->createMock(RouterInterface::class);
-        $this->iriConverter = new IriConverter($this->decoratedIriConverterMock, $this->pathPrefixProviderMock, $this->operationResolverMock, $this->routerMock);
+        parent::setUp();
+        $this->decoratedIriConverter = $this->createMock(IriConverterInterface::class);
+        $this->pathPrefixProvider = $this->createMock(PathPrefixProviderInterface::class);
+        $this->operationResolver = $this->createMock(OperationResolverInterface::class);
+        $this->router = $this->createMock(RouterInterface::class);
+        $this->iriConverter = new IriConverter(
+            $this->decoratedIriConverter,
+            $this->pathPrefixProvider,
+            $this->operationResolver,
+            $this->router,
+        );
+        $this->country = $this->createMock(CountryInterface::class);
     }
 
     public function testImplementsTheIriConverterInterface(): void
     {
-        $this->assertInstanceOf(IriConverterInterface::class, $this->iriConverter);
+        self::assertInstanceOf(IriConverterInterface::class, $this->iriConverter);
     }
 
     public function testUsesInnerIriConverterToGetResourceFromIri(): void
     {
-        /** @var CountryInterface|MockObject $countryMock */
-        $countryMock = $this->createMock(CountryInterface::class);
-        $this->decoratedIriConverterMock->expects($this->once())->method('getResourceFromIri')->with('api/v2/admin/countries/CODE', [], null)->willReturn($countryMock);
-        $this->assertSame($countryMock, $this->iriConverter->getResourceFromIri('api/v2/admin/countries/CODE'));
+        $this->decoratedIriConverter->expects(self::once())
+            ->method('getResourceFromIri')
+            ->with('api/v2/admin/countries/CODE', [], null)
+            ->willReturn($this->country);
+
+        self::assertSame($this->country, $this->iriConverter->getResourceFromIri('api/v2/admin/countries/CODE'));
     }
 
     public function testUsesOperationResolverToGetProperIriFromResource(): void
     {
-        /** @var CountryInterface|MockObject $countryMock */
-        $countryMock = $this->createMock(CountryInterface::class);
-        /** @var Operation|MockObject $operationMock */
-        $operationMock = $this->createMock(Operation::class);
-        $this->pathPrefixProviderMock->expects($this->once())->method('getPathPrefix')->with('api/v2/admin/countries')->willReturn('admin');
-        $this->operationResolverMock->expects($this->once())->method('resolve')->with(Country::class, 'admin', null)
-            ->willReturn($operationMock)
-        ;
-        $this->decoratedIriConverterMock->expects($this->once())->method('getIriFromResource')->with($countryMock, UrlGeneratorInterface::ABS_PATH, $operationMock, [
+        /** @var Operation&MockObject $operation */
+        $operation = $this->createMock(Operation::class);
+
+        $this->pathPrefixProvider->expects(self::once())
+            ->method('getPathPrefix')
+            ->with('api/v2/admin/countries')
+            ->willReturn('admin');
+
+        $this->operationResolver->expects(self::once())
+            ->method('resolve')
+            ->with(Country::class, 'admin', null)
+            ->willReturn($operation);
+
+        $this->decoratedIriConverter->expects(self::once())
+            ->method('getIriFromResource')
+            ->with($this->country, UrlGeneratorInterface::ABS_PATH, $operation, [
             'request_uri' => 'api/v2/admin/countries',
             'force_resource_class' => Country::class,
         ])
-            ->willReturn('api/v2/admin/countries/CODE')
-        ;
-        $this->assertSame('api/v2/admin/countries/CODE', $this->iriConverter
+            ->willReturn('api/v2/admin/countries/CODE');
+
+        self::assertSame('api/v2/admin/countries/CODE', $this->iriConverter
             ->getIriFromResource(
-                $countryMock,
+                $this->country,
                 UrlGeneratorInterface::ABS_PATH,
                 null,
                 [

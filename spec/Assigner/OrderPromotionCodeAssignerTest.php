@@ -23,60 +23,77 @@ use Sylius\Component\Promotion\Repository\PromotionCouponRepositoryInterface;
 
 final class OrderPromotionCodeAssignerTest extends TestCase
 {
-    /** @var PromotionCouponRepositoryInterface|MockObject */
-    private MockObject $promotionCouponRepositoryMock;
+    private PromotionCouponRepositoryInterface&MockObject $promotionCouponRepository;
 
-    /** @var OrderProcessorInterface|MockObject */
-    private MockObject $orderProcessorMock;
+    private OrderProcessorInterface&MockObject $orderProcessor;
 
     private OrderPromotionCodeAssigner $orderPromotionCodeAssigner;
 
+    private OrderInterface&MockObject $cart;
+
     protected function setUp(): void
     {
-        $this->promotionCouponRepositoryMock = $this->createMock(PromotionCouponRepositoryInterface::class);
-        $this->orderProcessorMock = $this->createMock(OrderProcessorInterface::class);
-        $this->orderPromotionCodeAssigner = new OrderPromotionCodeAssigner($this->promotionCouponRepositoryMock, $this->orderProcessorMock);
+        $this->promotionCouponRepository = $this->createMock(PromotionCouponRepositoryInterface::class);
+        $this->orderProcessor = $this->createMock(OrderProcessorInterface::class);
+        $this->orderPromotionCodeAssigner = new OrderPromotionCodeAssigner(
+            $this->promotionCouponRepository,
+            $this->orderProcessor
+        );
+        $this->cart = $this->createMock(OrderInterface::class);
     }
 
     public function testAppliesCouponToCart(): void
     {
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        $this->promotionCouponRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'couponCode'])->willReturn($promotionCouponMock);
-        $cartMock->expects($this->once())->method('setPromotionCoupon')->with($promotionCouponMock);
-        $this->orderProcessorMock->expects($this->once())->method('process')->with($cartMock);
-        $this->orderPromotionCodeAssigner->assign($cartMock, 'couponCode');
+        /** @var PromotionCouponInterface&MockObject $promotionCoupon */
+        $promotionCoupon = $this->createMock(PromotionCouponInterface::class);
+
+        $this->promotionCouponRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['code' => 'couponCode'])
+            ->willReturn($promotionCoupon);
+
+        $this->cart->expects(self::once())->method('setPromotionCoupon')->with($promotionCoupon);
+
+        $this->orderProcessor->expects(self::once())->method('process')->with($this->cart);
+
+        $this->orderPromotionCodeAssigner->assign($this->cart, 'couponCode');
     }
 
     public function testDoesNotApplyCouponIfPromotionCouponCodeIsEmpty(): void
     {
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        $this->promotionCouponRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => '']);
-        $cartMock->expects($this->never())->method('setPromotionCoupon');
-        $this->orderProcessorMock->expects($this->never())->method('process')->with($cartMock);
-        $this->orderPromotionCodeAssigner->assign($cartMock, '');
+        $this->promotionCouponRepository->expects(self::once())->method('findOneBy')->with(['code' => '']);
+
+        $this->cart->expects(self::never())->method('setPromotionCoupon');
+
+        $this->orderProcessor->expects(self::never())->method('process')->with($this->cart);
+
+        $this->orderPromotionCodeAssigner->assign($this->cart, '');
     }
 
     public function testDoesNotApplyCouponIfPromotionCouponCodeIsInvalid(): void
     {
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        $this->promotionCouponRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'invalidCode'])->willReturn(null);
-        $cartMock->expects($this->never())->method('setPromotionCoupon');
-        $this->orderProcessorMock->expects($this->never())->method('process')->with($cartMock);
-        $this->orderPromotionCodeAssigner->assign($cartMock, 'invalidCode');
+        $this->promotionCouponRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['code' => 'invalidCode'])
+            ->willReturn(null);
+
+        $this->cart->expects(self::never())->method('setPromotionCoupon');
+
+        $this->orderProcessor->expects(self::never())->method('process')->with($this->cart);
+
+        $this->orderPromotionCodeAssigner->assign($this->cart, 'invalidCode');
     }
 
     public function testRemovesCouponIfPassedPromotionCouponCodeIsNull(): void
     {
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        $this->promotionCouponRepositoryMock->expects($this->never())->method('findOneBy')->with(['code' => null]);
-        $cartMock->expects($this->once())->method('setPromotionCoupon')->with(null);
-        $this->orderProcessorMock->expects($this->once())->method('process')->with($cartMock);
-        $this->orderPromotionCodeAssigner->assign($cartMock, null);
+        $this->promotionCouponRepository->expects(self::never())
+            ->method('findOneBy')
+            ->with(['code' => null]);
+
+        $this->cart->expects(self::once())->method('setPromotionCoupon')->with(null);
+
+        $this->orderProcessor->expects(self::once())->method('process')->with($this->cart);
+
+        $this->orderPromotionCodeAssigner->assign($this->cart, null);
     }
 }

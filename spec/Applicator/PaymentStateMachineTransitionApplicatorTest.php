@@ -23,52 +23,103 @@ use Sylius\Component\Payment\PaymentTransitions;
 
 final class PaymentStateMachineTransitionApplicatorTest extends TestCase
 {
-    /** @var StateMachineInterface|MockObject */
-    private MockObject $stateMachineMock;
+    private StateMachineInterface&MockObject $stateMachine;
 
     private PaymentStateMachineTransitionApplicator $paymentStateMachineTransitionApplicator;
 
+    private PaymentInterface&MockObject $payment;
+
     protected function setUp(): void
     {
-        $this->stateMachineMock = $this->createMock(StateMachineInterface::class);
-        $this->paymentStateMachineTransitionApplicator = new PaymentStateMachineTransitionApplicator($this->stateMachineMock);
+        parent::setUp();
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->paymentStateMachineTransitionApplicator = new PaymentStateMachineTransitionApplicator($this->stateMachine);
+        $this->payment = $this->createMock(PaymentInterface::class);
     }
 
     public function testCompletesPayment(): void
     {
-        /** @var PaymentInterface|MockObject $paymentMock */
-        $paymentMock = $this->createMock(PaymentInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_COMPLETE)->willReturn(true);
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_COMPLETE);
-        $this->paymentStateMachineTransitionApplicator->complete($paymentMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_COMPLETE
+            )->willReturn(true);
+
+        $this->stateMachine->expects(self::once())
+            ->method('apply')->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_COMPLETE
+            );
+
+        $this->paymentStateMachineTransitionApplicator->complete($this->payment);
     }
 
     public function testThrowsExceptionIfCannotCompletePayment(): void
     {
-        /** @var PaymentInterface|MockObject $paymentMock */
-        $paymentMock = $this->createMock(PaymentInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_COMPLETE)->willReturn(false);
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_COMPLETE);
-        $this->expectException(StateMachineTransitionFailedException::class);
-        $this->paymentStateMachineTransitionApplicator->complete($paymentMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_COMPLETE)
+            ->willReturn(false);
+
+        $this->stateMachine->expects(self::never())
+            ->method('apply')
+            ->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_COMPLETE
+            );
+
+        self::expectException(StateMachineTransitionFailedException::class);
+
+        $this->paymentStateMachineTransitionApplicator->complete($this->payment);
     }
 
     public function testRefundsPayment(): void
     {
-        /** @var PaymentInterface|MockObject $paymentMock */
-        $paymentMock = $this->createMock(PaymentInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_REFUND)->willReturn(true);
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_REFUND);
-        $this->paymentStateMachineTransitionApplicator->refund($paymentMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_REFUND
+            )->willReturn(true);
+
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_REFUND
+            );
+
+        $this->paymentStateMachineTransitionApplicator->refund($this->payment);
     }
 
     public function testThrowsAnExceptionIfCannotRefundPayment(): void
     {
-        /** @var PaymentInterface|MockObject $paymentMock */
-        $paymentMock = $this->createMock(PaymentInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_REFUND)->willReturn(false);
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($paymentMock, PaymentTransitions::GRAPH, PaymentTransitions::TRANSITION_REFUND);
-        $this->expectException(StateMachineTransitionFailedException::class);
-        $this->paymentStateMachineTransitionApplicator->refund($paymentMock);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_REFUND
+            )->willReturn(false);
+
+        $this->stateMachine->expects(self::never())
+            ->method('apply')
+            ->with(
+                $this->payment,
+                PaymentTransitions::GRAPH,
+                PaymentTransitions::TRANSITION_REFUND
+            );
+
+        self::expectException(StateMachineTransitionFailedException::class);
+
+        $this->paymentStateMachineTransitionApplicator->refund($this->payment);
     }
 }
