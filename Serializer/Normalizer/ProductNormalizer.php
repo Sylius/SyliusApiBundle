@@ -18,7 +18,6 @@ use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
 use Sylius\Bundle\ApiBundle\Serializer\SerializationGroupsSupportTrait;
 use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
-use Sylius\Component\Product\Model\ProductVariantInterface;
 use Sylius\Component\Product\Resolver\ProductVariantResolverInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
@@ -50,12 +49,6 @@ final class ProductNormalizer implements NormalizerInterface, NormalizerAwareInt
         $context[self::ALREADY_CALLED] = true;
 
         $data = $this->normalizer->normalize($object, $format, $context);
-
-        $data['variants'] = $object
-            ->getEnabledVariants()
-            ->map(fn (ProductVariantInterface $variant): string => $this->iriConverter->getIriFromResource($variant))
-            ->getValues()
-        ;
 
         $defaultVariant = $this->defaultProductVariantResolver->getVariant($object);
 
