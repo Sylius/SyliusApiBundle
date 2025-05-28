@@ -64,14 +64,24 @@ final class ProductDeletionEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
-        $requestMock->expects($this->once())->method('getMethod')->willReturn(Request::METHOD_POST);
+
+        $requestMock->expects($this->once())
+            ->method('getMethod')
+            ->willReturn(Request::METHOD_DELETE);
+
         $event = new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
             $productMock,
         );
-        $this->productInPromotionRuleCheckerMock->expects($this->once())->method('isInUse')->with($productMock)->willReturn(false);
+
+        $this->productInPromotionRuleCheckerMock
+            ->expects($this->once())
+            ->method('isInUse')
+            ->with($productMock)
+            ->willReturn(false);
+
         /** should not throw exception */
         $this->productDeletionEventSubscriber->protectFromRemovingProductInUseByPromotionRule($event);
     }

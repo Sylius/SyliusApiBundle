@@ -25,7 +25,7 @@ final class ArchivingPromotionApplicatorTest extends TestCase
 
     private ArchivingPromotionApplicator $archivingPromotionApplicator;
 
-    private PromotionInterface&MockObject $promotion;
+    private MockObject&PromotionInterface $promotion;
 
     protected function setUp(): void
     {

@@ -26,81 +26,118 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 final class TokenValueBasedCartContextTest extends TestCase
 {
-    /** @var RequestStack|MockObject */
-    private MockObject $requestStackMock;
+    private MockObject&RequestStack $requestStack;
 
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
     private TokenValueBasedCartContext $tokenValueBasedCartContext;
 
+    private MockObject&Request $request;
+
     protected function setUp(): void
     {
-        $this->requestStackMock = $this->createMock(RequestStack::class);
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->tokenValueBasedCartContext = new TokenValueBasedCartContext($this->requestStackMock, $this->orderRepositoryMock, '/api/v2');
+        parent::setUp();
+        $this->requestStack = $this->createMock(RequestStack::class);
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->tokenValueBasedCartContext = new TokenValueBasedCartContext($this->requestStack, $this->orderRepository, '/api/v2');
+        $this->request = $this->createMock(Request::class);
     }
 
     public function testImplementsCartContextInterface(): void
     {
-        $this->assertInstanceOf(CartContextInterface::class, $this->tokenValueBasedCartContext);
+        self::assertInstanceOf(CartContextInterface::class, $this->tokenValueBasedCartContext);
     }
 
     public function testReturnsCartByTokenValue(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        $requestMock->attributes = new ParameterBag(['tokenValue' => 'TOKEN_VALUE']);
-        $requestMock->expects($this->once())->method('getRequestUri')->willReturn('/api/v2/orders/TOKEN_VALUE');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($requestMock);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('TOKEN_VALUE')->willReturn($cartMock);
-        $this->assertSame($cartMock, $this->tokenValueBasedCartContext->getCart());
+        /** @var OrderInterface&MockObject $cart */
+        $cart = $this->createMock(OrderInterface::class);
+
+        $this->request->attributes = new ParameterBag(['tokenValue' => 'TOKEN_VALUE']);
+
+        $this->request->expects(self::once())
+            ->method('getRequestUri')
+            ->willReturn('/api/v2/orders/TOKEN_VALUE');
+
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn($this->request);
+
+        $this->orderRepository->expects(self::once())
+            ->method('findCartByTokenValue')
+            ->with('TOKEN_VALUE')
+            ->willReturn($cart);
+
+        self::assertSame($cart, $this->tokenValueBasedCartContext->getCart());
     }
 
     public function testThrowsAnExceptionIfThereIsNoMasterRequestOnRequestStack(): void
     {
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn(null);
-        $this->expectException(CartNotFoundException::class);
-        $this->tokenValueBasedCartContext->expectExceptionMessage('There is no main request on request stack.');
+        $this->requestStack->expects(self::once())
+            ->method('getMainRequest')
+            ->willReturn(null);
+
+        self::expectException(CartNotFoundException::class);
+
+        self::expectExceptionMessage('There is no main request on request stack.');
+
         $this->tokenValueBasedCartContext->getCart();
     }
 
     public function testThrowsAnExceptionIfTheRequestIsNotAnApiRequest(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        $requestMock->attributes = new ParameterBag([]);
-        $requestMock->expects($this->once())->method('getRequestUri')->willReturn('/orders');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($requestMock);
-        $this->expectException(CartNotFoundException::class);
-        $this->tokenValueBasedCartContext->expectExceptionMessage('The main request is not an API request.');
+        $this->request->attributes = new ParameterBag([]);
+        $this->request->expects(self::once())
+            ->method('getRequestUri')
+            ->willReturn('/orders');
+
+        $this->requestStack->expects(self::once())
+            ->method('getMainRequest')
+            ->willReturn($this->request);
+
+        self::expectException(CartNotFoundException::class);
+
+        self::expectExceptionMessage('The main request is not an API request.');
+
         $this->tokenValueBasedCartContext->getCart();
     }
 
     public function testThrowsAnExceptionIfThereIsNoTokenValue(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        $requestMock->attributes = new ParameterBag([]);
-        $requestMock->expects($this->once())->method('getRequestUri')->willReturn('/api/v2/orders');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($requestMock);
-        $this->expectException(CartNotFoundException::class);
-        $this->tokenValueBasedCartContext->expectExceptionMessage('Sylius was not able to find the cart, as there is no passed token value.');
+        $this->request->attributes = new ParameterBag([]);
+        $this->request->expects(self::once())
+            ->method('getRequestUri')
+            ->willReturn('/api/v2/orders');
+
+        $this->requestStack->expects(self::once())
+            ->method('getMainRequest')
+            ->willReturn($this->request);
+
+        self::expectException(CartNotFoundException::class);
+
+        self::expectExceptionMessage('Sylius was not able to find the cart, as there is no passed token value.');
+
         $this->tokenValueBasedCartContext->getCart();
     }
 
     public function testThrowsAnExceptionIfThereIsNoCartWithGivenTokenValue(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        $requestMock->attributes = new ParameterBag(['tokenValue' => 'TOKEN_VALUE']);
-        $requestMock->expects($this->once())->method('getRequestUri')->willReturn('/api/v2/orders/TOKEN_VALUE');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($requestMock);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('TOKEN_VALUE')->willReturn(null);
-        $this->expectException(CartNotFoundException::class);
-        $this->tokenValueBasedCartContext->expectExceptionMessage('Sylius was not able to find the cart for passed token value.');
+        $this->request->attributes = new ParameterBag(['tokenValue' => 'TOKEN_VALUE']);
+        $this->request->expects(self::once())
+            ->method('getRequestUri')
+            ->willReturn('/api/v2/orders/TOKEN_VALUE');
+
+        $this->requestStack->expects(self::once())
+            ->method('getMainRequest')
+            ->willReturn($this->request);
+
+        $this->orderRepository->expects(self::once())
+            ->method('findCartByTokenValue')
+            ->with('TOKEN_VALUE')
+            ->willReturn(null);
+
+        self::expectException(CartNotFoundException::class);
+
+        self::expectExceptionMessage('Sylius was not able to find the cart for passed token value.');
+
         $this->tokenValueBasedCartContext->getCart();
     }
 }

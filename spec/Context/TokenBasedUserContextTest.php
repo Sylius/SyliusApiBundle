@@ -23,54 +23,59 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 final class TokenBasedUserContextTest extends TestCase
 {
-    /** @var TokenStorageInterface|MockObject */
-    private MockObject $tokenStorageMock;
+    private MockObject&TokenStorageInterface $tokenStorage;
 
     private TokenBasedUserContext $tokenBasedUserContext;
 
+    private MockObject&TokenInterface $token;
+
     protected function setUp(): void
     {
-        $this->tokenStorageMock = $this->createMock(TokenStorageInterface::class);
-        $this->tokenBasedUserContext = new TokenBasedUserContext($this->tokenStorageMock);
+        parent::setUp();
+        $this->tokenStorage = $this->createMock(TokenStorageInterface::class);
+        $this->tokenBasedUserContext = new TokenBasedUserContext($this->tokenStorage);
+        $this->token = $this->createMock(TokenInterface::class);
     }
 
     public function testImplementsUserContextInterface(): void
     {
-        $this->assertInstanceOf(UserContextInterface::class, $this->tokenBasedUserContext);
+        self::assertInstanceOf(UserContextInterface::class, $this->tokenBasedUserContext);
     }
 
     public function testReturnsUserFromToken(): void
     {
-        /** @var TokenInterface|MockObject $tokenMock */
-        $tokenMock = $this->createMock(TokenInterface::class);
-        /** @var UserInterface|MockObject $userMock */
-        $userMock = $this->createMock(UserInterface::class);
-        $this->tokenStorageMock->expects($this->once())->method('getToken')->willReturn($tokenMock);
-        $tokenMock->expects($this->once())->method('getUser')->willReturn($userMock);
-        $this->assertSame($userMock, $this->tokenBasedUserContext->getUser());
+        /** @var UserInterface&MockObject $user */
+        $user = $this->createMock(UserInterface::class);
+
+        $this->tokenStorage->expects(self::once())->method('getToken')->willReturn($this->token);
+
+        $this->token->expects(self::once())->method('getUser')->willReturn($user);
+
+        self::assertSame($user, $this->tokenBasedUserContext->getUser());
     }
 
     public function testReturnsNullIfUserFromTokenIsAnonymous(): void
     {
-        /** @var TokenInterface|MockObject $tokenMock */
-        $tokenMock = $this->createMock(TokenInterface::class);
-        $this->tokenStorageMock->expects($this->once())->method('getToken')->willReturn($tokenMock);
-        $tokenMock->expects($this->once())->method('getUser')->willReturn(null);
-        $this->assertNull($this->tokenBasedUserContext->getUser());
+        $this->tokenStorage->expects(self::once())->method('getToken')->willReturn($this->token);
+
+        $this->token->expects(self::once())->method('getUser')->willReturn(null);
+
+        self::assertNull($this->tokenBasedUserContext->getUser());
     }
 
     public function testReturnsNullIfUserFromTokenIsNull(): void
     {
-        /** @var TokenInterface|MockObject $tokenMock */
-        $tokenMock = $this->createMock(TokenInterface::class);
-        $this->tokenStorageMock->expects($this->once())->method('getToken')->willReturn($tokenMock);
-        $tokenMock->expects($this->once())->method('getUser')->willReturn(null);
-        $this->assertNull($this->tokenBasedUserContext->getUser());
+        $this->tokenStorage->expects(self::once())->method('getToken')->willReturn($this->token);
+
+        $this->token->expects(self::once())->method('getUser')->willReturn(null);
+
+        self::assertNull($this->tokenBasedUserContext->getUser());
     }
 
     public function testReturnsNullIfNoTokenIsSetInTokenStorage(): void
     {
-        $this->tokenStorageMock->expects($this->once())->method('getToken')->willReturn(null);
-        $this->assertNull($this->tokenBasedUserContext->getUser());
+        $this->tokenStorage->expects(self::once())->method('getToken')->willReturn(null);
+
+        self::assertNull($this->tokenBasedUserContext->getUser());
     }
 }

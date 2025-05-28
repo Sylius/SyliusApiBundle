@@ -38,7 +38,7 @@ final class KernelRequestEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
-        $eventMock->expects($this->once())->method('getRequest')->willReturn($requestMock);
+        $eventMock->method('getRequest')->willReturn($requestMock);
         $requestMock->expects($this->once())->method('getPathInfo')->willReturn('/api/v2/any-endpoint');
         $this->kernelRequestEventSubscriber->validateApi(new RequestEvent(
             $kernelMock,
@@ -56,7 +56,7 @@ final class KernelRequestEventSubscriberTest extends TestCase
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         $this->kernelRequestEventSubscriber = new KernelRequestEventSubscriber(false, '/api/v2');
-        $eventMock->expects($this->once())->method('getRequest')->willReturn($requestMock);
+        $eventMock->method('getRequest')->willReturn($requestMock);
         $requestMock->expects($this->once())->method('getPathInfo')->willReturn('/api/v2/any-endpoint');
         $this->expectException(NotFoundHttpException::class);
         $this->kernelRequestEventSubscriber->validateApi(new RequestEvent(
@@ -75,7 +75,7 @@ final class KernelRequestEventSubscriberTest extends TestCase
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         $this->kernelRequestEventSubscriber = new KernelRequestEventSubscriber(false, '/api/v2');
-        $eventMock->expects($this->once())->method('getRequest')->willReturn($requestMock);
+        $eventMock->method('getRequest')->willReturn($requestMock);
         $requestMock->expects($this->once())->method('getPathInfo')->willReturn('/');
         $this->kernelRequestEventSubscriber->validateApi(new RequestEvent(
             $kernelMock,

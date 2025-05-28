@@ -23,11 +23,11 @@ use Sylius\Component\Order\OrderTransitions;
 
 final class OrderStateMachineTransitionApplicatorTest extends TestCase
 {
-    private StateMachineInterface&MockObject $stateMachine;
+    private MockObject&StateMachineInterface $stateMachine;
 
     private OrderStateMachineTransitionApplicator $orderStateMachineTransitionApplicator;
 
-    private OrderInterface&MockObject $order;
+    private MockObject&OrderInterface $order;
 
     protected function setUp(): void
     {
@@ -43,7 +43,7 @@ final class OrderStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->order,
                 OrderTransitions::GRAPH,
-                OrderTransitions::TRANSITION_CANCEL
+                OrderTransitions::TRANSITION_CANCEL,
             )->willReturn(true);
 
         $this->stateMachine->expects(self::once())
@@ -51,7 +51,7 @@ final class OrderStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->order,
                 OrderTransitions::GRAPH,
-                OrderTransitions::TRANSITION_CANCEL
+                OrderTransitions::TRANSITION_CANCEL,
             );
 
         $this->orderStateMachineTransitionApplicator->cancel($this->order);
@@ -64,7 +64,7 @@ final class OrderStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->order,
                 OrderTransitions::GRAPH,
-                OrderTransitions::TRANSITION_CANCEL
+                OrderTransitions::TRANSITION_CANCEL,
             )->willReturn(false);
 
         $this->stateMachine->expects(self::never())
@@ -72,7 +72,7 @@ final class OrderStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->order,
                 OrderTransitions::GRAPH,
-                OrderTransitions::TRANSITION_CANCEL
+                OrderTransitions::TRANSITION_CANCEL,
             );
 
         self::expectException(StateMachineTransitionFailedException::class);

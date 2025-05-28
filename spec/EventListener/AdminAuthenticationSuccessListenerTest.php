@@ -24,34 +24,38 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class AdminAuthenticationSuccessListenerTest extends TestCase
 {
-    /** @var IriConverterInterface|MockObject */
-    private MockObject $iriConverterMock;
+    private IriConverterInterface&MockObject $iriConverter;
+
+    private AdminUserInterface&MockObject $adminUser;
 
     private AdminAuthenticationSuccessListener $adminAuthenticationSuccessListener;
 
     protected function setUp(): void
     {
-        $this->iriConverterMock = $this->createMock(IriConverterInterface::class);
-        $this->adminAuthenticationSuccessListener = new AdminAuthenticationSuccessListener($this->iriConverterMock);
+        parent::setUp();
+        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->adminAuthenticationSuccessListener = new AdminAuthenticationSuccessListener($this->iriConverter);
+        $this->adminUser = $this->createMock(AdminUserInterface::class);
     }
 
     public function testAddsAdminsToAdminAuthenticationTokenResponse(): void
     {
-        /** @var AdminUserInterface|MockObject $adminUserMock */
-        $adminUserMock = $this->createMock(AdminUserInterface::class);
-        $event = new AuthenticationSuccessEvent([], $adminUserMock, new Response());
-        $this->iriConverterMock->expects($this->once())->method('getIriFromResource')->with($adminUserMock);
+        $event = new AuthenticationSuccessEvent([], $this->adminUser, new Response());
+
+        $this->iriConverter->expects(self::once())->method('getIriFromResource')->with($this->adminUser);
+
         $this->adminAuthenticationSuccessListener->onAuthenticationSuccessResponse($event);
     }
 
     public function testDoesNotAddAnythingToShopAuthenticationTokenResponse(): void
     {
-        /** @var AdminUserInterface|MockObject $adminUserMock */
-        $adminUserMock = $this->createMock(AdminUserInterface::class);
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $event = new AuthenticationSuccessEvent([], $shopUserMock, new Response());
-        $this->iriConverterMock->expects($this->never())->method('getIriFromResource')->with($adminUserMock);
+        /** @var ShopUserInterface&MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+
+        $event = new AuthenticationSuccessEvent([], $shopUser, new Response());
+
+        $this->iriConverter->expects(self::never())->method('getIriFromResource')->with($this->adminUser);
+
         $this->adminAuthenticationSuccessListener->onAuthenticationSuccessResponse($event);
     }
 }

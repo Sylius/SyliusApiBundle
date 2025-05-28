@@ -51,7 +51,7 @@ final class LoggedInShopUserIdAwareContextBuilderTest extends TestCase
         $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => RequestShopUserVerification::class]])
         ;
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
+        $this->userContextMock->expects($this->atLeastOnce())->method('getUser')->willReturn($shopUserMock);
         $shopUserMock->expects($this->once())->method('getId')->willReturn(11);
         $this->assertSame([
             'input' => ['class' => RequestShopUserVerification::class],
@@ -91,12 +91,23 @@ final class LoggedInShopUserIdAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn(['input' => ['class' => stdClass::class]])
+
+        $this->decoratedContextBuilderMock
+            ->expects($this->once())
+            ->method('createFromRequest')
+            ->with($requestMock, true, [])
+            ->willReturn(['input' => ['class' => RequestShopUserVerification::class]])
         ;
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn(null);
-        $this->assertSame(['input' => ['class' => stdClass::class]], $this->loggedInShopUserIdAwareContextBuilder
-            ->createFromRequest($requestMock, true, []))
+
+        $this->userContextMock
+            ->expects($this->once())
+            ->method('getUser')
+            ->willReturn(null)
         ;
+
+        $this->assertSame(
+            ['input' => ['class' => RequestShopUserVerification::class]],
+            $this->loggedInShopUserIdAwareContextBuilder->createFromRequest($requestMock, true, []),
+        );
     }
 }

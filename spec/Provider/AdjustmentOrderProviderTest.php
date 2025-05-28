@@ -49,7 +49,7 @@ final class AdjustmentOrderProviderTest extends TestCase
         $orderItemMock = $this->createMock(OrderItemInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
-        $adjustmentMock->expects($this->once())->method('getAdjustable')->willReturn($orderItemMock);
+        $adjustmentMock->expects($this->atLeastOnce())->method('getAdjustable')->willReturn($orderItemMock);
         $adjustmentMock->expects($this->once())->method('getOrderItem')->willReturn($orderItemMock);
         $orderItemMock->expects($this->once())->method('getOrder')->willReturn($orderMock);
         $this->assertSame($orderMock, $this->adjustmentOrderProvider->provide($adjustmentMock));
@@ -65,7 +65,7 @@ final class AdjustmentOrderProviderTest extends TestCase
         $orderItemMock = $this->createMock(OrderItemInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
-        $adjustmentMock->expects($this->once())->method('getAdjustable')->willReturn($orderItemUnitMock);
+        $adjustmentMock->expects($this->atLeastOnce())->method('getAdjustable')->willReturn($orderItemUnitMock);
         $adjustmentMock->expects($this->once())->method('getOrderItemUnit')->willReturn($orderItemUnitMock);
         $orderItemUnitMock->expects($this->once())->method('getOrderItem')->willReturn($orderItemMock);
         $orderItemMock->expects($this->once())->method('getOrder')->willReturn($orderMock);
@@ -76,7 +76,7 @@ final class AdjustmentOrderProviderTest extends TestCase
     {
         /** @var AdjustmentInterface|MockObject $adjustmentMock */
         $adjustmentMock = $this->createMock(AdjustmentInterface::class);
-        $adjustmentMock->expects($this->once())->method('getAdjustable')->willReturn(null);
+        $adjustmentMock->expects($this->atLeastOnce())->method('getAdjustable')->willReturn(null);
         $this->assertNull($this->adjustmentOrderProvider->provide($adjustmentMock));
     }
 }

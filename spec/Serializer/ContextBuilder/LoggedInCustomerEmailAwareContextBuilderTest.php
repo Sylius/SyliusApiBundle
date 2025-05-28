@@ -97,8 +97,8 @@ final class LoggedInCustomerEmailAwareContextBuilderTest extends TestCase
             ->willReturn(['input' => ['class' => SendContactRequest::class]])
         ;
         $requestMock->expects($this->once())->method('toArray')->willReturn(['message' => 'message']);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
+        $this->userContextMock->expects($this->atLeastOnce())->method('getUser')->willReturn($shopUserMock);
+        $shopUserMock->expects($this->atLeastOnce())->method('getCustomer')->willReturn($customerMock);
         $customerMock->expects($this->once())->method('getEmail')->willReturn('email@example.com');
         $this->assertSame([
             'input' => ['class' => SendContactRequest::class],

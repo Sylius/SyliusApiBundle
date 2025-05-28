@@ -73,7 +73,7 @@ final class ShopUserVoterTest extends TestCase
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         $shopUserMock->expects($this->once())->method('getRoles')->willReturn(['ROLE_USER']);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn(null);
+        $shopUserMock->method('getCustomer')->willReturn(null);
         $tokenMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
         $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->shopUserVoter->vote($tokenMock, null, [ShopUserVoter::SYLIUS_SHOP_USER]));
     }

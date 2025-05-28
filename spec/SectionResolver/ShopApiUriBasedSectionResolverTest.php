@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\ApiBundle\SectionResolver;
+namespace Sylius\Bundle\ApiBundle\Tests\SectionResolver;
 
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiOrdersSubSection;
@@ -22,50 +22,46 @@ use Sylius\Bundle\CoreBundle\SectionResolver\UriBasedSectionResolverInterface;
 
 final class ShopApiUriBasedSectionResolverTest extends TestCase
 {
-    private ShopApiUriBasedSectionResolver $shopApiUriBasedSectionResolver;
+    private ShopApiUriBasedSectionResolver $resolver;
 
     protected function setUp(): void
     {
-        $this->shopApiUriBasedSectionResolver = new ShopApiUriBasedSectionResolver('/api/v2/shop', 'orders');
+        $this->resolver = new ShopApiUriBasedSectionResolver('/api/v2/shop', 'orders');
     }
 
     public function testUriBasedSectionResolver(): void
     {
-        $this->assertInstanceOf(UriBasedSectionResolverInterface::class, $this->shopApiUriBasedSectionResolver);
+        $this->assertInstanceOf(UriBasedSectionResolverInterface::class, $this->resolver);
     }
 
     public function testReturnsShopApiSectionIfPathStartsWithApiV2Shop(): void
     {
-        $this->shopApiUriBasedSectionResolver->expects($this->once())->method('getSection')->with('/api/v2/shop/something')->shouldBeLike(new ShopApiSection());
-        $this->shopApiUriBasedSectionResolver->expects($this->once())->method('getSection')->with('/api/v2/shop')->shouldBeLike(new ShopApiSection());
+        $this->assertEquals(new ShopApiSection(), $this->resolver->getSection('/api/v2/shop/something'));
+        $this->assertEquals(new ShopApiSection(), $this->resolver->getSection('/api/v2/shop'));
     }
 
     public function testReturnsShopApiOrdersSubsectionIfPathContainsOrders(): void
     {
-        $this->shopApiUriBasedSectionResolver->expects($this->once())->method('getSection')->with('/api/v2/shop/orders')->shouldBeLike(new ShopApiOrdersSubSection());
+        $this->assertEquals(new ShopApiOrdersSubSection(), $this->resolver->getSection('/api/v2/shop/orders'));
     }
 
-    public function testThrowsAnExceptionIfPathDoesNotStartWithApiV2Shop(): void
+    /**
+     * @dataProvider nonMatchingPathsProvider
+     */
+    public function testThrowsAnExceptionIfPathDoesNotStartWithApiV2Shop(string $path): void
     {
         $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->shopApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->shopApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->shopApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->shopApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->shopApiUriBasedSectionResolver->getSection('/api/v2');
+        $this->resolver->getSection($path);
+    }
+
+    public function nonMatchingPathsProvider(): array
+    {
+        return [
+            ['/shop'],
+            ['/admin'],
+            ['/en_US/api'],
+            ['/api/v1'],
+            ['/api/v2'],
+        ];
     }
 }

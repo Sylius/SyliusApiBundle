@@ -23,11 +23,11 @@ use Sylius\Component\Payment\PaymentTransitions;
 
 final class PaymentStateMachineTransitionApplicatorTest extends TestCase
 {
-    private StateMachineInterface&MockObject $stateMachine;
+    private MockObject&StateMachineInterface $stateMachine;
 
     private PaymentStateMachineTransitionApplicator $paymentStateMachineTransitionApplicator;
 
-    private PaymentInterface&MockObject $payment;
+    private MockObject&PaymentInterface $payment;
 
     protected function setUp(): void
     {
@@ -44,14 +44,14 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_COMPLETE
+                PaymentTransitions::TRANSITION_COMPLETE,
             )->willReturn(true);
 
         $this->stateMachine->expects(self::once())
             ->method('apply')->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_COMPLETE
+                PaymentTransitions::TRANSITION_COMPLETE,
             );
 
         $this->paymentStateMachineTransitionApplicator->complete($this->payment);
@@ -63,7 +63,8 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
             ->method('can')->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_COMPLETE)
+                PaymentTransitions::TRANSITION_COMPLETE,
+            )
             ->willReturn(false);
 
         $this->stateMachine->expects(self::never())
@@ -71,7 +72,7 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_COMPLETE
+                PaymentTransitions::TRANSITION_COMPLETE,
             );
 
         self::expectException(StateMachineTransitionFailedException::class);
@@ -86,7 +87,7 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_REFUND
+                PaymentTransitions::TRANSITION_REFUND,
             )->willReturn(true);
 
         $this->stateMachine->expects(self::once())
@@ -94,7 +95,7 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_REFUND
+                PaymentTransitions::TRANSITION_REFUND,
             );
 
         $this->paymentStateMachineTransitionApplicator->refund($this->payment);
@@ -107,7 +108,7 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_REFUND
+                PaymentTransitions::TRANSITION_REFUND,
             )->willReturn(false);
 
         $this->stateMachine->expects(self::never())
@@ -115,7 +116,7 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->payment,
                 PaymentTransitions::GRAPH,
-                PaymentTransitions::TRANSITION_REFUND
+                PaymentTransitions::TRANSITION_REFUND,
             );
 
         self::expectException(StateMachineTransitionFailedException::class);

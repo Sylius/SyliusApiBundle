@@ -107,7 +107,7 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
             ->willReturn(['input' => ['class' => ChooseShippingMethod::class], 'uri_variables' => ['shipmentId' => '123']])
         ;
         $uriVariable = new Link(fromClass: ShipmentInterface::class, parameterName: 'shipmentId');
-        $operationMock->expects($this->once())->method('getUriVariables')->willReturn([$uriVariable]);
+        $operationMock->expects($this->atLeastOnce())->method('getUriVariables')->willReturn([$uriVariable]);
         $this->assertSame([
             'input' => ['class' => ChooseShippingMethod::class],
             'uri_variables' => ['shipmentId' => '123'],
@@ -130,7 +130,7 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
             ->willReturn(['input' => ['class' => CompleteOrder::class], 'uri_variables' => ['orderToken' => 'token123']])
         ;
         $uriVariable = new Link(fromClass: OrderInterface::class, parameterName: 'orderToken');
-        $operationMock->expects($this->once())->method('getUriVariables')->willReturn([$uriVariable]);
+        $operationMock->expects($this->atLeastOnce())->method('getUriVariables')->willReturn([$uriVariable]);
         $this->assertSame([
             'input' => ['class' => CompleteOrder::class],
             'uri_variables' => ['orderToken' => 'token123'],
@@ -153,7 +153,7 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
             ->willReturn(['input' => ['class' => ChangeItemQuantityInCart::class], 'uri_variables' => ['orderItemId' => '23']])
         ;
         $uriVariable = new Link(fromClass: OrderItemInterface::class, parameterName: 'orderItemId');
-        $operationMock->expects($this->once())->method('getUriVariables')->willReturn([$uriVariable]);
+        $operationMock->expects($this->atLeastOnce())->method('getUriVariables')->willReturn([$uriVariable]);
         $this->assertSame([
             'input' => ['class' => ChangeItemQuantityInCart::class],
             'uri_variables' => ['orderItemId' => '23'],

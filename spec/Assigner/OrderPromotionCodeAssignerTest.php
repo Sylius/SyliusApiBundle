@@ -23,13 +23,13 @@ use Sylius\Component\Promotion\Repository\PromotionCouponRepositoryInterface;
 
 final class OrderPromotionCodeAssignerTest extends TestCase
 {
-    private PromotionCouponRepositoryInterface&MockObject $promotionCouponRepository;
+    private MockObject&PromotionCouponRepositoryInterface $promotionCouponRepository;
 
-    private OrderProcessorInterface&MockObject $orderProcessor;
+    private MockObject&OrderProcessorInterface $orderProcessor;
 
     private OrderPromotionCodeAssigner $orderPromotionCodeAssigner;
 
-    private OrderInterface&MockObject $cart;
+    private MockObject&OrderInterface $cart;
 
     protected function setUp(): void
     {
@@ -37,7 +37,7 @@ final class OrderPromotionCodeAssignerTest extends TestCase
         $this->orderProcessor = $this->createMock(OrderProcessorInterface::class);
         $this->orderPromotionCodeAssigner = new OrderPromotionCodeAssigner(
             $this->promotionCouponRepository,
-            $this->orderProcessor
+            $this->orderProcessor,
         );
         $this->cart = $this->createMock(OrderInterface::class);
     }

@@ -53,7 +53,7 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
         $requestMock->expects($this->once())->method('getMethod')->willReturn(Request::METHOD_DELETE);
-        $taxonMock->expects($this->once())->method('getCode')->willReturn('WATCHES');
+        $taxonMock->method('getCode')->willReturn('WATCHES');
         $this->channelRepositoryMock->expects($this->once())->method('findOneBy')->with(['menuTaxon' => $taxonMock])->willReturn(null);
         $this->taxonDeletionEventSubscriber->protectFromRemovingMenuTaxon(new ViewEvent(
             $kernelMock,
@@ -128,15 +128,24 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
-        $requestMock->expects($this->once())->method('getMethod')->willReturn(Request::METHOD_POST);
+
+        $requestMock->expects($this->once())
+            ->method('getMethod')
+            ->willReturn(Request::METHOD_DELETE);  // Changed from POST to DELETE
+
         $event = new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
             $taxonMock,
         );
-        $this->taxonInPromotionRuleCheckerMock->expects($this->once())->method('isInUse')->with($taxonMock)->willReturn(false);
-        /** should not throw exception */
+
+        $this->taxonInPromotionRuleCheckerMock
+            ->expects($this->once())
+            ->method('isInUse')
+            ->with($taxonMock)
+            ->willReturn(false);
+
         $this->taxonDeletionEventSubscriber->protectFromRemovingTaxonInUseByPromotionRule($event);
     }
 

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\ApiBundle\SectionResolver;
+namespace Sylius\Bundle\ApiBundle\Tests\SectionResolver;
 
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
@@ -21,45 +21,41 @@ use Sylius\Bundle\CoreBundle\SectionResolver\UriBasedSectionResolverInterface;
 
 final class AdminApiUriBasedSectionResolverTest extends TestCase
 {
-    private AdminApiUriBasedSectionResolver $adminApiUriBasedSectionResolver;
+    private AdminApiUriBasedSectionResolver $resolver;
 
     protected function setUp(): void
     {
-        $this->adminApiUriBasedSectionResolver = new AdminApiUriBasedSectionResolver('/api/v2/admin');
+        $this->resolver = new AdminApiUriBasedSectionResolver('/api/v2/admin');
     }
 
     public function testUriBasedSectionResolver(): void
     {
-        $this->assertInstanceOf(UriBasedSectionResolverInterface::class, $this->adminApiUriBasedSectionResolver);
+        $this->assertInstanceOf(UriBasedSectionResolverInterface::class, $this->resolver);
     }
 
     public function testReturnsAdminApiSectionIfPathStartsWithApiV2Admin(): void
     {
-        $this->adminApiUriBasedSectionResolver->expects($this->once())->method('getSection')->with('/api/v2/admin/something')->shouldBeLike(new AdminApiSection());
-        $this->adminApiUriBasedSectionResolver->expects($this->once())->method('getSection')->with('/api/v2/admin')->shouldBeLike(new AdminApiSection());
+        $this->assertEquals(new AdminApiSection(), $this->resolver->getSection('/api/v2/admin/something'));
+        $this->assertEquals(new AdminApiSection(), $this->resolver->getSection('/api/v2/admin'));
     }
 
-    public function testThrowsAnExceptionIfPathDoesNotStartWithApiV2Admin(): void
+    /**
+     * @dataProvider nonMatchingPathsProvider
+     */
+    public function testThrowsAnExceptionIfPathDoesNotStartWithApiV2Admin(string $path): void
     {
         $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->adminApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->adminApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->adminApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->adminApiUriBasedSectionResolver->getSection('/api/v2');
-        $this->expectException(SectionCannotBeResolvedException::class);
-        $this->adminApiUriBasedSectionResolver->getSection('/api/v2');
+        $this->resolver->getSection($path);
+    }
+
+    public function nonMatchingPathsProvider(): array
+    {
+        return [
+            ['/shop'],
+            ['/admin'],
+            ['/en_US/api'],
+            ['/api/v1'],
+            ['/api/v2'],
+        ];
     }
 }

@@ -19,7 +19,6 @@ use Sylius\Bundle\ApiBundle\Command\Cart\BlameCart;
 use Sylius\Bundle\ApiBundle\EventListener\ApiCartBlamerListener;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiOrdersSubSection;
-use Sylius\Bundle\CoreBundle\SectionResolver\SectionInterface;
 use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
 use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Core\Model\OrderInterface;
@@ -37,23 +36,40 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 final class ApiCartBlamerListenerTest extends TestCase
 {
-    /** @var CartContextInterface|MockObject */
-    private MockObject $cartContextMock;
+    private CartContextInterface&MockObject $cartContext;
 
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionResolverMock;
+    private MockObject&SectionProviderInterface $sectionResolver;
 
-    /** @var MessageBusInterface|MockObject */
-    private MockObject $commandBusMock;
+    private MessageBusInterface&MockObject $commandBus;
 
     private ApiCartBlamerListener $apiCartBlamerListener;
 
+    private MockObject&Request $requestMock;
+
+    private MockObject&TokenInterface $tokenMock;
+
+    private AdminApiSection&MockObject $sectionMock;
+
+    private AuthenticatorInterface&MockObject $authenticatorMock;
+
+    private MockObject&Passport $passportMock;
+
     protected function setUp(): void
     {
-        $this->cartContextMock = $this->createMock(CartContextInterface::class);
-        $this->sectionResolverMock = $this->createMock(SectionProviderInterface::class);
-        $this->commandBusMock = $this->createMock(MessageBusInterface::class);
-        $this->apiCartBlamerListener = new ApiCartBlamerListener($this->cartContextMock, $this->sectionResolverMock, $this->commandBusMock);
+        parent::setUp();
+        $this->cartContext = $this->createMock(CartContextInterface::class);
+        $this->sectionResolver = $this->createMock(SectionProviderInterface::class);
+        $this->commandBus = $this->createMock(MessageBusInterface::class);
+        $this->apiCartBlamerListener = new ApiCartBlamerListener(
+            $this->cartContext,
+            $this->sectionResolver,
+            $this->commandBus,
+        );
+        $this->requestMock = $this->createMock(Request::class);
+        $this->tokenMock = $this->createMock(TokenInterface::class);
+        $this->sectionMock = $this->createMock(AdminApiSection::class);
+        $this->authenticatorMock = $this->createMock(AuthenticatorInterface::class);
+        $this->passportMock = $this->createMock(Passport::class);
     }
 
     public function testThrowsAnExceptionWhenCartDoesNotImplementCoreOrderInterfaceOnInteractiveLogin(): void
@@ -72,9 +88,9 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolverMock->expects($this->once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
-        $this->cartContextMock->expects($this->once())->method('getCart')->willReturn($orderMock);
-        $tokenMock->expects($this->once())->method('getUser')->willReturn($userMock);
+        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+        $this->cartContext->expects(self::once())->method('getCart')->willReturn($orderMock);
+        $tokenMock->expects(self::once())->method('getUser')->willReturn($userMock);
         $this->expectException(UnexpectedTypeException::class);
         $this->apiCartBlamerListener->onLoginSuccess(new LoginSuccessEvent(
             $authenticatorMock,
@@ -104,15 +120,15 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolverMock->expects($this->once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
-        $this->cartContextMock->expects($this->once())->method('getCart')->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('isCreatedByGuest')->willReturn(true);
-        $tokenMock->expects($this->once())->method('getUser')->willReturn($userMock);
-        $userMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $userMock->expects($this->once())->method('getEmail')->willReturn('email@sylius.com');
-        $cartMock->expects($this->once())->method('getTokenValue')->willReturn('TOKEN');
+        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+        $this->cartContext->expects(self::once())->method('getCart')->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('isCreatedByGuest')->willReturn(true);
+        $tokenMock->expects(self::once())->method('getUser')->willReturn($userMock);
+        $userMock->method('getCustomer')->willReturn($customerMock);
+        $userMock->expects(self::once())->method('getEmail')->willReturn('email@sylius.com');
+        $cartMock->expects(self::once())->method('getTokenValue')->willReturn('TOKEN');
         $blameCart = new BlameCart('email@sylius.com', 'TOKEN');
-        $this->commandBusMock->expects($this->once())->method('dispatch')->with($blameCart)
+        $this->commandBus->expects(self::once())->method('dispatch')->with($blameCart)
             ->willReturn(new Envelope($blameCart))
         ;
         $this->apiCartBlamerListener->onLoginSuccess(
@@ -143,10 +159,10 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolverMock->expects($this->once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
-        $this->cartContextMock->expects($this->once())->method('getCart')->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('isCreatedByGuest')->willReturn(false);
-        $cartMock->expects($this->never())->method('setCustomer');
+        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+        $this->cartContext->method('getCart')->willReturn($cartMock);
+        $cartMock->method('isCreatedByGuest')->willReturn(false);
+        $cartMock->expects(self::never())->method('setCustomer');
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
                 $authenticatorMock,
@@ -173,10 +189,10 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolverMock->expects($this->once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
-        $this->cartContextMock->expects($this->once())->method('getCart')->willReturn($cartMock);
-        $tokenMock->expects($this->once())->method('getUser')->willReturn(null);
-        $cartMock->expects($this->never())->method('setCustomer');
+        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+        $this->cartContext->method('getCart')->willReturn($cartMock);
+        $tokenMock->expects(self::once())->method('getUser')->willReturn(null);
+        $cartMock->expects(self::never())->method('setCustomer');
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
                 $authenticatorMock,
@@ -191,27 +207,27 @@ final class ApiCartBlamerListenerTest extends TestCase
 
     public function testDoesNothingIfThereIsNoExistingCartOnInteractiveLogin(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        /** @var TokenInterface|MockObject $tokenMock */
-        $tokenMock = $this->createMock(TokenInterface::class);
-        /** @var ShopUserInterface|MockObject $userMock */
+        /** @var ShopUserInterface&MockObject $userMock */
         $userMock = $this->createMock(ShopUserInterface::class);
-        /** @var ShopApiOrdersSubSection|MockObject $shopApiOrdersSubSectionMock */
+        /** @var ShopApiOrdersSubSection&MockObject $shopApiOrdersSubSectionMock */
         $shopApiOrdersSubSectionMock = $this->createMock(ShopApiOrdersSubSection::class);
-        /** @var AuthenticatorInterface|MockObject $authenticatorMock */
-        $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
-        /** @var Passport|MockObject $passportMock */
-        $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolverMock->expects($this->once())->method('getSection')->willReturn($shopApiOrdersSubSectionMock);
-        $this->cartContextMock->expects($this->once())->method('getCart')->willThrowException(CartNotFoundException::class);
-        $tokenMock->expects($this->once())->method('getUser')->willReturn($userMock);
+
+        $this->sectionResolver->expects(self::once())
+            ->method('getSection')
+            ->willReturn($shopApiOrdersSubSectionMock);
+
+        $this->cartContext->expects(self::once())
+            ->method('getCart')
+            ->willThrowException(new CartNotFoundException());
+
+        $this->tokenMock->expects(self::once())->method('getUser')->willReturn($userMock);
+
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
-                $authenticatorMock,
-                $passportMock,
-                $tokenMock,
-                $requestMock,
+                $this->authenticatorMock,
+                $this->passportMock,
+                $this->tokenMock,
+                $this->requestMock,
                 null,
                 'api_shop',
             ),
@@ -220,25 +236,18 @@ final class ApiCartBlamerListenerTest extends TestCase
 
     public function testDoesNothingIfTheCurrentSectionIsNotShopOnInteractiveLogin(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        /** @var TokenInterface|MockObject $tokenMock */
-        $tokenMock = $this->createMock(TokenInterface::class);
-        /** @var SectionInterface|MockObject $sectionMock */
-        $sectionMock = $this->createMock(SectionInterface::class);
-        /** @var AuthenticatorInterface|MockObject $authenticatorMock */
-        $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
-        /** @var Passport|MockObject $passportMock */
-        $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolverMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $tokenMock->expects($this->never())->method('getUser');
-        $this->cartContextMock->expects($this->never())->method('getCart');
+        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($this->sectionMock);
+
+        $this->tokenMock->expects(self::never())->method('getUser');
+
+        $this->cartContext->expects(self::never())->method('getCart');
+
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
-                $authenticatorMock,
-                $passportMock,
-                $tokenMock,
-                $requestMock,
+                $this->authenticatorMock,
+                $this->passportMock,
+                $this->tokenMock,
+                $this->requestMock,
                 null,
                 'api_shop',
             ),
@@ -247,25 +256,18 @@ final class ApiCartBlamerListenerTest extends TestCase
 
     public function testDoesNothingIfTheCurrentSectionIsNotOrdersSubsection(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        /** @var TokenInterface|MockObject $tokenMock */
-        $tokenMock = $this->createMock(TokenInterface::class);
-        /** @var AdminApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(AdminApiSection::class);
-        /** @var AuthenticatorInterface|MockObject $authenticatorMock */
-        $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
-        /** @var Passport|MockObject $passportMock */
-        $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolverMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $tokenMock->expects($this->never())->method('getUser');
-        $this->cartContextMock->expects($this->never())->method('getCart');
+        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($this->sectionMock);
+
+        $this->tokenMock->expects(self::never())->method('getUser');
+
+        $this->cartContext->expects(self::never())->method('getCart');
+
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
-                $authenticatorMock,
-                $passportMock,
-                $tokenMock,
-                $requestMock,
+                $this->authenticatorMock,
+                $this->passportMock,
+                $this->tokenMock,
+                $this->requestMock,
                 null,
                 'api_shop',
             ),

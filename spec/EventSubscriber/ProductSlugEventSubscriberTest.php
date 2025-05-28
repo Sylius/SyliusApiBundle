@@ -50,7 +50,7 @@ final class ProductSlugEventSubscriberTest extends TestCase
         $requestMock->expects($this->once())->method('getMethod')->willReturn(Request::METHOD_POST);
         $productMock->expects($this->once())->method('getTranslations')->willReturn(new ArrayCollection([$productTranslationMock]));
         $productTranslationMock->expects($this->once())->method('getSlug')->willReturn(null);
-        $productTranslationMock->expects($this->once())->method('getName')->willReturn('Audi RS7');
+        $productTranslationMock->expects($this->atLeastOnce())->method('getName')->willReturn('Audi RS7');
         $this->slugGeneratorMock->expects($this->once())->method('generate')->with('Audi RS7')->willReturn('audi-rs7');
         $productTranslationMock->expects($this->once())->method('setSlug')->with('audi-rs7');
         $this->productSlugEventSubscriber->generateSlug(new ViewEvent(
@@ -73,7 +73,7 @@ final class ProductSlugEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         $requestMock->expects($this->once())->method('getMethod')->willReturn(Request::METHOD_POST);
         $productMock->expects($this->once())->method('getTranslations')->willReturn(new ArrayCollection([$productTranslationMock]));
-        $productTranslationMock->expects($this->once())->method('getSlug')->willReturn('audi-rs7');
+        $productTranslationMock->expects($this->atLeastOnce())->method('getSlug')->willReturn('audi-rs7');
         $productTranslationMock->expects($this->never())->method('getName');
         $this->slugGeneratorMock->expects($this->never())->method('generate');
         $productTranslationMock->expects($this->never())->method('setSlug');

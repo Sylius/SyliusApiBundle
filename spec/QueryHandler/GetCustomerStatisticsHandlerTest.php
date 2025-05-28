@@ -45,10 +45,24 @@ final class GetCustomerStatisticsHandlerTest extends TestCase
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
         $customerStatistics = new CustomerStatistics([]);
-        $this->customerRepositoryMock->expects($this->once())->method('find')->with(1)->willReturn($customerMock);
-        $this->customerStatisticsProviderMock->expects($this->once())->method('getCustomerStatistics')->with($customerMock)->willReturn($customerStatistics);
+
+        $this->customerRepositoryMock
+            ->expects($this->once())
+            ->method('find')
+            ->with(1)
+            ->willReturn($customerMock);
+
+        $this->customerStatisticsProviderMock
+            ->expects($this->once())
+            ->method('getCustomerStatistics')
+            ->with($customerMock)
+            ->willReturn($customerStatistics);
+
         $query = new GetCustomerStatistics(1);
-        $this->assertSame($customerStatistics, $this($query));
+
+        // This line needs to be fixed - call the handler instead of $this
+        $result = $this->getCustomerStatisticsHandler->__invoke($query);
+        $this->assertSame($customerStatistics, $result);
     }
 
     public function testThrowsAnExceptionWhenCustomerWithAGivenIdDoesntExist(): void

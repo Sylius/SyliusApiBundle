@@ -27,132 +27,144 @@ use Sylius\Component\Promotion\Checker\Eligibility\PromotionEligibilityCheckerIn
 
 final class AppliedCouponEligibilityCheckerTest extends TestCase
 {
-    /** @var PromotionEligibilityCheckerInterface|MockObject */
-    private MockObject $promotionCheckerMock;
+    private MockObject&PromotionEligibilityCheckerInterface $promotionChecker;
 
-    /** @var PromotionCouponEligibilityCheckerInterface|MockObject */
-    private MockObject $promotionCouponCheckerMock;
+    private MockObject&PromotionCouponEligibilityCheckerInterface $promotionCouponChecker;
 
     private AppliedCouponEligibilityChecker $appliedCouponEligibilityChecker;
 
+    private MockObject&PromotionCouponInterface $promotionCoupon;
+
+    private MockObject&PromotionInterface $promotion;
+
+    private MockObject&OrderInterface $cart;
+
+    private ChannelInterface&MockObject $firstChannel;
+
+    private ChannelInterface&MockObject $secondChannel;
+
     protected function setUp(): void
     {
-        $this->promotionCheckerMock = $this->createMock(PromotionEligibilityCheckerInterface::class);
-        $this->promotionCouponCheckerMock = $this->createMock(PromotionCouponEligibilityCheckerInterface::class);
-        $this->appliedCouponEligibilityChecker = new AppliedCouponEligibilityChecker($this->promotionCheckerMock, $this->promotionCouponCheckerMock);
+        parent::setUp();
+        $this->promotionChecker = $this->createMock(PromotionEligibilityCheckerInterface::class);
+        $this->promotionCouponChecker = $this->createMock(PromotionCouponEligibilityCheckerInterface::class);
+        $this->appliedCouponEligibilityChecker = new AppliedCouponEligibilityChecker(
+            $this->promotionChecker,
+            $this->promotionCouponChecker,
+        );
+        $this->promotionCoupon = $this->createMock(PromotionCouponInterface::class);
+        $this->promotion = $this->createMock(PromotionInterface::class);
+        $this->cart = $this->createMock(OrderInterface::class);
+        $this->firstChannel = $this->createMock(ChannelInterface::class);
+        $this->secondChannel = $this->createMock(ChannelInterface::class);
     }
 
     public function testImplementsPromotionCouponEligibilityCheckerInterface(): void
     {
-        $this->assertInstanceOf(AppliedCouponEligibilityCheckerInterface::class, $this->appliedCouponEligibilityChecker);
+        self::assertInstanceOf(
+            AppliedCouponEligibilityCheckerInterface::class,
+            $this->appliedCouponEligibilityChecker,
+        );
     }
 
     public function testReturnsFalseIfPromotionCouponIsNull(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        /** @var PromotionInterface|MockObject $promotionMock */
-        $promotionMock = $this->createMock(PromotionInterface::class);
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        $promotionCouponMock->expects($this->never())->method('getPromotion');
-        $promotionMock->expects($this->never())->method('getChannels');
-        $this->promotionCheckerMock->expects($this->never())->method('isEligible');
-        $this->promotionCouponCheckerMock->expects($this->never())->method('isEligible');
-        $this->assertFalse($this->appliedCouponEligibilityChecker->isEligible(null, $cartMock));
+        $this->promotionCoupon->expects(self::never())->method('getPromotion');
+
+        $this->promotion->expects(self::never())->method('getChannels');
+
+        $this->promotionChecker->expects(self::never())->method('isEligible');
+
+        $this->promotionCouponChecker->expects(self::never())->method('isEligible');
+
+        self::assertFalse($this->appliedCouponEligibilityChecker->isEligible(null, $this->cart));
     }
 
     public function testReturnsFalseIfCartChannelIsNotOneOfPromotionChannels(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        /** @var PromotionInterface|MockObject $promotionMock */
-        $promotionMock = $this->createMock(PromotionInterface::class);
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        /** @var ChannelInterface|MockObject $firstChannelMock */
-        $firstChannelMock = $this->createMock(ChannelInterface::class);
-        /** @var ChannelInterface|MockObject $secondChannelMock */
-        $secondChannelMock = $this->createMock(ChannelInterface::class);
-        /** @var ChannelInterface|MockObject $thirdChannelMock */
-        $thirdChannelMock = $this->createMock(ChannelInterface::class);
-        $promotionCouponMock->expects($this->once())->method('getPromotion')->willReturn($promotionMock);
-        $promotionMock->expects($this->once())->method('getChannels')->willReturn(new ArrayCollection([
-            $secondChannelMock,
-            $thirdChannelMock,
-        ]));
-        $cartMock->expects($this->once())->method('getChannel')->willReturn($firstChannelMock);
-        $this->promotionCheckerMock->expects($this->never())->method('isEligible');
-        $this->promotionCouponCheckerMock->expects($this->never())->method('isEligible');
-        $this->assertFalse($this->appliedCouponEligibilityChecker->isEligible($promotionCouponMock, $cartMock));
+        /** @var ChannelInterface&MockObject $thirdChannel */
+        $thirdChannel = $this->createMock(ChannelInterface::class);
+
+        $this->promotionCoupon->expects(self::once())
+            ->method('getPromotion')
+            ->willReturn($this->promotion);
+
+        $this->promotion->expects(self::once())
+            ->method('getChannels')
+            ->willReturn(new ArrayCollection(
+                [
+                    $this->secondChannel,
+                    $thirdChannel,
+                ],
+            ));
+
+        $this->cart->expects(self::once())->method('getChannel')->willReturn($this->firstChannel);
+
+        $this->promotionChecker->expects(self::never())->method('isEligible');
+
+        $this->promotionCouponChecker->expects(self::never())->method('isEligible');
+
+        self::assertFalse($this->appliedCouponEligibilityChecker->isEligible($this->promotionCoupon, $this->cart));
     }
 
     public function testReturnsFalseIfCouponIsNotEligible(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        /** @var PromotionInterface|MockObject $promotionMock */
-        $promotionMock = $this->createMock(PromotionInterface::class);
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        /** @var ChannelInterface|MockObject $firstChannelMock */
-        $firstChannelMock = $this->createMock(ChannelInterface::class);
-        /** @var ChannelInterface|MockObject $secondChannelMock */
-        $secondChannelMock = $this->createMock(ChannelInterface::class);
-        $promotionCouponMock->expects($this->once())->method('getPromotion')->willReturn($promotionMock);
-        $promotionMock->expects($this->once())->method('getChannels')->willReturn(new ArrayCollection([
-            $firstChannelMock,
-            $secondChannelMock,
+        $this->promotionCoupon->expects(self::once())->method('getPromotion')->willReturn($this->promotion);
+
+        $this->promotion->expects(self::once())->method('getChannels')->willReturn(new ArrayCollection([
+            $this->firstChannel,
+            $this->secondChannel,
         ]));
-        $cartMock->expects($this->once())->method('getChannel')->willReturn($firstChannelMock);
-        $this->promotionCouponCheckerMock->expects($this->once())->method('isEligible')->with($cartMock, $promotionCouponMock)->willReturn(false);
-        $this->promotionCheckerMock->expects($this->never())->method('isEligible');
-        $this->assertFalse($this->appliedCouponEligibilityChecker->isEligible($promotionCouponMock, $cartMock));
+
+        $this->cart->expects(self::once())->method('getChannel')->willReturn($this->firstChannel);
+
+        $this->promotionCouponChecker->expects(self::once())
+            ->method('isEligible')
+            ->with($this->cart, $this->promotionCoupon)
+            ->willReturn(false);
+
+        $this->promotionChecker->expects(self::never())->method('isEligible');
+
+        self::assertFalse($this->appliedCouponEligibilityChecker->isEligible($this->promotionCoupon, $this->cart));
     }
 
     public function testReturnsFalseIfPromotionIsNotEligible(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        /** @var PromotionInterface|MockObject $promotionMock */
-        $promotionMock = $this->createMock(PromotionInterface::class);
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        /** @var ChannelInterface|MockObject $firstChannelMock */
-        $firstChannelMock = $this->createMock(ChannelInterface::class);
-        /** @var ChannelInterface|MockObject $secondChannelMock */
-        $secondChannelMock = $this->createMock(ChannelInterface::class);
-        $promotionCouponMock->expects($this->once())->method('getPromotion')->willReturn($promotionMock);
-        $promotionMock->expects($this->once())->method('getChannels')->willReturn(new ArrayCollection([
-            $firstChannelMock,
-            $secondChannelMock,
+        $this->promotionCoupon->method('getPromotion')->willReturn($this->promotion);
+
+        $this->promotion->method('getChannels')->willReturn(new ArrayCollection([
+            $this->firstChannel,
+            $this->secondChannel,
         ]));
-        $cartMock->expects($this->once())->method('getChannel')->willReturn($firstChannelMock);
-        $this->promotionCouponCheckerMock->expects($this->once())->method('isEligible')->with($cartMock, $promotionCouponMock)->willReturn(true);
-        $this->promotionCheckerMock->expects($this->once())->method('isEligible')->with($cartMock, $promotionMock)->willReturn(false);
-        $this->assertFalse($this->appliedCouponEligibilityChecker->isEligible($promotionCouponMock, $cartMock));
+
+        $this->cart->method('getChannel')->willReturn($this->firstChannel);
+
+        $this->promotionCouponChecker->method('isEligible')
+            ->with($this->cart, $this->promotionCoupon)
+            ->willReturn(true);
+
+        $this->promotionChecker->method('isEligible')->with($this->cart, $this->promotion)->willReturn(false);
+
+        self::assertFalse($this->appliedCouponEligibilityChecker->isEligible($this->promotionCoupon, $this->cart));
     }
 
     public function testReturnsTrueIfPromotionAndCouponAreEligible(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        /** @var PromotionInterface|MockObject $promotionMock */
-        $promotionMock = $this->createMock(PromotionInterface::class);
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        /** @var ChannelInterface|MockObject $firstChannelMock */
-        $firstChannelMock = $this->createMock(ChannelInterface::class);
-        /** @var ChannelInterface|MockObject $secondChannelMock */
-        $secondChannelMock = $this->createMock(ChannelInterface::class);
-        $promotionCouponMock->expects($this->once())->method('getPromotion')->willReturn($promotionMock);
-        $promotionMock->expects($this->once())->method('getChannels')->willReturn(new ArrayCollection([
-            $firstChannelMock,
-            $secondChannelMock,
+        $this->promotionCoupon->method('getPromotion')->willReturn($this->promotion);
+
+        $this->promotion->method('getChannels')->willReturn(new ArrayCollection([
+            $this->firstChannel,
+            $this->secondChannel,
         ]));
-        $cartMock->expects($this->once())->method('getChannel')->willReturn($firstChannelMock);
-        $this->promotionCouponCheckerMock->expects($this->once())->method('isEligible')->with($cartMock, $promotionCouponMock)->willReturn(true);
-        $this->promotionCheckerMock->expects($this->once())->method('isEligible')->with($cartMock, $promotionMock)->willReturn(true);
-        $this->assertTrue($this->appliedCouponEligibilityChecker->isEligible($promotionCouponMock, $cartMock));
+
+        $this->cart->method('getChannel')->willReturn($this->firstChannel);
+
+        $this->promotionCouponChecker->method('isEligible')
+            ->with($this->cart, $this->promotionCoupon)
+            ->willReturn(true);
+
+        $this->promotionChecker->method('isEligible')->with($this->cart, $this->promotion)->willReturn(true);
+
+        self::assertTrue($this->appliedCouponEligibilityChecker->isEligible($this->promotionCoupon, $this->cart));
     }
 }

@@ -27,57 +27,82 @@ use Sylius\Resource\Factory\FactoryInterface;
 
 final class TaxonImageCreatorTest extends TestCase
 {
-    /** @var FactoryInterface|MockObject */
-    private MockObject $taxonImageFactoryMock;
+    private FactoryInterface&MockObject $taxonImageFactory;
 
-    /** @var TaxonRepositoryInterface|MockObject */
-    private MockObject $taxonRepositoryMock;
+    private MockObject&TaxonRepositoryInterface $taxonRepository;
 
-    /** @var ImageUploaderInterface|MockObject */
-    private MockObject $imageUploaderMock;
+    private ImageUploaderInterface&MockObject $imageUploader;
 
     private TaxonImageCreator $taxonImageCreator;
 
     protected function setUp(): void
     {
-        $this->taxonImageFactoryMock = $this->createMock(FactoryInterface::class);
-        $this->taxonRepositoryMock = $this->createMock(TaxonRepositoryInterface::class);
-        $this->imageUploaderMock = $this->createMock(ImageUploaderInterface::class);
-        $this->taxonImageCreator = new TaxonImageCreator($this->taxonImageFactoryMock, $this->taxonRepositoryMock, $this->imageUploaderMock);
+        parent::setUp();
+        $this->taxonImageFactory = $this->createMock(FactoryInterface::class);
+        $this->taxonRepository = $this->createMock(TaxonRepositoryInterface::class);
+        $this->imageUploader = $this->createMock(ImageUploaderInterface::class);
+        $this->taxonImageCreator = new TaxonImageCreator(
+            $this->taxonImageFactory,
+            $this->taxonRepository,
+            $this->imageUploader,
+        );
     }
 
     public function testCreatesTaxonImage(): void
     {
-        /** @var TaxonInterface|MockObject $taxonMock */
-        $taxonMock = $this->createMock(TaxonInterface::class);
-        /** @var TaxonImageInterface|MockObject $taxonImageMock */
-        $taxonImageMock = $this->createMock(TaxonImageInterface::class);
+        /** @var TaxonInterface&MockObject $taxon */
+        $taxon = $this->createMock(TaxonInterface::class);
+        /** @var TaxonImageInterface&MockObject $taxonImage */
+        $taxonImage = $this->createMock(TaxonImageInterface::class);
+
         $file = new SplFileInfo(__FILE__);
-        $this->taxonRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'CODE'])->willReturn($taxonMock);
-        $this->taxonImageFactoryMock->expects($this->once())->method('createNew')->willReturn($taxonImageMock);
-        $taxonImageMock->expects($this->once())->method('setFile')->with($file);
-        $taxonImageMock->expects($this->once())->method('setType')->with('banner');
-        $taxonMock->expects($this->once())->method('addImage')->with($taxonImageMock);
-        $this->imageUploaderMock->expects($this->once())->method('upload')->with($taxonImageMock);
-        $this->assertSame($taxonImageMock, $this->taxonImageCreator->create('CODE', $file, 'banner'));
+
+        $this->taxonRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['code' => 'CODE'])
+            ->willReturn($taxon);
+
+        $this->taxonImageFactory->expects(self::once())->method('createNew')->willReturn($taxonImage);
+
+        $taxonImage->expects(self::once())->method('setFile')->with($file);
+
+        $taxonImage->expects(self::once())->method('setType')->with('banner');
+
+        $taxon->expects(self::once())->method('addImage')->with($taxonImage);
+
+        $this->imageUploader->expects(self::once())->method('upload')->with($taxonImage);
+
+        self::assertSame($taxonImage, $this->taxonImageCreator->create('CODE', $file, 'banner'));
     }
 
     public function testThrowsAnExceptionIfTaxonIsNotFound(): void
     {
         $file = new SplFileInfo(__FILE__);
-        $this->taxonRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'CODE'])->willReturn(null);
-        $this->taxonImageFactoryMock->expects($this->never())->method('createNew');
-        $this->imageUploaderMock->expects($this->never())->method('upload');
-        $this->expectException(TaxonNotFoundException::class);
+
+        $this->taxonRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['code' => 'CODE'])
+            ->willReturn(null);
+
+        $this->taxonImageFactory->expects(self::never())->method('createNew');
+
+        $this->imageUploader->expects(self::never())->method('upload');
+
+        self::expectException(TaxonNotFoundException::class);
+
         $this->taxonImageCreator->create('CODE', $file, 'banner');
     }
 
     public function testThrowsAnExceptionIfThereIsNoUploadedFile(): void
     {
-        $this->taxonRepositoryMock->expects($this->never())->method('findOneBy')->with(['code' => 'CODE']);
-        $this->taxonImageFactoryMock->expects($this->never())->method('createNew');
-        $this->imageUploaderMock->expects($this->never())->method('upload');
-        $this->expectException(NoFileUploadedException::class);
+        $this->taxonRepository->expects(self::never())->method('findOneBy')->with(['code' => 'CODE']);
+
+        $this->taxonImageFactory->expects(self::never())->method('createNew');
+
+        $this->imageUploader->expects(self::never())->method('upload');
+
+        self::expectException(NoFileUploadedException::class);
+
         $this->taxonImageCreator->create('CODE', null, 'banner');
     }
 }

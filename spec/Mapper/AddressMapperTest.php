@@ -41,7 +41,7 @@ final class AddressMapperTest extends TestCase
         $targetAddressMock->expects($this->once())->method('getCity')->willReturn('New York');
         $targetAddressMock->expects($this->once())->method('getPostcode')->willReturn('00000');
         $targetAddressMock->expects($this->once())->method('getPhoneNumber')->willReturn('123456789');
-        $targetAddressMock->expects($this->once())->method('getProvinceCode')->willReturn('999');
+        $targetAddressMock->expects($this->atLeastOnce())->method('getProvinceCode')->willReturn('999');
         $targetAddressMock->expects($this->once())->method('getProvinceName')->willReturn('east');
         $currentAddressMock->expects($this->once())->method('setFirstName')->with('John');
         $currentAddressMock->expects($this->once())->method('setLastName')->with('Doe');

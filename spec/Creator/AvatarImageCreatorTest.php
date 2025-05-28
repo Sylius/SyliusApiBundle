@@ -27,56 +27,74 @@ use Sylius\Resource\Factory\FactoryInterface;
 
 final class AvatarImageCreatorTest extends TestCase
 {
-    /** @var FactoryInterface|MockObject */
-    private MockObject $avatarImageFactoryMock;
+    private FactoryInterface&MockObject $avatarImageFactory;
 
-    /** @var RepositoryInterface|MockObject */
-    private MockObject $adminUserRepositoryMock;
+    private MockObject&RepositoryInterface $adminUserRepository;
 
-    /** @var ImageUploaderInterface|MockObject */
-    private MockObject $imageUploaderMock;
+    private ImageUploaderInterface&MockObject $imageUploader;
 
     private AvatarImageCreator $avatarImageCreator;
 
     protected function setUp(): void
     {
-        $this->avatarImageFactoryMock = $this->createMock(FactoryInterface::class);
-        $this->adminUserRepositoryMock = $this->createMock(RepositoryInterface::class);
-        $this->imageUploaderMock = $this->createMock(ImageUploaderInterface::class);
-        $this->avatarImageCreator = new AvatarImageCreator($this->avatarImageFactoryMock, $this->adminUserRepositoryMock, $this->imageUploaderMock);
+        parent::setUp();
+        $this->avatarImageFactory = $this->createMock(FactoryInterface::class);
+        $this->adminUserRepository = $this->createMock(RepositoryInterface::class);
+        $this->imageUploader = $this->createMock(ImageUploaderInterface::class);
+        $this->avatarImageCreator = new AvatarImageCreator(
+            $this->avatarImageFactory,
+            $this->adminUserRepository,
+            $this->imageUploader,
+        );
     }
 
     public function testCreatesAnAvatarImage(): void
     {
-        /** @var AdminUserInterface|MockObject $adminUserMock */
-        $adminUserMock = $this->createMock(AdminUserInterface::class);
-        /** @var AvatarImageInterface|MockObject $avatarImageMock */
-        $avatarImageMock = $this->createMock(AvatarImageInterface::class);
+        /** @var AdminUserInterface&MockObject $adminUser */
+        $adminUser = $this->createMock(AdminUserInterface::class);
+        /** @var AvatarImageInterface&MockObject $avatarImage */
+        $avatarImage = $this->createMock(AvatarImageInterface::class);
+
         $file = new SplFileInfo(__FILE__);
-        $this->adminUserRepositoryMock->expects($this->once())->method('find')->with('1')->willReturn($adminUserMock);
-        $this->avatarImageFactoryMock->expects($this->once())->method('createNew')->willReturn($avatarImageMock);
-        $avatarImageMock->expects($this->once())->method('setFile')->with($file);
-        $adminUserMock->expects($this->once())->method('setImage')->with($avatarImageMock);
-        $this->imageUploaderMock->expects($this->once())->method('upload')->with($avatarImageMock);
-        $this->assertSame($avatarImageMock, $this->avatarImageCreator->create('1', $file, null));
+
+        $this->adminUserRepository->expects(self::once())->method('find')->with('1')->willReturn($adminUser);
+
+        $this->avatarImageFactory->expects(self::once())->method('createNew')->willReturn($avatarImage);
+
+        $avatarImage->expects(self::once())->method('setFile')->with($file);
+
+        $adminUser->expects(self::once())->method('setImage')->with($avatarImage);
+
+        $this->imageUploader->expects(self::once())->method('upload')->with($avatarImage);
+
+        self::assertSame($avatarImage, $this->avatarImageCreator->create('1', $file, null));
     }
 
     public function testThrowsAnExceptionIfAdminUserIsNotFound(): void
     {
         $file = new SplFileInfo(__FILE__);
-        $this->adminUserRepositoryMock->expects($this->once())->method('find')->with('1')->willReturn(null);
-        $this->avatarImageFactoryMock->expects($this->never())->method('createNew');
-        $this->imageUploaderMock->expects($this->never())->method('upload');
-        $this->expectException(AdminUserNotFoundException::class);
+
+        $this->adminUserRepository->expects(self::once())->method('find')->with('1')->willReturn(null);
+
+        $this->avatarImageFactory->expects(self::never())->method('createNew');
+
+        $this->imageUploader->expects(self::never())->method('upload');
+
+        self::expectException(AdminUserNotFoundException::class);
+
         $this->avatarImageCreator->create('1', $file, null);
     }
 
     public function testThrowsAnExceptionIfThereIsNoUploadedFile(): void
     {
-        $this->adminUserRepositoryMock->expects($this->never())->method('find')->with('1');
-        $this->avatarImageFactoryMock->expects($this->never())->method('createNew');
-        $this->imageUploaderMock->expects($this->never())->method('upload');
-        $this->expectException(NoFileUploadedException::class);
+        $this->adminUserRepository->expects(self::never())->method('find')->with('1');
+
+        $this->avatarImageFactory->expects(self::never())->method('createNew');
+
+        $this->imageUploader->expects(self::never())->method('upload');
+
+        self::expectException(NoFileUploadedException::class);
+
         $this->avatarImageCreator->create('1', null, null);
     }
 }

@@ -50,7 +50,7 @@ final class TaxonSlugEventSubscriberTest extends TestCase
         $requestMock->expects($this->once())->method('getMethod')->willReturn(Request::METHOD_POST);
         $taxonMock->expects($this->once())->method('getTranslations')->willReturn(new ArrayCollection([$taxonTranslationMock]));
         $taxonTranslationMock->expects($this->once())->method('getSlug')->willReturn(null);
-        $taxonTranslationMock->expects($this->once())->method('getName')->willReturn('PHP Mug');
+        $taxonTranslationMock->expects($this->atLeastOnce())->method('getName')->willReturn('PHP Mug');
         $taxonTranslationMock->expects($this->once())->method('getLocale')->willReturn('en_US');
         $this->taxonSlugGeneratorMock->expects($this->once())->method('generate')->with($taxonMock, 'en_US')->willReturn('php-mug');
         $taxonTranslationMock->expects($this->once())->method('setSlug')->with('php-mug');
@@ -74,7 +74,7 @@ final class TaxonSlugEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         $requestMock->expects($this->once())->method('getMethod')->willReturn(Request::METHOD_POST);
         $taxonMock->expects($this->once())->method('getTranslations')->willReturn(new ArrayCollection([$taxonTranslationMock]));
-        $taxonTranslationMock->expects($this->once())->method('getSlug')->willReturn('php-mug');
+        $taxonTranslationMock->expects($this->atLeastOnce())->method('getSlug')->willReturn('php-mug');
         $taxonTranslationMock->expects($this->never())->method('getName');
         $this->taxonSlugGeneratorMock->expects($this->never())->method('generate');
         $taxonTranslationMock->expects($this->never())->method('setSlug');

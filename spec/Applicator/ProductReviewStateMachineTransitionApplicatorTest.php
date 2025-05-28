@@ -23,18 +23,18 @@ use Sylius\Component\Review\Model\ReviewInterface;
 
 final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
 {
-    private StateMachineInterface&MockObject $stateMachine;
+    private MockObject&StateMachineInterface $stateMachine;
 
     private ProductReviewStateMachineTransitionApplicator $productReviewStateMachineTransitionApplicator;
 
-    private ReviewInterface&MockObject $review;
+    private MockObject&ReviewInterface $review;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->stateMachine = $this->createMock(StateMachineInterface::class);
         $this->productReviewStateMachineTransitionApplicator = new ProductReviewStateMachineTransitionApplicator(
-            $this->stateMachine
+            $this->stateMachine,
         );
         $this->review = $this->createMock(ReviewInterface::class);
     }
@@ -46,7 +46,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_ACCEPT
+                ProductReviewTransitions::TRANSITION_ACCEPT,
             )->willReturn(true);
 
         $this->stateMachine->expects(self::once())
@@ -54,7 +54,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_ACCEPT
+                ProductReviewTransitions::TRANSITION_ACCEPT,
             );
 
         $this->productReviewStateMachineTransitionApplicator->accept($this->review);
@@ -67,7 +67,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_ACCEPT
+                ProductReviewTransitions::TRANSITION_ACCEPT,
             )->willReturn(false);
 
         $this->stateMachine->expects(self::never())
@@ -75,7 +75,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_ACCEPT
+                ProductReviewTransitions::TRANSITION_ACCEPT,
             );
 
         self::expectException(StateMachineTransitionFailedException::class);
@@ -90,7 +90,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_REJECT
+                ProductReviewTransitions::TRANSITION_REJECT,
             )->willReturn(true);
 
         $this->stateMachine->expects(self::once())
@@ -98,7 +98,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_REJECT
+                ProductReviewTransitions::TRANSITION_REJECT,
             );
 
         $this->productReviewStateMachineTransitionApplicator->reject($this->review);
@@ -111,7 +111,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_REJECT
+                ProductReviewTransitions::TRANSITION_REJECT,
             )->willReturn(false);
 
         $this->stateMachine->expects(self::never())
@@ -119,7 +119,7 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
             ->with(
                 $this->review,
                 ProductReviewTransitions::GRAPH,
-                ProductReviewTransitions::TRANSITION_REJECT
+                ProductReviewTransitions::TRANSITION_REJECT,
             );
 
         self::expectException(StateMachineTransitionFailedException::class);
