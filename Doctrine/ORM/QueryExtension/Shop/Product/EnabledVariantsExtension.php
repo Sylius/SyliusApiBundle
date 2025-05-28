@@ -17,6 +17,7 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
 use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
@@ -75,8 +76,7 @@ final readonly class EnabledVariantsExtension implements QueryCollectionExtensio
 
         $queryBuilder
             ->addSelect($variantAliasName)
-            ->leftJoin(sprintf('%s.variants', $rootAlias), $variantAliasName)
-            ->andWhere(sprintf('%s.enabled = :%s OR %1$s.id IS NULL', $variantAliasName, $enabledParameterName))
+            ->leftJoin(sprintf('%s.variants', $rootAlias), $variantAliasName, Join::WITH, sprintf('%s.enabled = :%s', $variantAliasName, $enabledParameterName))
             ->setParameter($enabledParameterName, true)
         ;
     }

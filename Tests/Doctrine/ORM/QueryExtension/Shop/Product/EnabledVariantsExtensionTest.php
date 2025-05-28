@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Tests\Doctrine\ORM\QueryExtension\Shop\Product;
@@ -9,6 +18,7 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\HttpOperation;
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -75,7 +85,8 @@ final class EnabledVariantsExtensionTest extends TestCase
         );
     }
 
-    public function test_it_filters_out_disabled_variants_on_collection(): void
+    /** @dataProvider getGetOperations */
+    public function test_it_filters_out_disabled_variants_on_collection(HttpOperation $operation): void
     {
         $shopApiSection = $this->createMock(ShopApiSection::class);
         $queryBuilder = $this->createMock(QueryBuilder::class);
@@ -99,12 +110,10 @@ final class EnabledVariantsExtensionTest extends TestCase
 
         $queryBuilder->expects($this->once())->method('getRootAliases')->willReturn(['o']);
         $queryBuilder->expects($this->once())->method('addSelect')->with('variant')->willReturnSelf();
-        $queryBuilder->expects($this->once())->method('leftJoin')->with('o.variants', 'variant')->willReturnSelf();
-
         $queryBuilder
             ->expects($this->once())
-            ->method('andWhere')
-            ->with('variant.enabled = :enabledParameter OR variant.id IS NULL')
+            ->method('leftJoin')
+            ->with('o.variants', 'variant', 'WITH', 'variant.enabled = :enabledParameter')
             ->willReturnSelf()
         ;
 
@@ -119,57 +128,14 @@ final class EnabledVariantsExtensionTest extends TestCase
             $queryBuilder,
             $queryNameGenerator,
             ProductInterface::class,
-            new GetCollection(),
+            $operation,
         );
     }
-    public function test_it_filters_out_disabled_variants_on_item(): void
+
+    /** @return iterable<string, HttpOperation> */
+    public static function getGetOperations(): iterable
     {
-        $queryBuilder = $this->createMock(QueryBuilder::class);
-        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
-
-        $this->sectionProvider
-            ->expects($this->once())
-            ->method('getSection')
-            ->willReturn($this->createMock(ShopApiSection::class))
-        ;
-
-        $queryNameGenerator
-            ->expects($this->once())
-            ->method('generateJoinAlias')
-            ->with('variant')
-            ->willReturn('variant')
-        ;
-
-        $queryNameGenerator
-            ->expects($this->once())
-            ->method('generateParameterName')
-            ->with('enabled')
-            ->willReturn('enabledParameter')
-        ;
-
-        $queryBuilder->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilder->expects($this->once())->method('addSelect')->with('variant')->willReturnSelf();
-        $queryBuilder->expects($this->once())->method('leftJoin')->with('o.variants', 'variant')->willReturnSelf();
-
-        $queryBuilder
-            ->expects($this->once())
-            ->method('andWhere')
-            ->with('variant.enabled = :enabledParameter OR variant.id IS NULL')
-            ->willReturnSelf()
-        ;
-
-        $queryBuilder
-            ->expects($this->once())
-            ->method('setParameter')
-            ->with('enabledParameter', true)
-            ->willReturnSelf();
-
-        $this->extension->applyToItem(
-            $queryBuilder,
-            $queryNameGenerator,
-            ProductInterface::class,
-            [],
-            new Get(),
-        );
+        yield 'Get operation' => [new Get()];
+        yield 'GetCollection operation' => [new GetCollection()];
     }
 }
