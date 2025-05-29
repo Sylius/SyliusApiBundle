@@ -44,6 +44,7 @@
                 <argument>sylius:shop:product:index</argument>
                 <argument>sylius:shop:product:show</argument>
             </argument>
+            <argument type="service" id="serializer.normalizer.object" />
             <tag name="serializer.normalizer" priority="64" />
         </service>
 
@@ -87,6 +88,8 @@
             <argument type="collection">
                 <argument>sylius:shop:product_variant:index</argument>
                 <argument>sylius:shop:product_variant:show</argument>
+                <argument>sylius:shop:product:index</argument>
+                <argument>sylius:shop:product:show</argument>
             </argument>
             <tag name="serializer.normalizer" priority="64" />
         </service>
