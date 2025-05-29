@@ -18,7 +18,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Serializer\Denormalizer\ChannelPriceHistoryConfigDenormalizer;
 use Sylius\Component\Core\Model\ChannelPriceHistoryConfigInterface;
 use Sylius\Component\Core\Model\TaxonInterface;
@@ -27,11 +26,9 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
 {
-    /** @var IriConverterInterface|MockObject */
-    private MockObject $iriConverterMock;
+    private IriConverterInterface&MockObject $iriConverter;
 
-    /** @var FactoryInterface|MockObject */
-    private MockObject $configFactoryMock;
+    private FactoryInterface&MockObject $configFactory;
 
     private ChannelPriceHistoryConfigDenormalizer $channelPriceHistoryConfigDenormalizer;
 
@@ -39,24 +36,25 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->iriConverterMock = $this->createMock(IriConverterInterface::class);
-        $this->configFactoryMock = $this->createMock(FactoryInterface::class);
-        $this->channelPriceHistoryConfigDenormalizer = new ChannelPriceHistoryConfigDenormalizer($this->iriConverterMock, $this->configFactoryMock);
+        parent::setUp();
+        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->configFactory = $this->createMock(FactoryInterface::class);
+        $this->channelPriceHistoryConfigDenormalizer = new ChannelPriceHistoryConfigDenormalizer($this->iriConverter, $this->configFactory);
     }
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
     {
-        $this->assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization([], 'string', context: [self::ALREADY_CALLED => true]));
+        self::assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization([], 'string', context: [self::ALREADY_CALLED => true]));
     }
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        $this->assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization('string', 'string'));
+        self::assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization('string', 'string'));
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotAChannelPriceHistoryConfig(): void
     {
-        $this->assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization([], 'string'));
+        self::assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization([], 'string'));
     }
 
     public function testThrowsAnExceptionWhenDenormalizingAnObjectThatIsNotAChannelPriceHistoryConfig(): void
@@ -66,10 +64,10 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
         $this->channelPriceHistoryConfigDenormalizer->setDenormalizer($denormalizerMock);
 
         $denormalizerMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('denormalize')
             ->with([], 'string', null, [self::ALREADY_CALLED => true])
-            ->willReturn(new stdClass());
+            ->willReturn(new \stdClass());
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -95,16 +93,16 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
         ]];
 
         $denormalizerMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('denormalize')
             ->with($data, 'string', null, [self::ALREADY_CALLED => true])
             ->willReturn($configMock);
 
         $configMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('clearTaxonsExcludedFromShowingLowestPrice');
 
-        $this->iriConverterMock
+        $this->iriConverter
             ->expects($this->exactly(2))
             ->method('getResourceFromIri')
             ->with($this->callback(function ($iri) {
@@ -124,7 +122,7 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
                 return $taxon === $firstTaxonMock || $taxon === $secondTaxonMock;
             }));
 
-        $this->assertSame($configMock, $this->channelPriceHistoryConfigDenormalizer->denormalize($data, 'string'));
+        self::assertSame($configMock, $this->channelPriceHistoryConfigDenormalizer->denormalize($data, 'string'));
     }
 
     public function testRemovesExcludedTaxonsWhenDataHasNone(): void
@@ -141,18 +139,18 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
         $dummyConfigMock = $this->createMock(ChannelPriceHistoryConfigInterface::class);
         $this->channelPriceHistoryConfigDenormalizer->setDenormalizer($denormalizerMock);
         $data = [];
-        $this->configFactoryMock->expects($this->once())->method('createNew')->willReturn($dummyConfigMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with($data, 'string', null, [self::ALREADY_CALLED => true])
+        $this->configFactory->expects(self::once())->method('createNew')->willReturn($dummyConfigMock);
+        $denormalizerMock->expects(self::once())->method('denormalize')->with($data, 'string', null, [self::ALREADY_CALLED => true])
             ->willReturn($configMock)
         ;
-        $configMock->expects($this->once())->method('getTaxonsExcludedFromShowingLowestPrice')->willReturn(new ArrayCollection([
+        $configMock->expects(self::once())->method('getTaxonsExcludedFromShowingLowestPrice')->willReturn(new ArrayCollection([
             $firstTaxonMock,
             $secondTaxonMock,
         ]));
-        $configMock->expects($this->once())->method('clearTaxonsExcludedFromShowingLowestPrice');
-        $this->iriConverterMock->expects($this->never())->method('getResourceFromIri')->with($this->any());
-        $configMock->expects($this->never())->method('addTaxonExcludedFromShowingLowestPrice');
-        $this->assertSame($configMock, $this->channelPriceHistoryConfigDenormalizer->denormalize($data, 'string'));
+        $configMock->expects(self::once())->method('clearTaxonsExcludedFromShowingLowestPrice');
+        $this->iriConverter->expects(self::never())->method('getResourceFromIri')->with($this->any());
+        $configMock->expects(self::never())->method('addTaxonExcludedFromShowingLowestPrice');
+        self::assertSame($configMock, $this->channelPriceHistoryConfigDenormalizer->denormalize($data, 'string'));
     }
 
     public function testReplacesCurrentExcludedTaxonsWithOnesFromData(): void
@@ -178,21 +176,21 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
         ]];
 
         $denormalizerMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('denormalize')
             ->with($data, 'string', null, [self::ALREADY_CALLED => true])
             ->willReturn($configMock);
 
         $configMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('getTaxonsExcludedFromShowingLowestPrice')
             ->willReturn(new ArrayCollection([$firstCurrentTaxonMock, $secondCurrentTaxonMock]));
 
         $configMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('clearTaxonsExcludedFromShowingLowestPrice');
 
-        $this->iriConverterMock
+        $this->iriConverter
             ->expects($this->exactly(2))
             ->method('getResourceFromIri')
             ->with($this->callback(function ($iri) {
@@ -212,6 +210,6 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
                 return $taxon === $firstNewTaxonMock || $taxon === $secondNewTaxonMock;
             }));
 
-        $this->assertSame($configMock, $this->channelPriceHistoryConfigDenormalizer->denormalize($data, 'string'));
+        self::assertSame($configMock, $this->channelPriceHistoryConfigDenormalizer->denormalize($data, 'string'));
     }
 }

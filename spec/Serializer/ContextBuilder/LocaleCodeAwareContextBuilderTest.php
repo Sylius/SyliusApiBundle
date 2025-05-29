@@ -43,11 +43,11 @@ final class LocaleCodeAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => SendContactRequest::class]])
         ;
-        $this->localeContext->expects($this->once())->method('getLocaleCode')->willReturn('en_US');
-        $this->assertSame([
+        $this->localeContext->expects(self::once())->method('getLocaleCode')->willReturn('en_US');
+        self::assertSame([
             'input' => ['class' => SendContactRequest::class],
             AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS => [
                 SendContactRequest::class => ['localeCode' => 'en_US'],
@@ -61,22 +61,22 @@ final class LocaleCodeAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn([])
         ;
-        $this->localeContext->expects($this->never())->method('getLocaleCode');
-        $this->assertSame([], $this->localeCodeAwareContextBuilder->createFromRequest($requestMock, true, []));
+        $this->localeContext->expects(self::never())->method('getLocaleCode');
+        self::assertSame([], $this->localeCodeAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
     public function testDoesNothingIfInputClassIsNoChannelAware(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => \stdClass::class]])
         ;
-        $this->localeContext->expects($this->never())->method('getLocaleCode');
-        $this->assertSame(['input' => ['class' => \stdClass::class]], $this->localeCodeAwareContextBuilder
+        $this->localeContext->expects(self::never())->method('getLocaleCode');
+        self::assertSame(['input' => ['class' => \stdClass::class]], $this->localeCodeAwareContextBuilder
             ->createFromRequest($requestMock, true, []))
         ;
     }

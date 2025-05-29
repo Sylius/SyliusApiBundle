@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Serializer\Denormalizer;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Serializer\Denormalizer\ChannelDenormalizer;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\ChannelPriceHistoryConfigInterface;
@@ -26,11 +24,9 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class ChannelDenormalizerTest extends TestCase
 {
-    /** @var FactoryInterface|MockObject */
-    private MockObject $configFactoryMock;
+    private FactoryInterface&MockObject $configFactory;
 
-    /** @var FactoryInterface|MockObject */
-    private MockObject $shopBillingDataFactoryMock;
+    private FactoryInterface&MockObject $shopBillingDataFactory;
 
     private ChannelDenormalizer $channelDenormalizer;
 
@@ -38,24 +34,25 @@ final class ChannelDenormalizerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->configFactoryMock = $this->createMock(FactoryInterface::class);
-        $this->shopBillingDataFactoryMock = $this->createMock(FactoryInterface::class);
-        $this->channelDenormalizer = new ChannelDenormalizer($this->configFactoryMock, $this->shopBillingDataFactoryMock);
+        parent::setUp();
+        $this->configFactory = $this->createMock(FactoryInterface::class);
+        $this->shopBillingDataFactory = $this->createMock(FactoryInterface::class);
+        $this->channelDenormalizer = new ChannelDenormalizer($this->configFactory, $this->shopBillingDataFactory);
     }
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
     {
-        $this->assertFalse($this->channelDenormalizer->supportsDenormalization([], ChannelInterface::class, context: [self::ALREADY_CALLED => true]));
+        self::assertFalse($this->channelDenormalizer->supportsDenormalization([], ChannelInterface::class, context: [self::ALREADY_CALLED => true]));
     }
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        $this->assertFalse($this->channelDenormalizer->supportsDenormalization('string', ChannelInterface::class));
+        self::assertFalse($this->channelDenormalizer->supportsDenormalization('string', ChannelInterface::class));
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotAChannel(): void
     {
-        $this->assertFalse($this->channelDenormalizer->supportsDenormalization([], 'string'));
+        self::assertFalse($this->channelDenormalizer->supportsDenormalization([], 'string'));
     }
 
     public function testThrowsAnExceptionWhenDenormalizingAnObjectThatIsNotAChannel(): void
@@ -63,8 +60,8 @@ final class ChannelDenormalizerTest extends TestCase
         /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with([], 'string', null, [self::ALREADY_CALLED => true])->willReturn(new stdClass());
-        $this->expectException(InvalidArgumentException::class);
+        $denormalizerMock->expects(self::once())->method('denormalize')->with([], 'string', null, [self::ALREADY_CALLED => true])->willReturn(new \stdClass());
+        $this->expectException(\InvalidArgumentException::class);
         $this->channelDenormalizer->denormalize([], 'string');
     }
 
@@ -79,12 +76,12 @@ final class ChannelDenormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
-        $channelMock->expects($this->once())->method('getChannelPriceHistoryConfig')->willReturn($configMock);
-        $channelMock->expects($this->once())->method('getShopBillingData')->willReturn($shopBillingDataMock);
-        $channelMock->expects($this->never())->method('setChannelPriceHistoryConfig');
-        $this->configFactoryMock->expects($this->never())->method('createNew');
-        $denormalizerMock->expects($this->once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
-        $this->assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
+        $channelMock->expects(self::once())->method('getChannelPriceHistoryConfig')->willReturn($configMock);
+        $channelMock->expects(self::once())->method('getShopBillingData')->willReturn($shopBillingDataMock);
+        $channelMock->expects(self::never())->method('setChannelPriceHistoryConfig');
+        $this->configFactory->expects(self::never())->method('createNew');
+        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
+        self::assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
     }
 
     public function testAddsANewChannelPriceHistoryConfigWhenChannelHasNone(): void
@@ -98,12 +95,12 @@ final class ChannelDenormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
-        $channelMock->expects($this->once())->method('getChannelPriceHistoryConfig')->willReturn(null);
-        $channelMock->expects($this->once())->method('getShopBillingData')->willReturn($shopBillingDataMock);
-        $this->configFactoryMock->expects($this->once())->method('createNew')->willReturn($configMock);
-        $channelMock->expects($this->once())->method('setChannelPriceHistoryConfig')->with($configMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
-        $this->assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
+        $channelMock->expects(self::once())->method('getChannelPriceHistoryConfig')->willReturn(null);
+        $channelMock->expects(self::once())->method('getShopBillingData')->willReturn($shopBillingDataMock);
+        $this->configFactory->expects(self::once())->method('createNew')->willReturn($configMock);
+        $channelMock->expects(self::once())->method('setChannelPriceHistoryConfig')->with($configMock);
+        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
+        self::assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
     }
 
     public function testAddsANewShopBillingDataWhenChannelHasNone(): void
@@ -117,11 +114,11 @@ final class ChannelDenormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
-        $channelMock->expects($this->once())->method('getChannelPriceHistoryConfig')->willReturn($configMock);
-        $channelMock->expects($this->once())->method('getShopBillingData')->willReturn(null);
-        $this->shopBillingDataFactoryMock->expects($this->once())->method('createNew')->willReturn($shopBillingDataMock);
-        $channelMock->expects($this->once())->method('setShopBillingData')->with($shopBillingDataMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
-        $this->assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
+        $channelMock->expects(self::once())->method('getChannelPriceHistoryConfig')->willReturn($configMock);
+        $channelMock->expects(self::once())->method('getShopBillingData')->willReturn(null);
+        $this->shopBillingDataFactory->expects(self::once())->method('createNew')->willReturn($shopBillingDataMock);
+        $channelMock->expects(self::once())->method('setShopBillingData')->with($shopBillingDataMock);
+        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
+        self::assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
     }
 }

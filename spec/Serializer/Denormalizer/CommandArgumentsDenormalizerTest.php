@@ -13,34 +13,36 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Serializer\Denormalizer;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Sylius\Bundle\ApiBundle\Serializer\Denormalizer\CommandArgumentsDenormalizer;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Catalog\AddProductReview;
 use Sylius\Bundle\ApiBundle\Command\IriToIdentifierConversionAwareInterface;
 use Sylius\Bundle\ApiBundle\Converter\IriToIdentifierConverterInterface;
+use Sylius\Bundle\ApiBundle\Serializer\Denormalizer\CommandArgumentsDenormalizer;
 use Sylius\Component\Core\Model\Order;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class CommandArgumentsDenormalizerTest extends TestCase
 {
-    /** @var DenormalizerInterface|MockObject */
-    private MockObject $commandDenormalizerMock;
-    /** @var IriToIdentifierConverterInterface|MockObject */
-    private MockObject $iriToIdentifierConverterMock;
+    private DenormalizerInterface&MockObject $commandDenormalizer;
+
+    private IriToIdentifierConverterInterface&MockObject $iriToIdentifierConverter;
+
     private CommandArgumentsDenormalizer $commandArgumentsDenormalizer;
+
     protected function setUp(): void
     {
-        $this->commandDenormalizerMock = $this->createMock(DenormalizerInterface::class);
-        $this->iriToIdentifierConverterMock = $this->createMock(IriToIdentifierConverterInterface::class);
-        $this->commandArgumentsDenormalizer = new CommandArgumentsDenormalizer($this->commandDenormalizerMock, $this->iriToIdentifierConverterMock);
+        parent::setUp();
+        $this->commandDenormalizer = $this->createMock(DenormalizerInterface::class);
+        $this->iriToIdentifierConverter = $this->createMock(IriToIdentifierConverterInterface::class);
+        $this->commandArgumentsDenormalizer = new CommandArgumentsDenormalizer($this->commandDenormalizer, $this->iriToIdentifierConverter);
     }
 
     public function testSupportsDenormalizationAddProductReview(): void
     {
         $context = ['input' => ['class' => AddProductReview::class]];
 
-        $this->assertTrue($this->commandArgumentsDenormalizer
+        self::assertTrue($this->commandArgumentsDenormalizer
             ->supportsDenormalization(
                 new AddProductReview('Cap', 5, 'ok', 'cap_code', 'john@example.com'),
                 AddProductReview::class,
@@ -54,7 +56,7 @@ final class CommandArgumentsDenormalizerTest extends TestCase
     {
         $context = ['input' => ['class' => Order::class]];
 
-        $this->assertFalse($this->commandArgumentsDenormalizer
+        self::assertFalse($this->commandArgumentsDenormalizer
             ->supportsDenormalization(
                 new Order(),
                 AddProductReview::class,
@@ -68,13 +70,13 @@ final class CommandArgumentsDenormalizerTest extends TestCase
     {
         $context = ['input' => ['class' => AddProductReview::class]];
         $addProductReview = new AddProductReview('Cap', 5, 'ok', 'cap_code', 'john@example.com');
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('Cap')->willReturn(false);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with(5)->willReturn(false);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('ok')->willReturn(false);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('john@example.com')->willReturn(false);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('/api/v2/shop/products/cap_code')->willReturn(true);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('getIdentifier')->with('/api/v2/shop/products/cap_code')->willReturn('cap_code');
-        $this->commandDenormalizerMock->expects($this->once())->method('denormalize')->with([
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('Cap')->willReturn(false);
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with(5)->willReturn(false);
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('ok')->willReturn(false);
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('john@example.com')->willReturn(false);
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/shop/products/cap_code')->willReturn(true);
+        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/shop/products/cap_code')->willReturn('cap_code');
+        $this->commandDenormalizer->expects(self::once())->method('denormalize')->with([
             'title' => 'Cap',
             'rating' => 5,
             'comment' => 'ok',
@@ -83,7 +85,7 @@ final class CommandArgumentsDenormalizerTest extends TestCase
         ], AddProductReview::class, null, $context)
             ->willReturn($addProductReview)
         ;
-        $this->assertSame($addProductReview, $this->commandArgumentsDenormalizer
+        self::assertSame($addProductReview, $this->commandArgumentsDenormalizer
             ->denormalize(
                 [
                     'title' => 'Cap',
@@ -112,16 +114,16 @@ final class CommandArgumentsDenormalizerTest extends TestCase
             public array $arrayField = ['array'];
         };
         $context = ['input' => ['class' => $command::class]];
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('array')->willReturn(false);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('/api/v2/iri')->willReturn(true);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('getIdentifier')->with('/api/v2/iri')->willReturn('iri');
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('/api/v2/first-iri')->willReturn(true);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('getIdentifier')->with('/api/v2/first-iri')->willReturn('first-iri');
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('')->willReturn(false);
-        $this->iriToIdentifierConverterMock->expects($this->never())->method('getIdentifier')->with('');
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('isIdentifier')->with('/api/v2/second-iri')->willReturn(true);
-        $this->iriToIdentifierConverterMock->expects($this->once())->method('getIdentifier')->with('/api/v2/second-iri')->willReturn('second-iri');
-        $this->commandDenormalizerMock->expects($this->once())->method('denormalize')->with([
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('array')->willReturn(false);
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/iri')->willReturn(true);
+        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/iri')->willReturn('iri');
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/first-iri')->willReturn(true);
+        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/first-iri')->willReturn('first-iri');
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('')->willReturn(false);
+        $this->iriToIdentifierConverter->expects(self::never())->method('getIdentifier')->with('');
+        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/second-iri')->willReturn(true);
+        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/second-iri')->willReturn('second-iri');
+        $this->commandDenormalizer->expects(self::once())->method('denormalize')->with([
             'iri' => 'iri',
             'arrayIris' => [
                 'first-iri',
@@ -132,7 +134,7 @@ final class CommandArgumentsDenormalizerTest extends TestCase
         ], $command::class, null, $context)
             ->willReturn($command)
         ;
-        $this->assertSame($command, $this->commandArgumentsDenormalizer
+        self::assertSame($command, $this->commandArgumentsDenormalizer
             ->denormalize(
                 [
                     'iri' => '/api/v2/iri',

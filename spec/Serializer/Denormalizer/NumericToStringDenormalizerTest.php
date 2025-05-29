@@ -15,15 +15,13 @@ namespace Tests\Sylius\Bundle\ApiBundle\Serializer\Denormalizer;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Serializer\Denormalizer\NumericToStringDenormalizer;
 use Sylius\Component\Core\Model\TaxRateInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class NumericToStringDenormalizerTest extends TestCase
 {
-    /** @var DenormalizerInterface|MockObject */
-    private MockObject $denormalizerMock;
+    private DenormalizerInterface&MockObject $denormalizer;
 
     private NumericToStringDenormalizer $numericToStringDenormalizer;
 
@@ -31,43 +29,40 @@ final class NumericToStringDenormalizerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->denormalizerMock = $this->createMock(DenormalizerInterface::class);
-
-        // Initialize NumericToStringDenormalizer
+        parent::setUp();
+        $this->denormalizer = $this->createMock(DenormalizerInterface::class);
         $this->numericToStringDenormalizer = new NumericToStringDenormalizer(
             TaxRateInterface::class,
-            'amount'
+            'amount',
         );
-
-        // Set the denormalizer mock on the test subject
-        $this->numericToStringDenormalizer->setDenormalizer($this->denormalizerMock);
+        $this->numericToStringDenormalizer->setDenormalizer($this->denormalizer);
     }
 
     public function testSupportsDenormalizationOfTaxRateWithAmountSet(): void
     {
-        $this->assertFalse(
-            $this->numericToStringDenormalizer->supportsDenormalization(['amount' => 0.23], \stdClass::class)
+        self::assertFalse(
+            $this->numericToStringDenormalizer->supportsDenormalization(['amount' => 0.23], \stdClass::class),
         );
 
-        $this->assertFalse(
-            $this->numericToStringDenormalizer->supportsDenormalization(0.23, TaxRateInterface::class)
+        self::assertFalse(
+            $this->numericToStringDenormalizer->supportsDenormalization(0.23, TaxRateInterface::class),
         );
 
-        $this->assertFalse(
-            $this->numericToStringDenormalizer->supportsDenormalization([], TaxRateInterface::class)
+        self::assertFalse(
+            $this->numericToStringDenormalizer->supportsDenormalization([], TaxRateInterface::class),
         );
 
-        $this->assertFalse(
+        self::assertFalse(
             $this->numericToStringDenormalizer->supportsDenormalization(
                 ['amount' => 0.23],
                 TaxRateInterface::class,
                 null,
-                [self::ALREADY_CALLED => true]
-            )
+                [self::ALREADY_CALLED => true],
+            ),
         );
 
-        $this->assertTrue(
-            $this->numericToStringDenormalizer->supportsDenormalization(['amount' => 0.23], TaxRateInterface::class)
+        self::assertTrue(
+            $this->numericToStringDenormalizer->supportsDenormalization(['amount' => 0.23], TaxRateInterface::class),
         );
     }
 
@@ -76,15 +71,15 @@ final class NumericToStringDenormalizerTest extends TestCase
         /** @var TaxRateInterface|MockObject $taxRateMock */
         $taxRateMock = $this->createMock(TaxRateInterface::class);
 
-        $this->denormalizerMock
-            ->expects($this->once())
+        $this->denormalizer
+            ->expects(self::once())
             ->method('denormalize')
             ->with(['amount' => '0.23'], TaxRateInterface::class, null, [self::ALREADY_CALLED => true])
             ->willReturn($taxRateMock);
 
-        $this->assertSame(
+        self::assertSame(
             $taxRateMock,
-            $this->numericToStringDenormalizer->denormalize(['amount' => 0.23], TaxRateInterface::class)
+            $this->numericToStringDenormalizer->denormalize(['amount' => 0.23], TaxRateInterface::class),
         );
     }
 
@@ -93,15 +88,15 @@ final class NumericToStringDenormalizerTest extends TestCase
         /** @var TaxRateInterface|MockObject $taxRateMock */
         $taxRateMock = $this->createMock(TaxRateInterface::class);
 
-        $this->denormalizerMock
-            ->expects($this->once())
+        $this->denormalizer
+            ->expects(self::once())
             ->method('denormalize')
             ->with(['amount' => '12'], TaxRateInterface::class, null, [self::ALREADY_CALLED => true])
             ->willReturn($taxRateMock);
 
-        $this->assertSame(
+        self::assertSame(
             $taxRateMock,
-            $this->numericToStringDenormalizer->denormalize(['amount' => 12], TaxRateInterface::class)
+            $this->numericToStringDenormalizer->denormalize(['amount' => 12], TaxRateInterface::class),
         );
     }
 }

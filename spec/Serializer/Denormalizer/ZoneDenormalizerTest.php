@@ -28,31 +28,30 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class ZoneDenormalizerTest extends TestCase
 {
-    /** @var DenormalizerInterface|MockObject */
-    private MockObject $denormalizerMock;
+    private DenormalizerInterface&MockObject $denormalizer;
 
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private MockObject&SectionProviderInterface $sectionProvider;
 
     private ZoneDenormalizer $zoneDenormalizer;
 
     protected function setUp(): void
     {
-        $this->denormalizerMock = $this->createMock(DenormalizerInterface::class);
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->zoneDenormalizer = new ZoneDenormalizer($this->denormalizerMock, $this->sectionProviderMock);
+        parent::setUp();
+        $this->denormalizer = $this->createMock(DenormalizerInterface::class);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->zoneDenormalizer = new ZoneDenormalizer($this->denormalizer, $this->sectionProvider);
     }
 
     public function testSupportsOnlyAdminSection(): void
     {
         /** @var ZoneInterface|MockObject $zoneMock */
         $zoneMock = $this->createMock(ZoneInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->assertTrue($this->zoneDenormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        self::assertTrue($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $zoneMock]))
         ;
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertFalse($this->zoneDenormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertFalse($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $zoneMock]))
         ;
     }
@@ -63,20 +62,20 @@ final class ZoneDenormalizerTest extends TestCase
         $zoneMock = $this->createMock(ZoneInterface::class);
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->assertTrue($this->zoneDenormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        self::assertTrue($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $zoneMock]))
         ;
-        $this->assertFalse($this->zoneDenormalizer
+        self::assertFalse($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class))
         ;
-        $this->assertFalse($this->zoneDenormalizer
+        self::assertFalse($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => null]))
         ;
-        $this->assertFalse($this->zoneDenormalizer
+        self::assertFalse($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => []]))
         ;
-        $this->assertFalse($this->zoneDenormalizer
+        self::assertFalse($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $productMock]))
         ;
     }
@@ -85,11 +84,11 @@ final class ZoneDenormalizerTest extends TestCase
     {
         /** @var ZoneInterface|MockObject $zoneMock */
         $zoneMock = $this->createMock(ZoneInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->assertTrue($this->zoneDenormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        self::assertTrue($this->zoneDenormalizer
             ->supportsDenormalization([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $zoneMock]))
         ;
-        $this->assertFalse($this->zoneDenormalizer
+        self::assertFalse($this->zoneDenormalizer
             ->supportsDenormalization([], ProductInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $zoneMock]))
         ;
     }
@@ -108,16 +107,16 @@ final class ZoneDenormalizerTest extends TestCase
         $memberPLMock = $this->createMock(ZoneMemberInterface::class);
         /** @var ZoneMemberInterface|MockObject $memberDEMock */
         $memberDEMock = $this->createMock(ZoneMemberInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
-        $memberUSMock->expects($this->once())->method('getCode')->willReturn('US');
-        $memberUKMock->expects($this->once())->method('getCode')->willReturn('UK');
-        $memberPLMock->expects($this->once())->method('getCode')->willReturn('PL');
-        $memberDEMock->expects($this->once())->method('getCode')->willReturn('DE');
-        $objectToPopulateMock->expects($this->once())->method('getMembers')->willReturn(new ArrayCollection([
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        $memberUSMock->expects(self::once())->method('getCode')->willReturn('US');
+        $memberUKMock->expects(self::once())->method('getCode')->willReturn('UK');
+        $memberPLMock->expects(self::once())->method('getCode')->willReturn('PL');
+        $memberDEMock->expects(self::once())->method('getCode')->willReturn('DE');
+        $objectToPopulateMock->expects(self::once())->method('getMembers')->willReturn(new ArrayCollection([
             $memberUSMock,
             $memberUKMock,
         ]));
-        $zoneMock->expects($this->once())->method('getMembers')->willReturn(new ArrayCollection([
+        $zoneMock->expects(self::once())->method('getMembers')->willReturn(new ArrayCollection([
             $memberPLMock,
             $memberDEMock,
         ]));
@@ -125,9 +124,9 @@ final class ZoneDenormalizerTest extends TestCase
             AbstractNormalizer::OBJECT_TO_POPULATE => $objectToPopulateMock,
             'sylius_zone_denormalizer_already_called' => true,
         ];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with([], ZoneInterface::class, null, $context)->willReturn($zoneMock);
-        $zoneMock->expects($this->never())->method('removeMember');
-        $zoneMock->expects($this->never())->method('addMember');
+        $this->denormalizer->expects(self::once())->method('denormalize')->with([], ZoneInterface::class, null, $context)->willReturn($zoneMock);
+        $zoneMock->expects(self::never())->method('removeMember');
+        $zoneMock->expects(self::never())->method('addMember');
         $this->zoneDenormalizer->denormalize([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $objectToPopulateMock]);
     }
 
@@ -145,16 +144,16 @@ final class ZoneDenormalizerTest extends TestCase
         $memberPLMock = $this->createMock(ZoneMemberInterface::class);
         /** @var ZoneMemberInterface|MockObject $newMemberUSMock */
         $newMemberUSMock = $this->createMock(ZoneMemberInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
-        $memberUSMock->expects($this->once())->method('getCode')->willReturn('US');
-        $memberUKMock->expects($this->once())->method('getCode')->willReturn('UK');
-        $memberPLMock->expects($this->once())->method('getCode')->willReturn('PL');
-        $newMemberUSMock->expects($this->once())->method('getCode')->willReturn('US');
-        $objectToPopulateMock->expects($this->once())->method('getMembers')->willReturn(new ArrayCollection([
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        $memberUSMock->expects(self::once())->method('getCode')->willReturn('US');
+        $memberUKMock->expects(self::once())->method('getCode')->willReturn('UK');
+        $memberPLMock->expects(self::once())->method('getCode')->willReturn('PL');
+        $newMemberUSMock->expects(self::once())->method('getCode')->willReturn('US');
+        $objectToPopulateMock->expects(self::once())->method('getMembers')->willReturn(new ArrayCollection([
             $memberUSMock,
             $memberUKMock,
         ]));
-        $zoneMock->expects($this->once())->method('getMembers')->willReturn(new ArrayCollection([
+        $zoneMock->expects(self::once())->method('getMembers')->willReturn(new ArrayCollection([
             $memberPLMock,
             $newMemberUSMock,
         ]));
@@ -162,9 +161,9 @@ final class ZoneDenormalizerTest extends TestCase
             AbstractNormalizer::OBJECT_TO_POPULATE => $objectToPopulateMock,
             'sylius_zone_denormalizer_already_called' => true,
         ];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with([], ZoneInterface::class, null, $context)->willReturn($zoneMock);
-        $zoneMock->expects($this->once())->method('removeMember')->with($newMemberUSMock);
-        $zoneMock->expects($this->once())->method('addMember')->with($memberUSMock);
+        $this->denormalizer->expects(self::once())->method('denormalize')->with([], ZoneInterface::class, null, $context)->willReturn($zoneMock);
+        $zoneMock->expects(self::once())->method('removeMember')->with($newMemberUSMock);
+        $zoneMock->expects(self::once())->method('addMember')->with($memberUSMock);
         $this->zoneDenormalizer->denormalize([], ZoneInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $objectToPopulateMock]);
     }
 }

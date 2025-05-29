@@ -24,8 +24,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class ProductAttributeValueDenormalizerTest extends TestCase
 {
-    /** @var IriConverterInterface|MockObject */
-    private MockObject $iriConverterMock;
+    private IriConverterInterface&MockObject $iriConverter;
 
     private ProductAttributeValueDenormalizer $productAttributeValueDenormalizer;
 
@@ -33,25 +32,26 @@ final class ProductAttributeValueDenormalizerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->iriConverterMock = $this->createMock(IriConverterInterface::class);
-        $this->productAttributeValueDenormalizer = new ProductAttributeValueDenormalizer($this->iriConverterMock);
+        parent::setUp();
+        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->productAttributeValueDenormalizer = new ProductAttributeValueDenormalizer($this->iriConverter);
     }
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
     {
-        $this->assertFalse($this->productAttributeValueDenormalizer
+        self::assertFalse($this->productAttributeValueDenormalizer
             ->supportsDenormalization([], ProductAttributeValueInterface::class, context: [self::ALREADY_CALLED => true]))
         ;
     }
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        $this->assertFalse($this->productAttributeValueDenormalizer->supportsDenormalization('string', ProductAttributeValueInterface::class));
+        self::assertFalse($this->productAttributeValueDenormalizer->supportsDenormalization('string', ProductAttributeValueInterface::class));
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotAProductAttributeValue(): void
     {
-        $this->assertFalse($this->productAttributeValueDenormalizer->supportsDenormalization([], 'string'));
+        self::assertFalse($this->productAttributeValueDenormalizer->supportsDenormalization([], 'string'));
     }
 
     public function testThrowsAnExceptionIfGivenValueIsInWrongType(): void
@@ -60,11 +60,11 @@ final class ProductAttributeValueDenormalizerTest extends TestCase
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         /** @var ProductAttributeInterface|MockObject $attributeMock */
         $attributeMock = $this->createMock(ProductAttributeInterface::class);
-        $this->iriConverterMock->expects($this->once())->method('getResourceFromIri')->with('/attributes/material')->willReturn($attributeMock);
-        $attributeMock->expects($this->once())->method('getStorageType')->willReturn('text');
-        $attributeMock->expects($this->once())->method('getName')->willReturn('Material');
+        $this->iriConverter->expects(self::once())->method('getResourceFromIri')->with('/attributes/material')->willReturn($attributeMock);
+        $attributeMock->expects(self::once())->method('getStorageType')->willReturn('text');
+        $attributeMock->expects(self::once())->method('getName')->willReturn('Material');
         $this->productAttributeValueDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->never())->method('denormalize')->with([], ProductAttributeValueInterface::class, null, [self::ALREADY_CALLED => true])
+        $denormalizerMock->expects(self::never())->method('denormalize')->with([], ProductAttributeValueInterface::class, null, [self::ALREADY_CALLED => true])
         ;
         $this->expectException(InvalidProductAttributeValueTypeException::class);
         $this->productAttributeValueDenormalizer->denormalize(['attribute' => '/attributes/material', 'value' => 4], ProductAttributeValueInterface::class);
@@ -78,11 +78,11 @@ final class ProductAttributeValueDenormalizerTest extends TestCase
         $attributeMock = $this->createMock(ProductAttributeInterface::class);
         /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
         $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
-        $this->iriConverterMock->expects($this->once())->method('getResourceFromIri')->with('/attributes/material')->willReturn($attributeMock);
-        $attributeMock->expects($this->once())->method('getStorageType')->willReturn('text');
-        $attributeMock->expects($this->once())->method('getType')->willReturn('text');
+        $this->iriConverter->expects(self::once())->method('getResourceFromIri')->with('/attributes/material')->willReturn($attributeMock);
+        $attributeMock->expects(self::once())->method('getStorageType')->willReturn('text');
+        $attributeMock->expects(self::once())->method('getType')->willReturn('text');
         $this->productAttributeValueDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with(['attribute' => '/attributes/material', 'value' => 'ceramic'], ProductAttributeValueInterface::class, null, [self::ALREADY_CALLED => true])
+        $denormalizerMock->expects(self::once())->method('denormalize')->with(['attribute' => '/attributes/material', 'value' => 'ceramic'], ProductAttributeValueInterface::class, null, [self::ALREADY_CALLED => true])
             ->willReturn($productAttributeValueMock)
         ;
         $this->productAttributeValueDenormalizer->denormalize(

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Tests\Sylius\Bundle\ApiBundle\Serializer\Denormalizer;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Serializer\Denormalizer\ProductDenormalizer;
@@ -29,6 +28,7 @@ final class ProductDenormalizerTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->productDenormalizer = new ProductDenormalizer();
     }
 
@@ -36,19 +36,19 @@ final class ProductDenormalizerTest extends TestCase
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
     {
-        $this->assertFalse($this->productDenormalizer
+        self::assertFalse($this->productDenormalizer
             ->supportsDenormalization([], ProductInterface::class, context: [self::ALREADY_CALLED => true]))
         ;
     }
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        $this->assertFalse($this->productDenormalizer->supportsDenormalization('string', ProductInterface::class));
+        self::assertFalse($this->productDenormalizer->supportsDenormalization('string', ProductInterface::class));
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotAProduct(): void
     {
-        $this->assertFalse($this->productDenormalizer->supportsDenormalization([], 'string'));
+        self::assertFalse($this->productDenormalizer->supportsDenormalization([], 'string'));
     }
 
     public function testRemovesOptionsFromDataIfGivenProductHasVariantsDefined(): void
@@ -59,9 +59,9 @@ final class ProductDenormalizerTest extends TestCase
         $productMock = $this->createMock(ProductInterface::class);
         /** @var ProductVariantInterface|MockObject $productVariantMock */
         $productVariantMock = $this->createMock(ProductVariantInterface::class);
-        $productMock->expects($this->once())->method('getVariants')->willReturn(new ArrayCollection([$productVariantMock]));
+        $productMock->expects(self::once())->method('getVariants')->willReturn(new ArrayCollection([$productVariantMock]));
         $this->productDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with([], ProductInterface::class, null, [
+        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ProductInterface::class, null, [
             AbstractNormalizer::OBJECT_TO_POPULATE => $productMock,
             self::ALREADY_CALLED => true,
         ])
@@ -81,9 +81,9 @@ final class ProductDenormalizerTest extends TestCase
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
-        $productMock->expects($this->once())->method('getVariants')->willReturn(new ArrayCollection([]));
+        $productMock->expects(self::once())->method('getVariants')->willReturn(new ArrayCollection([]));
         $this->productDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with(['options' => ['/options/color']], ProductInterface::class, null, [
+        $denormalizerMock->expects(self::once())->method('denormalize')->with(['options' => ['/options/color']], ProductInterface::class, null, [
             AbstractNormalizer::OBJECT_TO_POPULATE => $productMock,
             self::ALREADY_CALLED => true,
         ])
@@ -104,7 +104,7 @@ final class ProductDenormalizerTest extends TestCase
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
         $this->productDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with(['options' => ['/options/color']], ProductInterface::class, null, [self::ALREADY_CALLED => true])
+        $denormalizerMock->expects(self::once())->method('denormalize')->with(['options' => ['/options/color']], ProductInterface::class, null, [self::ALREADY_CALLED => true])
             ->willReturn($productMock)
         ;
         $this->productDenormalizer->denormalize(['options' => ['/options/color']], ProductInterface::class);
@@ -117,8 +117,8 @@ final class ProductDenormalizerTest extends TestCase
         /** @var ProductVariantInterface|MockObject $productVariantMock */
         $productVariantMock = $this->createMock(ProductVariantInterface::class);
         $this->productDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->never())->method('denormalize')->with([], ProductInterface::class, null, [self::ALREADY_CALLED => true]);
-        $this->expectException(InvalidArgumentException::class);
+        $denormalizerMock->expects(self::never())->method('denormalize')->with([], ProductInterface::class, null, [self::ALREADY_CALLED => true]);
+        $this->expectException(\InvalidArgumentException::class);
         $this->productDenormalizer->denormalize(['options' => ['/options/color']], ProductInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $productVariantMock]);
     }
 }

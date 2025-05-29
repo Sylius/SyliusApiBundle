@@ -15,7 +15,6 @@ namespace Tests\Sylius\Bundle\ApiBundle\Serializer\Denormalizer;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Serializer\ContextKeys;
 use Sylius\Bundle\ApiBundle\Serializer\Denormalizer\TranslatableDenormalizer;
 use Sylius\Resource\Model\TranslatableInterface;
@@ -24,34 +23,33 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class TranslatableDenormalizerTest extends TestCase
 {
-    /** @var DenormalizerInterface|MockObject */
-    private MockObject $denormalizerMock;
+    private DenormalizerInterface&MockObject $denormalizer;
 
-    /** @var TranslationLocaleProviderInterface|MockObject */
-    private MockObject $localeProviderMock;
+    private MockObject&TranslationLocaleProviderInterface $localeProvider;
 
     private TranslatableDenormalizer $translatableDenormalizer;
 
     protected function setUp(): void
     {
-        $this->denormalizerMock = $this->createMock(DenormalizerInterface::class);
-        $this->localeProviderMock = $this->createMock(TranslationLocaleProviderInterface::class);
-        $this->translatableDenormalizer = new TranslatableDenormalizer($this->localeProviderMock);
-        $this->translatableDenormalizer->setDenormalizer($this->denormalizerMock);
+        parent::setUp();
+        $this->denormalizer = $this->createMock(DenormalizerInterface::class);
+        $this->localeProvider = $this->createMock(TranslationLocaleProviderInterface::class);
+        $this->translatableDenormalizer = new TranslatableDenormalizer($this->localeProvider);
+        $this->translatableDenormalizer->setDenormalizer($this->denormalizer);
     }
 
     public function testOnlySupportsTranslatableResource(): void
     {
-        $this->assertFalse($this->translatableDenormalizer->supportsDenormalization([], TranslatableInterface::class, null, [
+        self::assertFalse($this->translatableDenormalizer->supportsDenormalization([], TranslatableInterface::class, null, [
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'PUT',
         ]));
 
-        $this->assertFalse($this->translatableDenormalizer->supportsDenormalization([], TranslatableInterface::class, null, [
+        self::assertFalse($this->translatableDenormalizer->supportsDenormalization([], TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ]));
 
-        $this->assertFalse($this->translatableDenormalizer->supportsDenormalization([], stdClass::class, null, [
+        self::assertFalse($this->translatableDenormalizer->supportsDenormalization([], \stdClass::class, null, [
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ]));
     }
@@ -59,95 +57,95 @@ final class TranslatableDenormalizerTest extends TestCase
     public function testDoesNothingWhenDataContainsATranslationInDefaultLocale(): void
     {
         $data = ['translations' => ['en' => ['locale' => 'en']]];
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en');
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with($data, TranslatableInterface::class, null, [
+        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en');
+        $this->denormalizer->expects(self::once())->method('denormalize')->with($data, TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ])->willReturn($data);
-        $this->assertSame($data, $this->translatableDenormalizer
+        self::assertSame($data, $this->translatableDenormalizer
             ->denormalize($data, TranslatableInterface::class, null, [ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST']))
         ;
     }
 
     public function testAddsDefaultTranslationWhenNoTranslationsPassedInData(): void
     {
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en');
+        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en');
         $updatedData = ['translations' => ['en' => ['locale' => 'en']]];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
+        $this->denormalizer->expects(self::once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ])->willReturn($updatedData);
-        $this->assertSame($updatedData, $this->translatableDenormalizer
+        self::assertSame($updatedData, $this->translatableDenormalizer
             ->denormalize([], TranslatableInterface::class, null, [ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST']))
         ;
     }
 
     public function testAddsDefaultTranslationWhenNoTranslationPassedForDefaultLocaleInData(): void
     {
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en');
+        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en');
         $originalData = ['translations' => ['en' => []]];
         $updatedData = ['translations' => ['en' => ['locale' => 'en']]];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
+        $this->denormalizer->expects(self::once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ])->willReturn($updatedData);
-        $this->assertSame($updatedData, $this->translatableDenormalizer
+        self::assertSame($updatedData, $this->translatableDenormalizer
             ->denormalize($originalData, TranslatableInterface::class, null, [ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST']))
         ;
     }
 
     public function testAddsDefaultTranslationWhenPassedDefaultTranslationHasEmptyLocale(): void
     {
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en');
+        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en');
         $originalData = ['translations' => ['en' => ['locale' => '']]];
         $updatedData = ['translations' => ['en' => ['locale' => 'en']]];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
+        $this->denormalizer->expects(self::once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ])->willReturn($updatedData);
-        $this->assertSame($updatedData, $this->translatableDenormalizer
+        self::assertSame($updatedData, $this->translatableDenormalizer
             ->denormalize($originalData, TranslatableInterface::class, null, [ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST']))
         ;
     }
 
     public function testAddsDefaultTranslationWhenPassedDefaultTranslationHasNullLocale(): void
     {
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en');
+        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en');
         $originalData = ['translations' => ['en' => ['locale' => null]]];
         $updatedData = ['translations' => ['en' => ['locale' => 'en']]];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
+        $this->denormalizer->expects(self::once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ])->willReturn($updatedData);
-        $this->assertSame($updatedData, $this->translatableDenormalizer
+        self::assertSame($updatedData, $this->translatableDenormalizer
             ->denormalize($originalData, TranslatableInterface::class, null, [ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST']))
         ;
     }
 
     public function testAddsDefaultTranslationWhenPassedDefaultTranslationHasMismatchedLocale(): void
     {
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en');
+        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en');
         $originalData = ['translations' => ['en' => ['locale' => 'fr']]];
         $updatedData = ['translations' => ['en' => ['locale' => 'en']]];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
+        $this->denormalizer->expects(self::once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ])->willReturn($updatedData);
-        $this->assertSame($updatedData, $this->translatableDenormalizer
+        self::assertSame($updatedData, $this->translatableDenormalizer
             ->denormalize($originalData, TranslatableInterface::class, null, [ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST']))
         ;
     }
 
     public function testAddsDefaultTranslationWhenNoTranslationInDefaultLocalePassedInData(): void
     {
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en');
+        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en');
         $originalData = ['translations' => ['pl' => ['locale' => 'pl']]];
         $updatedData = ['translations' => ['en' => ['locale' => 'en'], 'pl' => ['locale' => 'pl']]];
-        $this->denormalizerMock->expects($this->once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
+        $this->denormalizer->expects(self::once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, [
             'sylius_translatable_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
             ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST',
         ])->willReturn($updatedData);
-        $this->assertSame($updatedData, $this->translatableDenormalizer
+        self::assertSame($updatedData, $this->translatableDenormalizer
             ->denormalize($originalData, TranslatableInterface::class, null, [ContextKeys::HTTP_REQUEST_METHOD_TYPE => 'POST']))
         ;
     }

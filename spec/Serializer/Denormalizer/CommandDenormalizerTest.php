@@ -26,34 +26,33 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class CommandDenormalizerTest extends TestCase
 {
-    /** @var DenormalizerInterface|MockObject */
-    private MockObject $baseNormalizerMock;
+    private DenormalizerInterface&MockObject $baseNormalizer;
 
-    /** @var AdvancedNameConverterInterface|MockObject */
-    private MockObject $nameConverterMock;
+    private AdvancedNameConverterInterface&MockObject $nameConverter;
 
     private CommandDenormalizer $commandDenormalizer;
 
     protected function setUp(): void
     {
-        $this->baseNormalizerMock = $this->createMock(DenormalizerInterface::class);
-        $this->nameConverterMock = $this->createMock(AdvancedNameConverterInterface::class);
-        $this->commandDenormalizer = new CommandDenormalizer($this->baseNormalizerMock, $this->nameConverterMock);
+        parent::setUp();
+        $this->baseNormalizer = $this->createMock(DenormalizerInterface::class);
+        $this->nameConverter = $this->createMock(AdvancedNameConverterInterface::class);
+        $this->commandDenormalizer = new CommandDenormalizer($this->baseNormalizer, $this->nameConverter);
     }
 
     public function testImplementsContextAwareDenormalizerInterface(): void
     {
-        $this->assertInstanceOf(DenormalizerInterface::class, $this->commandDenormalizer);
+        self::assertInstanceOf(DenormalizerInterface::class, $this->commandDenormalizer);
     }
 
     public function testSupportsDenormalizationForSpecifiedInputClass(): void
     {
-        $this->assertTrue($this->commandDenormalizer->supportsDenormalization(null, '', context: ['input' => ['class' => 'Class']]));
+        self::assertTrue($this->commandDenormalizer->supportsDenormalization(null, '', context: ['input' => ['class' => 'Class']]));
     }
 
     public function testDoesNotSupportDenormalizationForNotSpecifiedInputClass(): void
     {
-        $this->assertFalse($this->commandDenormalizer->supportsDenormalization(null, ''));
+        self::assertFalse($this->commandDenormalizer->supportsDenormalization(null, ''));
     }
 
     public function testThrowsExceptionIfNotAllRequiredParametersArePresentInTheContext(): void
@@ -61,9 +60,9 @@ final class CommandDenormalizerTest extends TestCase
         $exception = new MissingConstructorArgumentsException('', 400, null, ['firstName', 'lastName']);
         $context = ['input' => ['class' => RegisterShopUser::class]];
         $data = ['email' => 'test@example.com', 'password' => 'pa$$word'];
-        $this->nameConverterMock->expects($this->once())->method('normalize')->with('firstName', class: RegisterShopUser::class)->willReturn('first_name');
-        $this->nameConverterMock->expects($this->once())->method('normalize')->with('lastName', class: RegisterShopUser::class)->willReturn('lastName');
-        $this->baseNormalizerMock->expects($this->once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
+        $this->nameConverter->expects(self::once())->method('normalize')->with('firstName', class: RegisterShopUser::class)->willReturn('first_name');
+        $this->nameConverter->expects(self::once())->method('normalize')->with('lastName', class: RegisterShopUser::class)->willReturn('lastName');
+        $this->baseNormalizer->expects(self::once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
         $this->expectException(MissingConstructorArgumentsException::class);
         $this->commandDenormalizer->expectExceptionMessage('Request does not have the following required fields specified: first_name, lastName.');
         $this->commandDenormalizer->denormalize($data, '', null, $context);
@@ -75,8 +74,8 @@ final class CommandDenormalizerTest extends TestCase
         $exception = new UnexpectedValueException('', 400, $previousException);
         $context = ['input' => ['class' => RegisterShopUser::class]];
         $data = ['firstName' => 1];
-        $this->nameConverterMock->expects($this->once())->method('normalize')->with('firstName', class: RegisterShopUser::class)->willReturn('first_name');
-        $this->baseNormalizerMock->expects($this->once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
+        $this->nameConverter->expects(self::once())->method('normalize')->with('firstName', class: RegisterShopUser::class)->willReturn('first_name');
+        $this->baseNormalizer->expects(self::once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
         $this->expectException(InvalidRequestArgumentException::class);
         $this->commandDenormalizer->expectExceptionMessage('Request field "first_name" should be of type "string".');
         $this->commandDenormalizer->denormalize($data, '', null, $context);
@@ -87,7 +86,7 @@ final class CommandDenormalizerTest extends TestCase
         $exception = new UnexpectedValueException('Unexpected value');
         $context = ['input' => ['class' => RegisterShopUser::class]];
         $data = ['firstName' => '1'];
-        $this->baseNormalizerMock->expects($this->once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
+        $this->baseNormalizer->expects(self::once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
         $this->expectException(UnexpectedValueException::class);
         $this->commandDenormalizer->expectExceptionMessage('Unexpected value');
         $this->commandDenormalizer->denormalize($data, '', null, $context);
