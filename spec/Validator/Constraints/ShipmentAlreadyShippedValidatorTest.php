@@ -25,20 +25,19 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ShipmentAlreadyShippedValidatorTest extends TestCase
 {
-    /** @var ShipmentRepositoryInterface|MockObject */
-    private MockObject $shipmentRepositoryMock;
+    private MockObject&ShipmentRepositoryInterface $shipmentRepository;
 
-    /** @var ExecutionContextInterface|MockObject */
-    private MockObject $executionContextMock;
+    private ExecutionContextInterface&MockObject $executionContext;
 
     private ShipmentAlreadyShippedValidator $shipmentAlreadyShippedValidator;
 
     protected function setUp(): void
     {
-        $this->shipmentRepositoryMock = $this->createMock(ShipmentRepositoryInterface::class);
-        $this->executionContextMock = $this->createMock(ExecutionContextInterface::class);
-        $this->shipmentAlreadyShippedValidator = new ShipmentAlreadyShippedValidator($this->shipmentRepositoryMock);
-        $this->initialize($this->executionContextMock);
+        parent::setUp();
+        $this->shipmentRepository = $this->createMock(ShipmentRepositoryInterface::class);
+        $this->executionContext = $this->createMock(ExecutionContextInterface::class);
+        $this->shipmentAlreadyShippedValidator = new ShipmentAlreadyShippedValidator($this->shipmentRepository);
+        $this->shipmentAlreadyShippedValidator->initialize($this->executionContext);
     }
 
     public function testAddsViolationIfShipmentStatusIsShipped(): void
@@ -47,9 +46,9 @@ final class ShipmentAlreadyShippedValidatorTest extends TestCase
         $shipmentMock = $this->createMock(ShipmentInterface::class);
         $constraint = new ShipmentAlreadyShipped();
         $shipShipment = new ShipShipment(shipmentId: 123);
-        $this->shipmentRepositoryMock->expects($this->once())->method('find')->with(123)->willReturn($shipmentMock);
-        $shipmentMock->expects($this->once())->method('getState')->willReturn(OrderShippingStates::STATE_SHIPPED);
-        $this->executionContextMock->expects($this->once())->method('addViolation')->with($constraint->message);
+        $this->shipmentRepository->expects(self::once())->method('find')->with(123)->willReturn($shipmentMock);
+        $shipmentMock->expects(self::once())->method('getState')->willReturn(OrderShippingStates::STATE_SHIPPED);
+        $this->executionContext->expects(self::once())->method('addViolation')->with($constraint->message);
         $this->shipmentAlreadyShippedValidator->validate($shipShipment, $constraint);
     }
 
@@ -59,9 +58,9 @@ final class ShipmentAlreadyShippedValidatorTest extends TestCase
         $shipmentMock = $this->createMock(ShipmentInterface::class);
         $constraint = new ShipmentAlreadyShipped();
         $shipShipment = new ShipShipment(shipmentId: 123);
-        $this->shipmentRepositoryMock->expects($this->once())->method('find')->with(123)->willReturn($shipmentMock);
-        $shipmentMock->expects($this->once())->method('getState')->willReturn(OrderShippingStates::STATE_CART);
-        $this->executionContextMock->expects($this->never())->method('addViolation')->with($constraint->message);
+        $this->shipmentRepository->expects(self::once())->method('find')->with(123)->willReturn($shipmentMock);
+        $shipmentMock->expects(self::once())->method('getState')->willReturn(OrderShippingStates::STATE_CART);
+        $this->executionContext->expects(self::never())->method('addViolation')->with($constraint->message);
         $this->shipmentAlreadyShippedValidator->validate($shipShipment, $constraint);
     }
 }

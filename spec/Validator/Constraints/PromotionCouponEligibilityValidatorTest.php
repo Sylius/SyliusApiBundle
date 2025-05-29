@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Checker\AppliedCouponEligibilityCheckerInterface;
@@ -31,33 +30,31 @@ use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 
 final class PromotionCouponEligibilityValidatorTest extends TestCase
 {
-    /** @var PromotionCouponRepositoryInterface|MockObject */
-    private MockObject $promotionCouponRepositoryMock;
+    private MockObject&PromotionCouponRepositoryInterface $promotionCouponRepository;
 
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
-    /** @var AppliedCouponEligibilityCheckerInterface|MockObject */
-    private MockObject $appliedCouponEligibilityCheckerMock;
+    private AppliedCouponEligibilityCheckerInterface&MockObject $appliedCouponEligibilityChecker;
 
     private PromotionCouponEligibilityValidator $promotionCouponEligibilityValidator;
 
     protected function setUp(): void
     {
-        $this->promotionCouponRepositoryMock = $this->createMock(PromotionCouponRepositoryInterface::class);
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->appliedCouponEligibilityCheckerMock = $this->createMock(AppliedCouponEligibilityCheckerInterface::class);
-        $this->promotionCouponEligibilityValidator = new PromotionCouponEligibilityValidator($this->promotionCouponRepositoryMock, $this->orderRepositoryMock, $this->appliedCouponEligibilityCheckerMock);
+        parent::setUp();
+        $this->promotionCouponRepository = $this->createMock(PromotionCouponRepositoryInterface::class);
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->appliedCouponEligibilityChecker = $this->createMock(AppliedCouponEligibilityCheckerInterface::class);
+        $this->promotionCouponEligibilityValidator = new PromotionCouponEligibilityValidator($this->promotionCouponRepository, $this->orderRepository, $this->appliedCouponEligibilityChecker);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->promotionCouponEligibilityValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->promotionCouponEligibilityValidator);
     }
 
     public function testThrowsAnExceptionIfConstraintIsNotOfExpectedType(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->promotionCouponEligibilityValidator->validate('', new NotNull());
     }
 
@@ -72,11 +69,11 @@ final class PromotionCouponEligibilityValidatorTest extends TestCase
         $this->promotionCouponEligibilityValidator->initialize($executionContextMock);
         $constraint = new PromotionCouponEligibility();
         $value = new UpdateCart(couponCode: 'couponCode', orderTokenValue: 'token');
-        $this->promotionCouponRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'couponCode'])->willReturn($promotionCouponMock);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('token')->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('setPromotionCoupon')->with($promotionCouponMock);
-        $this->appliedCouponEligibilityCheckerMock->expects($this->once())->method('isEligible')->with($promotionCouponMock, $cartMock)->willReturn(true);
-        $executionContextMock->expects($this->never())->method('buildViolation');
+        $this->promotionCouponRepository->expects(self::once())->method('findOneBy')->with(['code' => 'couponCode'])->willReturn($promotionCouponMock);
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValue')->with('token')->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('setPromotionCoupon')->with($promotionCouponMock);
+        $this->appliedCouponEligibilityChecker->expects(self::once())->method('isEligible')->with($promotionCouponMock, $cartMock)->willReturn(true);
+        $executionContextMock->expects(self::never())->method('buildViolation');
         $this->promotionCouponEligibilityValidator->validate($value, $constraint);
     }
 
@@ -94,13 +91,13 @@ final class PromotionCouponEligibilityValidatorTest extends TestCase
         $constraint = new PromotionCouponEligibility();
         $constraint->message = 'message';
         $value = new UpdateCart(couponCode: 'couponCode', orderTokenValue: 'token');
-        $this->promotionCouponRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'couponCode'])->willReturn($promotionCouponMock);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('token')->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('setPromotionCoupon')->with($promotionCouponMock);
-        $this->appliedCouponEligibilityCheckerMock->expects($this->once())->method('isEligible')->with($promotionCouponMock, $cartMock)->willReturn(false);
-        $executionContextMock->expects($this->once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('atPath')->with('couponCode')->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('addViolation');
+        $this->promotionCouponRepository->expects(self::once())->method('findOneBy')->with(['code' => 'couponCode'])->willReturn($promotionCouponMock);
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValue')->with('token')->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('setPromotionCoupon')->with($promotionCouponMock);
+        $this->appliedCouponEligibilityChecker->expects(self::once())->method('isEligible')->with($promotionCouponMock, $cartMock)->willReturn(false);
+        $executionContextMock->expects(self::once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('atPath')->with('couponCode')->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('addViolation');
         $this->promotionCouponEligibilityValidator->validate($value, $constraint);
     }
 
@@ -114,11 +111,11 @@ final class PromotionCouponEligibilityValidatorTest extends TestCase
         $constraint = new PromotionCouponEligibility();
         $constraint->message = 'message';
         $value = new UpdateCart(couponCode: 'couponCode', orderTokenValue: 'token');
-        $this->promotionCouponRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'couponCode'])->willReturn(null);
-        $executionContextMock->expects($this->once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('atPath')->with('couponCode')->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('addViolation');
-        $this->orderRepositoryMock->expects($this->never())->method('findCartByTokenValue')->with('token');
+        $this->promotionCouponRepository->expects(self::once())->method('findOneBy')->with(['code' => 'couponCode'])->willReturn(null);
+        $executionContextMock->expects(self::once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('atPath')->with('couponCode')->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('addViolation');
+        $this->orderRepository->expects(self::never())->method('findCartByTokenValue')->with('token');
         $this->promotionCouponEligibilityValidator->validate($value, $constraint);
     }
 }

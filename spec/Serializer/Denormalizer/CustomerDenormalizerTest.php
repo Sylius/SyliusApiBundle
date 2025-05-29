@@ -57,10 +57,18 @@ final class CustomerDenormalizerTest extends TestCase
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
+
         $this->customerDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects($this->once())->method('denormalize')->with([], CustomerInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($customerMock);
+
+        $denormalizerMock->expects($this->once())
+            ->method('denormalize')
+            ->with([], CustomerInterface::class, null, [self::ALREADY_CALLED => true])
+            ->willReturn($customerMock);
+
         $this->assertSame($customerMock, $this->customerDenormalizer->denormalize([], CustomerInterface::class));
-        $this->clockMock->expects($this->once())->method('now')->shouldNotHaveBeenCalled();
+
+        // Replace shouldNotHaveBeenCalled
+        $this->clockMock->expects($this->never())->method('now');
     }
 
     public function testChangesUserVerifiedFromFalseToNull(): void
@@ -72,7 +80,7 @@ final class CustomerDenormalizerTest extends TestCase
         $this->customerDenormalizer->setDenormalizer($denormalizerMock);
         $denormalizerMock->expects($this->once())->method('denormalize')->with(['user' => ['verified' => null]], CustomerInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($customerMock);
         $this->assertSame($customerMock, $this->customerDenormalizer->denormalize(['user' => ['verified' => false]], CustomerInterface::class));
-        $this->clockMock->expects($this->once())->method('now')->shouldNotHaveBeenCalled();
+        $this->clockMock->expects($this->never())->method('now');
     }
 
     public function testChangesUserVerifiedFromTrueToDatetime(): void

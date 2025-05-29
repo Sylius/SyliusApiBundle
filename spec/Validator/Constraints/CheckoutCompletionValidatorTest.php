@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Abstraction\StateMachine\StateMachineInterface;
@@ -30,31 +29,30 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class CheckoutCompletionValidatorTest extends TestCase
 {
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
-    /** @var StateMachineInterface|MockObject */
-    private MockObject $stateMachineMock;
+    private MockObject&StateMachineInterface $stateMachine;
 
     private CheckoutCompletionValidator $checkoutCompletionValidator;
 
     protected function setUp(): void
     {
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->stateMachineMock = $this->createMock(StateMachineInterface::class);
-        $this->checkoutCompletionValidator = new CheckoutCompletionValidator($this->orderRepositoryMock, $this->stateMachineMock);
+        parent::setUp();
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->checkoutCompletionValidator = new CheckoutCompletionValidator($this->orderRepository, $this->stateMachine);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->checkoutCompletionValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->checkoutCompletionValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotAnInstanceOfOrderTokenValueAwareInterface(): void
     {
         /** @var Constraint|MockObject $constraintMock */
         $constraintMock = $this->createMock(Constraint::class);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->checkoutCompletionValidator->validate('', $constraintMock);
     }
 
@@ -62,7 +60,7 @@ final class CheckoutCompletionValidatorTest extends TestCase
     {
         /** @var Constraint|MockObject $constraintMock */
         $constraintMock = $this->createMock(Constraint::class);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->checkoutCompletionValidator->validate(new CompleteOrder('token'), $constraintMock);
     }
 
@@ -71,8 +69,8 @@ final class CheckoutCompletionValidatorTest extends TestCase
         /** @var Constraint|MockObject $constraintMock */
         $constraintMock = $this->createMock(Constraint::class);
         $completeOrder = new CompleteOrder('xxx');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'xxx'])->willReturn(null);
-        $this->expectException(InvalidArgumentException::class);
+        $this->orderRepository->method('findOneBy')->with(['tokenValue' => 'xxx'])->willReturn(null);
+        self::expectException(\InvalidArgumentException::class);
         $this->checkoutCompletionValidator->validate($completeOrder, $constraintMock);
     }
 
@@ -84,9 +82,9 @@ final class CheckoutCompletionValidatorTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         $this->checkoutCompletionValidator->initialize($executionContextMock);
         $completeOrder = new CompleteOrder('xxx');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'xxx'])->willReturn($orderMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, 'sylius_order_checkout', OrderCheckoutTransitions::TRANSITION_COMPLETE)->willReturn(true);
-        $executionContextMock->expects($this->never())->method('addViolation')->with($this->any())
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'xxx'])->willReturn($orderMock);
+        $this->stateMachine->expects(self::once())->method('can')->with($orderMock, 'sylius_order_checkout', OrderCheckoutTransitions::TRANSITION_COMPLETE)->willReturn(true);
+        $executionContextMock->expects(self::never())->method('addViolation')->with($this->any())
         ;
         $this->checkoutCompletionValidator->validate($completeOrder, new CheckoutCompletion());
     }
@@ -99,14 +97,14 @@ final class CheckoutCompletionValidatorTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         $this->checkoutCompletionValidator->initialize($executionContextMock);
         $completeOrder = new CompleteOrder('xxx');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'xxx'])->willReturn($orderMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, 'sylius_order_checkout', OrderCheckoutTransitions::TRANSITION_COMPLETE)->willReturn(false);
-        $this->stateMachineMock->expects($this->once())->method('getEnabledTransitions')->with($orderMock, 'sylius_order_checkout')->willReturn([
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'xxx'])->willReturn($orderMock);
+        $this->stateMachine->expects(self::once())->method('can')->with($orderMock, 'sylius_order_checkout', OrderCheckoutTransitions::TRANSITION_COMPLETE)->willReturn(false);
+        $this->stateMachine->expects(self::once())->method('getEnabledTransitions')->with($orderMock, 'sylius_order_checkout')->willReturn([
             new Transition('some_possible_transition', [], []),
             new Transition('another_possible_transition', [], []),
         ]);
-        $orderMock->expects($this->once())->method('getCheckoutState')->willReturn('some_state_that_does_not_allow_to_complete_order');
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.order.invalid_state_transition', [
+        $orderMock->expects(self::once())->method('getCheckoutState')->willReturn('some_state_that_does_not_allow_to_complete_order');
+        $executionContextMock->expects(self::once())->method('addViolation')->with('sylius.order.invalid_state_transition', [
             '%currentState%' => 'some_state_that_does_not_allow_to_complete_order',
             '%possibleTransitions%' => 'some_possible_transition, another_possible_transition',
         ])

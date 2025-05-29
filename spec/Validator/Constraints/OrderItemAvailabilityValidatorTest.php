@@ -13,50 +13,57 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Sylius\Bundle\ApiBundle\Validator\Constraints\OrderItemAvailabilityValidator;
-use InvalidArgumentException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Checkout\CompleteOrder;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\OrderItemAvailability;
+use Sylius\Bundle\ApiBundle\Validator\Constraints\OrderItemAvailabilityValidator;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
 use Sylius\Component\Inventory\Checker\AvailabilityCheckerInterface;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class OrderItemAvailabilityValidatorTest extends TestCase
 {
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
-    /** @var AvailabilityCheckerInterface|MockObject */
-    private MockObject $availabilityCheckerMock;
-    /** @var ExecutionContextInterface|MockObject */
-    private MockObject $executionContextMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
+
+    private AvailabilityCheckerInterface&MockObject $availabilityChecker;
+
+    private ExecutionContextInterface&MockObject $executionContext;
+
     private OrderItemAvailabilityValidator $orderItemAvailabilityValidator;
+
     protected function setUp(): void
     {
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->availabilityCheckerMock = $this->createMock(AvailabilityCheckerInterface::class);
-        $this->executionContextMock = $this->createMock(ExecutionContextInterface::class);
-        $this->orderItemAvailabilityValidator = new OrderItemAvailabilityValidator($this->orderRepositoryMock, $this->availabilityCheckerMock);
-        $this->initialize($this->executionContextMock);
+        parent::setUp();
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->availabilityChecker = $this->createMock(AvailabilityCheckerInterface::class);
+        $this->executionContext = $this->createMock(ExecutionContextInterface::class);
+        $this->orderItemAvailabilityValidator = new OrderItemAvailabilityValidator($this->orderRepository, $this->availabilityChecker);
+        $this->orderItemAvailabilityValidator->initialize($this->executionContext);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->orderItemAvailabilityValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->orderItemAvailabilityValidator);
     }
 
     public function testThrowsExceptionIfConstraintIsNotAnInstanceOfOrderProductInStockEligibility(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->orderItemAvailabilityValidator->validate(new CompleteOrder('TOKEN'), final class() extends TestCase {
-        });
+        self::expectException(\InvalidArgumentException::class);
+
+        $invalidConstraint = $this->createMock(Constraint::class);
+
+        $this->orderItemAvailabilityValidator->validate(
+            new CompleteOrder('TOKEN'),
+            $invalidConstraint,
+        );
     }
 
     public function testAddsViolationIfProductVariantDoesNotHaveSufficientStock(): void
@@ -70,14 +77,14 @@ final class OrderItemAvailabilityValidatorTest extends TestCase
         /** @var Collection|MockObject $orderItemsMock */
         $orderItemsMock = $this->createMock(Collection::class);
         $command = new CompleteOrder(orderTokenValue: 'cartToken');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cartToken'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getItems')->willReturn($orderItemsMock);
-        $orderItemsMock->expects($this->once())->method('getIterator')->willReturn(new ArrayCollection([$orderItemMock]));
-        $orderItemMock->expects($this->once())->method('getVariant')->willReturn($productVariantMock);
-        $orderItemMock->expects($this->once())->method('getQuantity')->willReturn(1);
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockSufficient')->with($productVariantMock, 1)->willReturn(false);
-        $productVariantMock->expects($this->once())->method('getName')->willReturn('variant name');
-        $this->executionContextMock->expects($this->once())->method('addViolation')->with('sylius.product_variant.product_variant_with_name_not_sufficient', ['%productVariantName%' => 'variant name'])
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cartToken'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getItems')->willReturn($orderItemsMock);
+        $orderItemsMock->expects(self::once())->method('getIterator')->willReturn(new ArrayCollection([$orderItemMock]));
+        $orderItemMock->expects(self::once())->method('getVariant')->willReturn($productVariantMock);
+        $orderItemMock->expects(self::once())->method('getQuantity')->willReturn(1);
+        $this->availabilityChecker->expects(self::once())->method('isStockSufficient')->with($productVariantMock, 1)->willReturn(false);
+        $productVariantMock->expects(self::once())->method('getName')->willReturn('variant name');
+        $this->executionContext->expects(self::once())->method('addViolation')->with('sylius.product_variant.product_variant_with_name_not_sufficient', ['%productVariantName%' => 'variant name'])
         ;
         $this->orderItemAvailabilityValidator->validate($command, new OrderItemAvailability());
     }
@@ -93,14 +100,14 @@ final class OrderItemAvailabilityValidatorTest extends TestCase
         /** @var Collection|MockObject $orderItemsMock */
         $orderItemsMock = $this->createMock(Collection::class);
         $command = new CompleteOrder(orderTokenValue: 'cartToken');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cartToken'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getItems')->willReturn($orderItemsMock);
-        $orderItemsMock->expects($this->once())->method('getIterator')->willReturn(new ArrayCollection([$orderItemMock]));
-        $orderItemMock->expects($this->once())->method('getVariant')->willReturn($productVariantMock);
-        $orderItemMock->expects($this->once())->method('getQuantity')->willReturn(1);
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockSufficient')->with($productVariantMock, 1)->willReturn(true);
-        $productVariantMock->expects($this->never())->method('getName');
-        $this->executionContextMock->expects($this->never())->method('addViolation')->with('sylius.product_variant.product_variant_with_name_not_sufficient', ['%productVariantName%' => 'variant name'])
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cartToken'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getItems')->willReturn($orderItemsMock);
+        $orderItemsMock->expects(self::once())->method('getIterator')->willReturn(new ArrayCollection([$orderItemMock]));
+        $orderItemMock->expects(self::once())->method('getVariant')->willReturn($productVariantMock);
+        $orderItemMock->expects(self::once())->method('getQuantity')->willReturn(1);
+        $this->availabilityChecker->expects(self::once())->method('isStockSufficient')->with($productVariantMock, 1)->willReturn(true);
+        $productVariantMock->expects(self::never())->method('getName');
+        $this->executionContext->expects(self::never())->method('addViolation')->with('sylius.product_variant.product_variant_with_name_not_sufficient', ['%productVariantName%' => 'variant name'])
         ;
         $this->orderItemAvailabilityValidator->validate($command, new OrderItemAvailability());
     }

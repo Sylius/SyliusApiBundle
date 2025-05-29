@@ -13,44 +13,47 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserResetPasswordTokenNotExpiredValidator;
-use InvalidArgumentException;
-use DateInterval;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserResetPasswordTokenNotExpired;
+use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserResetPasswordTokenNotExpiredValidator;
 use Sylius\Component\User\Model\UserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ShopUserResetPasswordTokenNotExpiredValidatorTest extends TestCase
 {
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $userRepositoryMock;
+    private MockObject&UserRepositoryInterface $userRepository;
+
     private ShopUserResetPasswordTokenNotExpiredValidator $shopUserResetPasswordTokenNotExpiredValidator;
+
     protected function setUp(): void
     {
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->shopUserResetPasswordTokenNotExpiredValidator = new ShopUserResetPasswordTokenNotExpiredValidator($this->userRepositoryMock, 'P1D');
+        parent::setUp();
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->shopUserResetPasswordTokenNotExpiredValidator = new ShopUserResetPasswordTokenNotExpiredValidator($this->userRepository, 'P1D');
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserResetPasswordTokenNotExpiredValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserResetPasswordTokenNotExpiredValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotAString(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->shopUserResetPasswordTokenNotExpiredValidator->validate(null, new ShopUserResetPasswordTokenNotExpired());
     }
 
     public function testThrowsAnExceptionIfConstraintIsNotAResetPasswordTokenNotExpiredConstraint(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->shopUserResetPasswordTokenNotExpiredValidator->validate('', final class() extends TestCase {
-        });
+        self::expectException(\InvalidArgumentException::class);
+        $this->shopUserResetPasswordTokenNotExpiredValidator->validate(
+            '',
+            $this->createMock(Constraint::class),
+        );
     }
 
     public function testDoesNotAddViolationIfResetPasswordTokenDoesNotExist(): void
@@ -58,8 +61,8 @@ final class ShopUserResetPasswordTokenNotExpiredValidatorTest extends TestCase
         /** @var ExecutionContextInterface|MockObject $executionContextMock */
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
         $this->shopUserResetPasswordTokenNotExpiredValidator->initialize($executionContextMock);
-        $this->userRepositoryMock->expects($this->once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn(null);
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.reset_password.token_expired');
+        $this->userRepository->expects(self::once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn(null);
+        $executionContextMock->expects(self::never())->method('addViolation')->with('sylius.reset_password.token_expired');
         $this->shopUserResetPasswordTokenNotExpiredValidator->validate('token', new ShopUserResetPasswordTokenNotExpired());
     }
 
@@ -70,12 +73,13 @@ final class ShopUserResetPasswordTokenNotExpiredValidatorTest extends TestCase
         /** @var UserInterface|MockObject $userMock */
         $userMock = $this->createMock(UserInterface::class);
         $this->shopUserResetPasswordTokenNotExpiredValidator->initialize($executionContextMock);
-        $userMock->expects($this->once())->method('isPasswordRequestNonExpired')->with($this->callback(function (DateInterval $dateInterval) {
+        $userMock->expects(self::once())->method('isPasswordRequestNonExpired')->with($this->callback(function (\DateInterval $dateInterval) {
             $this->assertSame('1', $dateInterval->format('%d'));
+
             return true;
         }))->willReturn(true);
-        $this->userRepositoryMock->expects($this->once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn($userMock);
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.reset_password.token_expired');
+        $this->userRepository->expects(self::once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn($userMock);
+        $executionContextMock->expects(self::never())->method('addViolation')->with('sylius.reset_password.token_expired');
         $this->shopUserResetPasswordTokenNotExpiredValidator->validate('token', new ShopUserResetPasswordTokenNotExpired());
     }
 
@@ -86,12 +90,13 @@ final class ShopUserResetPasswordTokenNotExpiredValidatorTest extends TestCase
         /** @var UserInterface|MockObject $userMock */
         $userMock = $this->createMock(UserInterface::class);
         $this->shopUserResetPasswordTokenNotExpiredValidator->initialize($executionContextMock);
-        $userMock->expects($this->once())->method('isPasswordRequestNonExpired')->with($this->callback(function (DateInterval $dateInterval) {
+        $userMock->expects(self::once())->method('isPasswordRequestNonExpired')->with($this->callback(function (\DateInterval $dateInterval) {
             $this->assertSame('1', $dateInterval->format('%d'));
+
             return true;
         }))->willReturn(false);
-        $this->userRepositoryMock->expects($this->once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn($userMock);
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.reset_password.token_expired');
+        $this->userRepository->expects(self::once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn($userMock);
+        $executionContextMock->expects(self::once())->method('addViolation')->with('sylius.reset_password.token_expired');
         $this->shopUserResetPasswordTokenNotExpiredValidator->validate('token', new ShopUserResetPasswordTokenNotExpired());
     }
 }

@@ -13,13 +13,12 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserNotVerifiedValidator;
-use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Account\RequestShopUserVerification;
 use Sylius\Bundle\ApiBundle\Command\Checkout\CompleteOrder;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserNotVerified;
+use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserNotVerifiedValidator;
 use Sylius\Component\Core\Model\ShopUserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
 use Symfony\Component\Validator\Constraint;
@@ -28,39 +27,43 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ShopUserNotVerifiedValidatorTest extends TestCase
 {
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $userRepositoryMock;
+    private MockObject&UserRepositoryInterface $shopUserRepository;
+
     private ShopUserNotVerifiedValidator $shopUserNotVerifiedValidator;
+
     protected function setUp(): void
     {
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->shopUserNotVerifiedValidator = new ShopUserNotVerifiedValidator($this->userRepositoryMock);
+        parent::setUp();
+        $this->shopUserRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->shopUserNotVerifiedValidator = new ShopUserNotVerifiedValidator($this->shopUserRepository);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserNotVerifiedValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserNotVerifiedValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotAnInstanceOfRequestShopUserVerification(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->shopUserNotVerifiedValidator->validate(new CompleteOrder('TOKEN'), final class() extends TestCase {
-        });
+        self::expectException(\InvalidArgumentException::class);
+        $this->shopUserNotVerifiedValidator->validate(
+            new CompleteOrder('TOKEN'),
+            new ShopUserNotVerified(),
+        );
     }
 
     public function testThrowsAnExceptionIfConstraintIsNotAnInstanceOfShopUserExists(): void
     {
         /** @var Constraint|MockObject $constraintMock */
         $constraintMock = $this->createMock(Constraint::class);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->shopUserNotVerifiedValidator->validate(new RequestShopUserVerification(42, '', ''), $constraintMock);
     }
 
     public function testThrowsAnExceptionIfShopUserDoesNotExist(): void
     {
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn(null);
-        $this->expectException(InvalidArgumentException::class);
+        $this->shopUserRepository->expects(self::once())->method('find')->with(42)->willReturn(null);
+        self::expectException(\InvalidArgumentException::class);
         $this->shopUserNotVerifiedValidator->validate(new RequestShopUserVerification(42, '', ''), new ShopUserNotVerified());
     }
 
@@ -71,10 +74,10 @@ final class ShopUserNotVerifiedValidatorTest extends TestCase
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         $this->shopUserNotVerifiedValidator->initialize($executionContextMock);
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('isVerified')->willReturn(true);
-        $shopUserMock->expects($this->once())->method('getEmail')->willReturn('test@sylius.com');
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.account.is_verified', ['%email%' => 'test@sylius.com'])
+        $this->shopUserRepository->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('isVerified')->willReturn(true);
+        $shopUserMock->expects(self::once())->method('getEmail')->willReturn('test@sylius.com');
+        $executionContextMock->expects(self::once())->method('addViolation')->with('sylius.account.is_verified', ['%email%' => 'test@sylius.com'])
         ;
         $this->shopUserNotVerifiedValidator->validate(new RequestShopUserVerification(42, '', ''), new ShopUserNotVerified());
     }
@@ -86,9 +89,9 @@ final class ShopUserNotVerifiedValidatorTest extends TestCase
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         $this->shopUserNotVerifiedValidator->initialize($executionContextMock);
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('isVerified')->willReturn(false);
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.account.is_verified', ['%email%' => 'test@sylius.com'])
+        $this->shopUserRepository->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('isVerified')->willReturn(false);
+        $executionContextMock->expects(self::never())->method('addViolation')->with('sylius.account.is_verified', ['%email%' => 'test@sylius.com'])
         ;
         $this->shopUserNotVerifiedValidator->validate(new RequestShopUserVerification(42, '', ''), new ShopUserNotVerified());
     }

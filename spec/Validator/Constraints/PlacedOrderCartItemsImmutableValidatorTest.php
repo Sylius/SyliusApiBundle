@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Command\Cart\AddItemToCart;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\PlacedOrderCartItemsImmutable;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\PlacedOrderCartItemsImmutableValidator;
@@ -28,31 +26,31 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class PlacedOrderCartItemsImmutableValidatorTest extends TestCase
 {
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
     private PlacedOrderCartItemsImmutableValidator $placedOrderCartItemsImmutableValidator;
 
     protected function setUp(): void
     {
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->placedOrderCartItemsImmutableValidator = new PlacedOrderCartItemsImmutableValidator($this->orderRepositoryMock);
+        parent::setUp();
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->placedOrderCartItemsImmutableValidator = new PlacedOrderCartItemsImmutableValidator($this->orderRepository);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->placedOrderCartItemsImmutableValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->placedOrderCartItemsImmutableValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotAddItemToCartCommand(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->placedOrderCartItemsImmutableValidator->validate(new stdClass(), new PlacedOrderCartItemsImmutable());
+        self::expectException(\InvalidArgumentException::class);
+        $this->placedOrderCartItemsImmutableValidator->validate(new \stdClass(), new PlacedOrderCartItemsImmutable());
     }
 
     public function testThrowsAnExceptionIfConstraintIsNotPlacedOrderCartItemsImmutable(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->placedOrderCartItemsImmutableValidator->validate(new AddItemToCart(orderTokenValue: 'orderTokenValue', productVariantCode: 'productVariantCode', quantity: 1), new NotNull());
     }
 
@@ -63,9 +61,9 @@ final class PlacedOrderCartItemsImmutableValidatorTest extends TestCase
         /** @var ExecutionContextInterface|MockObject $executionContextMock */
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
         $this->placedOrderCartItemsImmutableValidator->initialize($executionContextMock);
-        $orderMock->expects($this->once())->method('getState')->willReturn(OrderInterface::STATE_NEW);
-        $this->orderRepositoryMock->expects($this->once())->method('findOneWithCompletedCheckout')->with('orderTokenValue')->willReturn($orderMock);
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.order.cart_items_immutable')
+        $orderMock->expects(self::once())->method('getState')->willReturn(OrderInterface::STATE_NEW);
+        $this->orderRepository->expects(self::once())->method('findOneWithCompletedCheckout')->with('orderTokenValue')->willReturn($orderMock);
+        $executionContextMock->expects(self::once())->method('addViolation')->with('sylius.order.cart_items_immutable')
         ;
         $this->placedOrderCartItemsImmutableValidator->validate(
             new AddItemToCart(orderTokenValue: 'orderTokenValue', productVariantCode: 'productVariantCode', quantity: 1),
@@ -80,8 +78,8 @@ final class PlacedOrderCartItemsImmutableValidatorTest extends TestCase
         /** @var ExecutionContextInterface|MockObject $executionContextMock */
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
         $this->placedOrderCartItemsImmutableValidator->initialize($executionContextMock);
-        $this->orderRepositoryMock->expects($this->once())->method('findOneWithCompletedCheckout')->with('orderTokenValue')->willReturn(null);
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.order.cart_items_immutable')
+        $this->orderRepository->expects(self::once())->method('findOneWithCompletedCheckout')->with('orderTokenValue')->willReturn(null);
+        $executionContextMock->expects(self::never())->method('addViolation')->with('sylius.order.cart_items_immutable')
         ;
         $this->placedOrderCartItemsImmutableValidator->validate(
             new AddItemToCart(orderTokenValue: 'orderTokenValue', productVariantCode: 'productVariantCode', quantity: 1),

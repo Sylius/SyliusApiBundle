@@ -28,12 +28,13 @@ final class ConfirmResetPasswordValidatorTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->confirmResetPasswordValidator = new ConfirmResetPasswordValidator();
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->confirmResetPasswordValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->confirmResetPasswordValidator);
     }
 
     public function testDoesNotAddViolationIfPasswordsAreSame(): void
@@ -43,7 +44,7 @@ final class ConfirmResetPasswordValidatorTest extends TestCase
         $constraint = new ConfirmResetPassword();
         $this->confirmResetPasswordValidator->initialize($executionContextMock);
         $value = new ResetPassword('token', 'password', 'password');
-        $executionContextMock->expects($this->never())->method('buildViolation');
+        $executionContextMock->expects(self::never())->method('buildViolation');
         $this->confirmResetPasswordValidator->validate($value, $constraint);
     }
 
@@ -57,9 +58,9 @@ final class ConfirmResetPasswordValidatorTest extends TestCase
         $constraint->message = 'message';
         $this->confirmResetPasswordValidator->initialize($executionContextMock);
         $value = new ResetPassword('token', 'password', 'differentPassword');
-        $executionContextMock->expects($this->once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('atPath')->with('newPassword')->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('addViolation');
+        $executionContextMock->expects(self::once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('atPath')->with('newPassword')->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('addViolation');
         $this->confirmResetPasswordValidator->validate($value, $constraint);
     }
 }

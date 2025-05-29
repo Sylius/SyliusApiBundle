@@ -37,7 +37,7 @@ final class TranslatableDenormalizerTest extends TestCase
         $this->denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->localeProviderMock = $this->createMock(TranslationLocaleProviderInterface::class);
         $this->translatableDenormalizer = new TranslatableDenormalizer($this->localeProviderMock);
-        $this->setDenormalizer($this->denormalizerMock);
+        $this->translatableDenormalizer->setDenormalizer($this->denormalizerMock);
     }
 
     public function testOnlySupportsTranslatableResource(): void

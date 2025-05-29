@@ -28,12 +28,13 @@ final class CorrectChangeShopUserConfirmPasswordValidatorTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->correctChangeShopUserConfirmPasswordValidator = new CorrectChangeShopUserConfirmPasswordValidator();
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->correctChangeShopUserConfirmPasswordValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->correctChangeShopUserConfirmPasswordValidator);
     }
 
     public function testDoesNotAddViolationIfPasswordsAreSame(): void
@@ -48,7 +49,7 @@ final class CorrectChangeShopUserConfirmPasswordValidatorTest extends TestCase
             currentPassword: 'current',
             shopUserId: 1,
         );
-        $executionContextMock->expects($this->never())->method('buildViolation');
+        $executionContextMock->expects(self::never())->method('buildViolation');
         $this->correctChangeShopUserConfirmPasswordValidator->validate($value, $constraint);
     }
 
@@ -67,9 +68,9 @@ final class CorrectChangeShopUserConfirmPasswordValidatorTest extends TestCase
             currentPassword: 'current',
             shopUserId: 1,
         );
-        $executionContextMock->expects($this->once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('atPath')->with('newPassword')->willReturn($constraintViolationBuilderMock);
-        $constraintViolationBuilderMock->expects($this->once())->method('addViolation');
+        $executionContextMock->expects(self::once())->method('buildViolation')->with($constraint->message)->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('atPath')->with('newPassword')->willReturn($constraintViolationBuilderMock);
+        $constraintViolationBuilderMock->expects(self::once())->method('addViolation');
         $this->correctChangeShopUserConfirmPasswordValidator->validate($value, $constraint);
     }
 }

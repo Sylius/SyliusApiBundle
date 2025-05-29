@@ -13,43 +13,47 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserResetPasswordTokenExistsValidator;
-use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserResetPasswordTokenExists;
+use Sylius\Bundle\ApiBundle\Validator\Constraints\ShopUserResetPasswordTokenExistsValidator;
 use Sylius\Component\User\Model\UserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ShopUserResetPasswordTokenExistsValidatorTest extends TestCase
 {
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $userRepositoryMock;
+    private MockObject&UserRepositoryInterface $userRepository;
+
     private ShopUserResetPasswordTokenExistsValidator $shopUserResetPasswordTokenExistsValidator;
+
     protected function setUp(): void
     {
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->shopUserResetPasswordTokenExistsValidator = new ShopUserResetPasswordTokenExistsValidator($this->userRepositoryMock);
+        parent::setUp();
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->shopUserResetPasswordTokenExistsValidator = new ShopUserResetPasswordTokenExistsValidator($this->userRepository);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserResetPasswordTokenExistsValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserResetPasswordTokenExistsValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotAString(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->shopUserResetPasswordTokenExistsValidator->validate(null, new ShopUserResetPasswordTokenExists());
     }
 
     public function testThrowsAnExceptionIfConstraintIsNotAResetPasswordTokenExistsConstraint(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->shopUserResetPasswordTokenExistsValidator->validate('', final class() extends TestCase {
-        });
+        self::expectException(\InvalidArgumentException::class);
+        $this->shopUserResetPasswordTokenExistsValidator->validate(
+            '',
+            $this->createMock(Constraint::class),
+        );
     }
 
     public function testDoesNotAddViolationIfUserExists(): void
@@ -59,8 +63,8 @@ final class ShopUserResetPasswordTokenExistsValidatorTest extends TestCase
         /** @var UserInterface|MockObject $userMock */
         $userMock = $this->createMock(UserInterface::class);
         $this->shopUserResetPasswordTokenExistsValidator->initialize($executionContextMock);
-        $this->userRepositoryMock->expects($this->once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn($userMock);
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.reset_password.invalid_token', ['%token%' => 'token']);
+        $this->userRepository->expects(self::once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn($userMock);
+        $executionContextMock->expects(self::never())->method('addViolation')->with('sylius.reset_password.invalid_token', ['%token%' => 'token']);
         $this->shopUserResetPasswordTokenExistsValidator->validate('token', new ShopUserResetPasswordTokenExists());
     }
 
@@ -69,8 +73,8 @@ final class ShopUserResetPasswordTokenExistsValidatorTest extends TestCase
         /** @var ExecutionContextInterface|MockObject $executionContextMock */
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
         $this->shopUserResetPasswordTokenExistsValidator->initialize($executionContextMock);
-        $this->userRepositoryMock->expects($this->once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn(null);
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.reset_password.invalid_token', ['%token%' => 'token']);
+        $this->userRepository->expects(self::once())->method('findOneBy')->with(['passwordResetToken' => 'token'])->willReturn(null);
+        $executionContextMock->expects(self::once())->method('addViolation')->with('sylius.reset_password.invalid_token', ['%token%' => 'token']);
         $this->shopUserResetPasswordTokenExistsValidator->validate('token', new ShopUserResetPasswordTokenExists());
     }
 }

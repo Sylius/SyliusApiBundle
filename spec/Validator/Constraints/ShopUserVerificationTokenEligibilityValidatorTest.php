@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Account\VerifyShopUser;
@@ -27,26 +26,26 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ShopUserVerificationTokenEligibilityValidatorTest extends TestCase
 {
-    /** @var RepositoryInterface|MockObject */
-    private MockObject $shopUserRepositoryMock;
+    private MockObject&RepositoryInterface $shopUserRepository;
 
     private ShopUserVerificationTokenEligibilityValidator $shopUserVerificationTokenEligibilityValidator;
 
     protected function setUp(): void
     {
-        $this->shopUserRepositoryMock = $this->createMock(RepositoryInterface::class);
-        $this->shopUserVerificationTokenEligibilityValidator = new ShopUserVerificationTokenEligibilityValidator($this->shopUserRepositoryMock);
+        parent::setUp();
+        $this->shopUserRepository = $this->createMock(RepositoryInterface::class);
+        $this->shopUserVerificationTokenEligibilityValidator = new ShopUserVerificationTokenEligibilityValidator($this->shopUserRepository);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserVerificationTokenEligibilityValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->shopUserVerificationTokenEligibilityValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotTypeOfVerifyShopUser(): void
     {
         $constraint = new ShopUserVerificationTokenEligibility();
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->shopUserVerificationTokenEligibilityValidator->validate('', $constraint);
     }
 
@@ -54,7 +53,7 @@ final class ShopUserVerificationTokenEligibilityValidatorTest extends TestCase
     {
         $value = new VerifyShopUser('TOKEN', 'en_US', 'WEB');
         $constraint = new OrderPaymentMethodEligibility();
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->shopUserVerificationTokenEligibilityValidator->validate($value, $constraint);
     }
 
@@ -69,8 +68,8 @@ final class ShopUserVerificationTokenEligibilityValidatorTest extends TestCase
             token: 'TOKEN',
         );
         $this->shopUserVerificationTokenEligibilityValidator->initialize($executionContextMock);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneBy')->with(['emailVerificationToken' => 'TOKEN'])->willReturn(null);
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.account.invalid_verification_token', ['%verificationToken%' => 'TOKEN'])
+        $this->shopUserRepository->expects(self::once())->method('findOneBy')->with(['emailVerificationToken' => 'TOKEN'])->willReturn(null);
+        $executionContextMock->expects(self::once())->method('addViolation')->with('sylius.account.invalid_verification_token', ['%verificationToken%' => 'TOKEN'])
         ;
         $this->shopUserVerificationTokenEligibilityValidator->validate($value, $constraint);
     }
@@ -88,8 +87,8 @@ final class ShopUserVerificationTokenEligibilityValidatorTest extends TestCase
             token: 'TOKEN',
         );
         $this->shopUserVerificationTokenEligibilityValidator->initialize($executionContextMock);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneBy')->with(['emailVerificationToken' => 'TOKEN'])->willReturn($userMock);
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.account.invalid_verification_token', ['%verificationToken%' => 'TOKEN'])
+        $this->shopUserRepository->expects(self::once())->method('findOneBy')->with(['emailVerificationToken' => 'TOKEN'])->willReturn($userMock);
+        $executionContextMock->expects(self::never())->method('addViolation')->with('sylius.account.invalid_verification_token', ['%verificationToken%' => 'TOKEN'])
         ;
         $this->shopUserVerificationTokenEligibilityValidator->validate($value, $constraint);
     }

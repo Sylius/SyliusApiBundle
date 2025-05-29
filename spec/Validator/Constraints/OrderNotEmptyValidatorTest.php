@@ -13,55 +13,62 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Sylius\Bundle\ApiBundle\Validator\Constraints\OrderNotEmptyValidator;
-use InvalidArgumentException;
 use Doctrine\Common\Collections\ArrayCollection;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Cart\RemoveItemFromCart;
 use Sylius\Bundle\ApiBundle\Command\Checkout\CompleteOrder;
 use Sylius\Bundle\ApiBundle\Command\Checkout\UpdateCart;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\OrderNotEmpty;
+use Sylius\Bundle\ApiBundle\Validator\Constraints\OrderNotEmptyValidator;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class OrderNotEmptyValidatorTest extends TestCase
 {
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
+
     private OrderNotEmptyValidator $orderNotEmptyValidator;
+
     protected function setUp(): void
     {
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->orderNotEmptyValidator = new OrderNotEmptyValidator($this->orderRepositoryMock);
+        parent::setUp();
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->orderNotEmptyValidator = new OrderNotEmptyValidator($this->orderRepository);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->orderNotEmptyValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->orderNotEmptyValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotAnInstanceOfCompleteOrderOrUpdateCart(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->orderNotEmptyValidator->validate(new RemoveItemFromCart('token', 1), new OrderNotEmpty());
     }
 
     public function testThrowsAnExceptionIfConstraintIsNotAnInstanceOfOrderNotEmpty(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->orderNotEmptyValidator->validate(new UpdateCart('token'), final class() extends TestCase {
-        });
+        self::expectException(\InvalidArgumentException::class);
+
+        $invalidConstraint = $this->createMock(Constraint::class);
+
+        $this->orderNotEmptyValidator->validate(
+            new CompleteOrder('TOKEN'),
+            $invalidConstraint,
+        );
     }
 
     public function testThrowsAnExceptionIfOrderIsNull(): void
     {
         $value = new CompleteOrder(orderTokenValue: 'token');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn(null);
-        $this->expectException(InvalidArgumentException::class);
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn(null);
+        self::expectException(\InvalidArgumentException::class);
         $this->orderNotEmptyValidator->validate($value, new OrderNotEmpty());
     }
 
@@ -73,9 +80,9 @@ final class OrderNotEmptyValidatorTest extends TestCase
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
         $this->orderNotEmptyValidator->initialize($executionContextMock);
         $value = new CompleteOrder(orderTokenValue: 'token');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getItems')->willReturn(new ArrayCollection());
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.order.not_empty');
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getItems')->willReturn(new ArrayCollection());
+        $executionContextMock->expects(self::once())->method('addViolation')->with('sylius.order.not_empty');
         $this->orderNotEmptyValidator->validate($value, new OrderNotEmpty());
     }
 
@@ -89,9 +96,9 @@ final class OrderNotEmptyValidatorTest extends TestCase
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
         $this->orderNotEmptyValidator->initialize($executionContextMock);
         $value = new UpdateCart(orderTokenValue: 'token');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getItems')->willReturn(new ArrayCollection([$orderItemMock]));
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.order.not_empty');
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getItems')->willReturn(new ArrayCollection([$orderItemMock]));
+        $executionContextMock->expects(self::never())->method('addViolation')->with('sylius.order.not_empty');
         $this->orderNotEmptyValidator->validate($value, new OrderNotEmpty());
     }
 }

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Tests\Sylius\Bundle\ApiBundle\Validator\Constraints;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Checkout\CompleteOrder;
@@ -31,25 +30,25 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class OrderPaymentMethodEligibilityValidatorTest extends TestCase
 {
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
     private OrderPaymentMethodEligibilityValidator $orderPaymentMethodEligibilityValidator;
 
     protected function setUp(): void
     {
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->orderPaymentMethodEligibilityValidator = new OrderPaymentMethodEligibilityValidator($this->orderRepositoryMock);
+        parent::setUp();
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->orderPaymentMethodEligibilityValidator = new OrderPaymentMethodEligibilityValidator($this->orderRepository);
     }
 
     public function testAConstraintValidator(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->orderPaymentMethodEligibilityValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->orderPaymentMethodEligibilityValidator);
     }
 
     public function testThrowsAnExceptionIfValueIsNotInstanceOfCompleteOrder(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->orderPaymentMethodEligibilityValidator->validate('', new OrderPaymentMethodEligibility());
     }
 
@@ -57,7 +56,7 @@ final class OrderPaymentMethodEligibilityValidatorTest extends TestCase
     {
         /** @var Constraint|MockObject $constraintMock */
         $constraintMock = $this->createMock(Constraint::class);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->orderPaymentMethodEligibilityValidator->validate(new UpdateCart('token'), $constraintMock);
     }
 
@@ -65,8 +64,8 @@ final class OrderPaymentMethodEligibilityValidatorTest extends TestCase
     {
         $constraint = new OrderPaymentMethodEligibility();
         $value = new CompleteOrder(orderTokenValue: 'token');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn(null);
-        $this->expectException(InvalidArgumentException::class);
+        $this->orderRepository->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn(null);
+        self::expectException(\InvalidArgumentException::class);
         $this->orderPaymentMethodEligibilityValidator->validate($value, $constraint);
     }
 
@@ -80,16 +79,46 @@ final class OrderPaymentMethodEligibilityValidatorTest extends TestCase
         $paymentMethodMock = $this->createMock(PaymentMethodInterface::class);
         /** @var ExecutionContextInterface|MockObject $executionContextMock */
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
+
         $this->orderPaymentMethodEligibilityValidator->initialize($executionContextMock);
+
         $constraint = new OrderPaymentMethodEligibility();
         $value = new CompleteOrder(orderTokenValue: 'token');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getPayments')->willReturn(new ArrayCollection([$paymentMock]));
-        $paymentMock->expects($this->once())->method('getMethod')->willReturn($paymentMethodMock);
-        $paymentMethodMock->expects($this->once())->method('getName')->willReturn('bank transfer');
-        $paymentMethodMock->expects($this->once())->method('isEnabled')->willReturn(false);
-        $executionContextMock->expects($this->once())->method('addViolation')->with('sylius.order.payment_method_eligibility', ['%paymentMethodName%' => 'bank transfer'])
-        ;
+
+        $this->orderRepository
+            ->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'token'])
+            ->willReturn($orderMock);
+
+        $orderMock
+            ->expects(self::once())
+            ->method('getPayments')
+            ->willReturn(new ArrayCollection([$paymentMock]));
+
+        $paymentMock
+            ->expects($this->exactly(2))
+            ->method('getMethod')
+            ->willReturn($paymentMethodMock);
+
+        $paymentMethodMock
+            ->expects(self::once())
+            ->method('isEnabled')
+            ->willReturn(false);
+
+        $paymentMethodMock
+            ->expects(self::once())
+            ->method('getName')
+            ->willReturn('bank transfer');
+
+        $executionContextMock
+            ->expects(self::once())
+            ->method('addViolation')
+            ->with(
+                'sylius.order.payment_method_eligibility',
+                ['%paymentMethodName%' => 'bank transfer'],
+            );
+
         $this->orderPaymentMethodEligibilityValidator->validate($value, $constraint);
     }
 
@@ -103,16 +132,37 @@ final class OrderPaymentMethodEligibilityValidatorTest extends TestCase
         $paymentMethodMock = $this->createMock(PaymentMethodInterface::class);
         /** @var ExecutionContextInterface|MockObject $executionContextMock */
         $executionContextMock = $this->createMock(ExecutionContextInterface::class);
+
         $this->orderPaymentMethodEligibilityValidator->initialize($executionContextMock);
+
         $constraint = new OrderPaymentMethodEligibility();
         $value = new CompleteOrder(orderTokenValue: 'token');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'token'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getPayments')->willReturn(new ArrayCollection([$paymentMock]));
-        $paymentMock->expects($this->once())->method('getMethod')->willReturn($paymentMethodMock);
-        $paymentMethodMock->expects($this->once())->method('getName')->willReturn('bank transfer');
-        $paymentMethodMock->expects($this->once())->method('isEnabled')->willReturn(true);
-        $executionContextMock->expects($this->never())->method('addViolation')->with('sylius.order.payment_method_eligibility', ['%paymentMethodName%' => 'bank transfer'])
-        ;
+
+        $this->orderRepository
+            ->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'token'])
+            ->willReturn($orderMock);
+
+        $orderMock
+            ->expects(self::once())
+            ->method('getPayments')
+            ->willReturn(new ArrayCollection([$paymentMock]));
+
+        $paymentMock
+            ->expects(self::once())
+            ->method('getMethod')
+            ->willReturn($paymentMethodMock);
+
+        $paymentMethodMock
+            ->expects(self::once())
+            ->method('isEnabled')
+            ->willReturn(true);
+
+        $executionContextMock
+            ->expects(self::never())
+            ->method('addViolation');
+
         $this->orderPaymentMethodEligibilityValidator->validate($value, $constraint);
     }
 }
