@@ -16,7 +16,6 @@ namespace Tests\Sylius\Bundle\ApiBundle\Serializer\ContextBuilder;
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Attribute\ShopUserIdAware;
 use Sylius\Bundle\ApiBundle\Command\Account\RequestShopUserVerification;
 use Sylius\Bundle\ApiBundle\Context\UserContextInterface;
@@ -27,19 +26,18 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 final class LoggedInShopUserIdAwareContextBuilderTest extends TestCase
 {
-    /** @var SerializerContextBuilderInterface|MockObject */
-    private MockObject $decoratedContextBuilderMock;
+    private MockObject&SerializerContextBuilderInterface $decoratedContextBuilder;
 
-    /** @var UserContextInterface|MockObject */
-    private MockObject $userContextMock;
+    private MockObject&UserContextInterface $userContext;
 
     private LoggedInShopUserIdAwareContextBuilder $loggedInShopUserIdAwareContextBuilder;
 
     protected function setUp(): void
     {
-        $this->decoratedContextBuilderMock = $this->createMock(SerializerContextBuilderInterface::class);
-        $this->userContextMock = $this->createMock(UserContextInterface::class);
-        $this->loggedInShopUserIdAwareContextBuilder = new LoggedInShopUserIdAwareContextBuilder($this->decoratedContextBuilderMock, ShopUserIdAware::class, 'shopUserId', $this->userContextMock);
+        parent::setUp();
+        $this->decoratedContextBuilder = $this->createMock(SerializerContextBuilderInterface::class);
+        $this->userContext = $this->createMock(UserContextInterface::class);
+        $this->loggedInShopUserIdAwareContextBuilder = new LoggedInShopUserIdAwareContextBuilder($this->decoratedContextBuilder, ShopUserIdAware::class, 'shopUserId', $this->userContext);
     }
 
     public function testSetsShopUserIdAsAConstructorArgument(): void
@@ -48,10 +46,10 @@ final class LoggedInShopUserIdAwareContextBuilderTest extends TestCase
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => RequestShopUserVerification::class]])
         ;
-        $this->userContextMock->expects($this->atLeastOnce())->method('getUser')->willReturn($shopUserMock);
+        $this->userContext->expects($this->atLeastOnce())->method('getUser')->willReturn($shopUserMock);
         $shopUserMock->expects($this->once())->method('getId')->willReturn(11);
         $this->assertSame([
             'input' => ['class' => RequestShopUserVerification::class],
@@ -67,10 +65,10 @@ final class LoggedInShopUserIdAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn([])
         ;
-        $this->userContextMock->expects($this->never())->method('getUser');
+        $this->userContext->expects($this->never())->method('getUser');
         $this->assertSame([], $this->loggedInShopUserIdAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
@@ -78,11 +76,11 @@ final class LoggedInShopUserIdAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn(['input' => ['class' => stdClass::class]])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+            ->willReturn(['input' => ['class' => \stdClass::class]])
         ;
-        $this->userContextMock->expects($this->never())->method('getUser');
-        $this->assertSame(['input' => ['class' => stdClass::class]], $this->loggedInShopUserIdAwareContextBuilder
+        $this->userContext->expects($this->never())->method('getUser');
+        $this->assertSame(['input' => ['class' => \stdClass::class]], $this->loggedInShopUserIdAwareContextBuilder
             ->createFromRequest($requestMock, true, []))
         ;
     }
@@ -92,14 +90,14 @@ final class LoggedInShopUserIdAwareContextBuilderTest extends TestCase
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
 
-        $this->decoratedContextBuilderMock
+        $this->decoratedContextBuilder
             ->expects($this->once())
             ->method('createFromRequest')
             ->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => RequestShopUserVerification::class]])
         ;
 
-        $this->userContextMock
+        $this->userContext
             ->expects($this->once())
             ->method('getUser')
             ->willReturn(null)

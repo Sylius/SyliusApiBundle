@@ -23,19 +23,18 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class ChannelContextBuilderTest extends TestCase
 {
-    /** @var SerializerContextBuilderInterface|MockObject */
-    private MockObject $decoratedContextBuilderMock;
+    private MockObject&SerializerContextBuilderInterface $decoratedContextBuilder;
 
-    /** @var ChannelContextInterface|MockObject */
-    private MockObject $channelContextMock;
+    private ChannelContextInterface&MockObject $channelContext;
 
     private ChannelContextBuilder $channelContextBuilder;
 
     protected function setUp(): void
     {
-        $this->decoratedContextBuilderMock = $this->createMock(SerializerContextBuilderInterface::class);
-        $this->channelContextMock = $this->createMock(ChannelContextInterface::class);
-        $this->channelContextBuilder = new ChannelContextBuilder($this->decoratedContextBuilderMock, $this->channelContextMock);
+        parent::setUp();
+        $this->decoratedContextBuilder = $this->createMock(SerializerContextBuilderInterface::class);
+        $this->channelContext = $this->createMock(ChannelContextInterface::class);
+        $this->channelContextBuilder = new ChannelContextBuilder($this->decoratedContextBuilder, $this->channelContext);
     }
 
     public function testUpdatesAnContextWhenChannelContextHasChannel(): void
@@ -44,8 +43,8 @@ final class ChannelContextBuilderTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, []);
-        $this->channelContextMock->expects($this->once())->method('getChannel')->willReturn($channelMock);
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, []);
+        $this->channelContext->expects($this->once())->method('getChannel')->willReturn($channelMock);
         $this->channelContextBuilder->createFromRequest($requestMock, true, []);
     }
 }

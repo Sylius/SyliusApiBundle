@@ -16,7 +16,6 @@ namespace Tests\Sylius\Bundle\ApiBundle\Serializer\ContextBuilder;
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Attribute\LoggedInCustomerEmailAware;
 use Sylius\Bundle\ApiBundle\Command\SendContactRequest;
 use Sylius\Bundle\ApiBundle\Context\UserContextInterface;
@@ -29,33 +28,32 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 final class LoggedInCustomerEmailAwareContextBuilderTest extends TestCase
 {
-    /** @var SerializerContextBuilderInterface|MockObject */
-    private MockObject $decoratedContextBuilderMock;
+    private MockObject&SerializerContextBuilderInterface $decoratedContextBuilder;
 
-    /** @var UserContextInterface|MockObject */
-    private MockObject $userContextMock;
+    private MockObject&UserContextInterface $userContext;
 
     private LoggedInCustomerEmailAwareContextBuilder $loggedInCustomerEmailAwareContextBuilder;
 
     protected function setUp(): void
     {
-        $this->decoratedContextBuilderMock = $this->createMock(SerializerContextBuilderInterface::class);
-        $this->userContextMock = $this->createMock(UserContextInterface::class);
-        $this->loggedInCustomerEmailAwareContextBuilder = new LoggedInCustomerEmailAwareContextBuilder($this->decoratedContextBuilderMock, LoggedInCustomerEmailAware::class, 'email', $this->userContextMock);
+        parent::setUp();
+        $this->decoratedContextBuilder = $this->createMock(SerializerContextBuilderInterface::class);
+        $this->userContext = $this->createMock(UserContextInterface::class);
+        $this->loggedInCustomerEmailAwareContextBuilder = new LoggedInCustomerEmailAwareContextBuilder($this->decoratedContextBuilder, LoggedInCustomerEmailAware::class, 'email', $this->userContext);
     }
 
     public function testDoesNotAddEmailToContactAwareCommandIfProvided(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => SendContactRequest::class]])
         ;
         $requestMock->expects($this->once())->method('toArray')->willReturn([
             'email' => 'email@example.com',
             'message' => 'message',
         ]);
-        $this->userContextMock->expects($this->never())->method('getUser');
+        $this->userContext->expects($this->never())->method('getUser');
         $this->assertSame(['input' => ['class' => SendContactRequest::class]], $this->loggedInCustomerEmailAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
@@ -65,11 +63,11 @@ final class LoggedInCustomerEmailAwareContextBuilderTest extends TestCase
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => SendContactRequest::class]])
         ;
         $requestMock->expects($this->once())->method('toArray')->willReturn(['message' => 'message']);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($adminUserMock);
+        $this->userContext->expects($this->once())->method('getUser')->willReturn($adminUserMock);
         $this->assertSame(['input' => ['class' => SendContactRequest::class]], $this->loggedInCustomerEmailAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
@@ -77,11 +75,11 @@ final class LoggedInCustomerEmailAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => SendContactRequest::class]])
         ;
         $requestMock->expects($this->once())->method('toArray')->willReturn(['message' => 'message']);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn(null);
+        $this->userContext->expects($this->once())->method('getUser')->willReturn(null);
         $this->assertSame(['input' => ['class' => SendContactRequest::class]], $this->loggedInCustomerEmailAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
@@ -93,11 +91,11 @@ final class LoggedInCustomerEmailAwareContextBuilderTest extends TestCase
         $customerMock = $this->createMock(CustomerInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => SendContactRequest::class]])
         ;
         $requestMock->expects($this->once())->method('toArray')->willReturn(['message' => 'message']);
-        $this->userContextMock->expects($this->atLeastOnce())->method('getUser')->willReturn($shopUserMock);
+        $this->userContext->expects($this->atLeastOnce())->method('getUser')->willReturn($shopUserMock);
         $shopUserMock->expects($this->atLeastOnce())->method('getCustomer')->willReturn($customerMock);
         $customerMock->expects($this->once())->method('getEmail')->willReturn('email@example.com');
         $this->assertSame([
@@ -114,10 +112,10 @@ final class LoggedInCustomerEmailAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn(['input' => ['class' => stdClass::class]])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+            ->willReturn(['input' => ['class' => \stdClass::class]])
         ;
         $requestMock->expects($this->never())->method('toArray');
-        $this->assertSame(['input' => ['class' => stdClass::class]], $this->loggedInCustomerEmailAwareContextBuilder->createFromRequest($requestMock, true, []));
+        $this->assertSame(['input' => ['class' => \stdClass::class]], $this->loggedInCustomerEmailAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 }

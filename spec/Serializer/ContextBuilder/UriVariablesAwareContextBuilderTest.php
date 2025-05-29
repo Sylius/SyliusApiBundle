@@ -18,7 +18,6 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Attribute\OrderItemIdAware;
 use Sylius\Bundle\ApiBundle\Attribute\OrderTokenValueAware;
 use Sylius\Bundle\ApiBundle\Attribute\ShipmentIdAware;
@@ -33,22 +32,22 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class UriVariablesAwareContextBuilderTest extends TestCase
 {
-    /** @var SerializerContextBuilderInterface|MockObject */
-    private MockObject $decoratedContextBuilderMock;
+    private MockObject&SerializerContextBuilderInterface $decoratedContextBuilder;
 
     private UriVariablesAwareContextBuilder $uriVariablesAwareContextBuilder;
 
     protected function setUp(): void
     {
-        $this->decoratedContextBuilderMock = $this->createMock(SerializerContextBuilderInterface::class);
-        $this->uriVariablesAwareContextBuilder = new UriVariablesAwareContextBuilder($this->decoratedContextBuilderMock, ShipmentIdAware::class, 'shipmentId', ShipmentInterface::class);
+        parent::setUp();
+        $this->decoratedContextBuilder = $this->createMock(SerializerContextBuilderInterface::class);
+        $this->uriVariablesAwareContextBuilder = new UriVariablesAwareContextBuilder($this->decoratedContextBuilder, ShipmentIdAware::class, 'shipmentId', ShipmentInterface::class);
     }
 
     public function testDoesNothingIfThereIsNoInputClass(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn([])
         ;
         $this->assertSame([], $this->uriVariablesAwareContextBuilder->createFromRequest($requestMock, true, []));
@@ -58,10 +57,10 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn(['input' => ['class' => stdClass::class]])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+            ->willReturn(['input' => ['class' => \stdClass::class]])
         ;
-        $this->assertSame(['input' => ['class' => stdClass::class]], $this->uriVariablesAwareContextBuilder
+        $this->assertSame(['input' => ['class' => \stdClass::class]], $this->uriVariablesAwareContextBuilder
             ->createFromRequest($requestMock, true, []))
         ;
     }
@@ -72,7 +71,7 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
             ->willReturn(['input' => ['class' => ChooseShippingMethod::class]])
         ;
         $operationMock->expects($this->once())->method('getUriVariables')->willReturn([]);
@@ -87,10 +86,10 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
             ->willReturn(['input' => ['class' => ChooseShippingMethod::class]])
         ;
-        $uriVariable = new Link(fromClass: 'stdClass');
+        $uriVariable = new Link(fromClass: '\stdClass');
         $operationMock->expects($this->once())->method('getUriVariables')->willReturn([$uriVariable]);
         $this->assertSame(['input' => ['class' => ChooseShippingMethod::class]], $this->uriVariablesAwareContextBuilder
             ->createFromRequest($requestMock, true, ['operation' => $operationMock]))
@@ -103,7 +102,7 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
             ->willReturn(['input' => ['class' => ChooseShippingMethod::class], 'uri_variables' => ['shipmentId' => '123']])
         ;
         $uriVariable = new Link(fromClass: ShipmentInterface::class, parameterName: 'shipmentId');
@@ -125,8 +124,8 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
-        $this->uriVariablesAwareContextBuilder = new UriVariablesAwareContextBuilder($this->decoratedContextBuilderMock, OrderTokenValueAware::class, 'orderTokenValue', OrderInterface::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
+        $this->uriVariablesAwareContextBuilder = new UriVariablesAwareContextBuilder($this->decoratedContextBuilder, OrderTokenValueAware::class, 'orderTokenValue', OrderInterface::class);
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
             ->willReturn(['input' => ['class' => CompleteOrder::class], 'uri_variables' => ['orderToken' => 'token123']])
         ;
         $uriVariable = new Link(fromClass: OrderInterface::class, parameterName: 'orderToken');
@@ -148,8 +147,8 @@ final class UriVariablesAwareContextBuilderTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
-        $this->uriVariablesAwareContextBuilder = new UriVariablesAwareContextBuilder($this->decoratedContextBuilderMock, OrderItemIdAware::class, 'orderItemId', OrderItemInterface::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
+        $this->uriVariablesAwareContextBuilder = new UriVariablesAwareContextBuilder($this->decoratedContextBuilder, OrderItemIdAware::class, 'orderItemId', OrderItemInterface::class);
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, ['operation' => $operationMock])
             ->willReturn(['input' => ['class' => ChangeItemQuantityInCart::class], 'uri_variables' => ['orderItemId' => '23']])
         ;
         $uriVariable = new Link(fromClass: OrderItemInterface::class, parameterName: 'orderItemId');

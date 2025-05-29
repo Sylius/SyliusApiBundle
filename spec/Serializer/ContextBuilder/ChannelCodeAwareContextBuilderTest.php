@@ -16,7 +16,6 @@ namespace Tests\Sylius\Bundle\ApiBundle\Serializer\ContextBuilder;
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Attribute\ChannelCodeAware;
 use Sylius\Bundle\ApiBundle\Command\SendContactRequest;
 use Sylius\Bundle\ApiBundle\Serializer\ContextBuilder\ChannelCodeAwareContextBuilder;
@@ -27,19 +26,18 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 final class ChannelCodeAwareContextBuilderTest extends TestCase
 {
-    /** @var SerializerContextBuilderInterface|MockObject */
-    private MockObject $decoratedContextBuilderMock;
+    private MockObject&SerializerContextBuilderInterface $decoratedContextBuilder;
 
-    /** @var ChannelContextInterface|MockObject */
-    private MockObject $channelContextMock;
+    private ChannelContextInterface&MockObject $channelContext;
 
     private ChannelCodeAwareContextBuilder $channelCodeAwareContextBuilder;
 
     protected function setUp(): void
     {
-        $this->decoratedContextBuilderMock = $this->createMock(SerializerContextBuilderInterface::class);
-        $this->channelContextMock = $this->createMock(ChannelContextInterface::class);
-        $this->channelCodeAwareContextBuilder = new ChannelCodeAwareContextBuilder($this->decoratedContextBuilderMock, ChannelCodeAware::class, 'channelCode', $this->channelContextMock);
+        parent::setUp();
+        $this->decoratedContextBuilder = $this->createMock(SerializerContextBuilderInterface::class);
+        $this->channelContext = $this->createMock(ChannelContextInterface::class);
+        $this->channelCodeAwareContextBuilder = new ChannelCodeAwareContextBuilder($this->decoratedContextBuilder, ChannelCodeAware::class, 'channelCode', $this->channelContext);
     }
 
     public function testSetsChannelCodeAsAConstructorArgument(): void
@@ -48,10 +46,10 @@ final class ChannelCodeAwareContextBuilderTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn(['input' => ['class' => SendContactRequest::class]])
         ;
-        $this->channelContextMock->expects($this->once())->method('getChannel')->willReturn($channelMock);
+        $this->channelContext->expects($this->once())->method('getChannel')->willReturn($channelMock);
         $channelMock->expects($this->once())->method('getCode')->willReturn('CODE');
         $this->assertSame([
             'input' => ['class' => SendContactRequest::class],
@@ -67,10 +65,10 @@ final class ChannelCodeAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
             ->willReturn([])
         ;
-        $this->channelContextMock->expects($this->never())->method('getChannel');
+        $this->channelContext->expects($this->never())->method('getChannel');
         $this->assertSame([], $this->channelCodeAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
@@ -78,11 +76,11 @@ final class ChannelCodeAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn(['input' => ['class' => stdClass::class]])
+        $this->decoratedContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, [])
+            ->willReturn(['input' => ['class' => \stdClass::class]])
         ;
-        $this->channelContextMock->expects($this->never())->method('getChannel');
-        $this->assertSame(['input' => ['class' => stdClass::class]], $this->channelCodeAwareContextBuilder
+        $this->channelContext->expects($this->never())->method('getChannel');
+        $this->assertSame(['input' => ['class' => \stdClass::class]], $this->channelCodeAwareContextBuilder
             ->createFromRequest($requestMock, true, []))
         ;
     }

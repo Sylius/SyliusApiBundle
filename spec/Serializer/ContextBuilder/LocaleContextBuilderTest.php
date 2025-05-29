@@ -22,27 +22,26 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class LocaleContextBuilderTest extends TestCase
 {
-    /** @var SerializerContextBuilderInterface|MockObject */
-    private MockObject $decoratedSerializerContextBuilderMock;
+    private MockObject&SerializerContextBuilderInterface $decoratedSerializerContextBuilder;
 
-    /** @var LocaleContextInterface|MockObject */
-    private MockObject $localeContextMock;
+    private LocaleContextInterface&MockObject $localeContext;
 
     private LocaleContextBuilder $localeContextBuilder;
 
     protected function setUp(): void
     {
-        $this->decoratedSerializerContextBuilderMock = $this->createMock(SerializerContextBuilderInterface::class);
-        $this->localeContextMock = $this->createMock(LocaleContextInterface::class);
-        $this->localeContextBuilder = new LocaleContextBuilder($this->decoratedSerializerContextBuilderMock, $this->localeContextMock);
+        parent::setUp();
+        $this->decoratedSerializerContextBuilder = $this->createMock(SerializerContextBuilderInterface::class);
+        $this->localeContext = $this->createMock(LocaleContextInterface::class);
+        $this->localeContextBuilder = new LocaleContextBuilder($this->decoratedSerializerContextBuilder, $this->localeContext);
     }
 
     public function testUpdatesAnContextWhenLocaleContextHasLocale(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedSerializerContextBuilderMock->expects($this->once())->method('createFromRequest')->with($requestMock, true, []);
-        $this->localeContextMock->expects($this->once())->method('getLocaleCode')->willReturn('en_US');
+        $this->decoratedSerializerContextBuilder->expects($this->once())->method('createFromRequest')->with($requestMock, true, []);
+        $this->localeContext->expects($this->once())->method('getLocaleCode')->willReturn('en_US');
         $this->localeContextBuilder->createFromRequest($requestMock, true, []);
     }
 }
