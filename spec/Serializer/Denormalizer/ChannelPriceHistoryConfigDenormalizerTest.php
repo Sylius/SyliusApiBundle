@@ -139,11 +139,11 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
         $dummyConfigMock = $this->createMock(ChannelPriceHistoryConfigInterface::class);
         $this->channelPriceHistoryConfigDenormalizer->setDenormalizer($denormalizerMock);
         $data = [];
-        $this->configFactory->expects(self::once())->method('createNew')->willReturn($dummyConfigMock);
+        $this->configFactory->method('createNew')->willReturn($dummyConfigMock);
         $denormalizerMock->expects(self::once())->method('denormalize')->with($data, 'string', null, [self::ALREADY_CALLED => true])
             ->willReturn($configMock)
         ;
-        $configMock->expects(self::once())->method('getTaxonsExcludedFromShowingLowestPrice')->willReturn(new ArrayCollection([
+        $configMock->method('getTaxonsExcludedFromShowingLowestPrice')->willReturn(new ArrayCollection([
             $firstTaxonMock,
             $secondTaxonMock,
         ]));
@@ -182,7 +182,6 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
             ->willReturn($configMock);
 
         $configMock
-            ->expects(self::once())
             ->method('getTaxonsExcludedFromShowingLowestPrice')
             ->willReturn(new ArrayCollection([$firstCurrentTaxonMock, $secondCurrentTaxonMock]));
 

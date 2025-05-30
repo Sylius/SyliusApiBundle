@@ -60,11 +60,24 @@ final class CommandDenormalizerTest extends TestCase
         $exception = new MissingConstructorArgumentsException('', 400, null, ['firstName', 'lastName']);
         $context = ['input' => ['class' => RegisterShopUser::class]];
         $data = ['email' => 'test@example.com', 'password' => 'pa$$word'];
-        $this->nameConverter->expects(self::once())->method('normalize')->with('firstName', class: RegisterShopUser::class)->willReturn('first_name');
-        $this->nameConverter->expects(self::once())->method('normalize')->with('lastName', class: RegisterShopUser::class)->willReturn('lastName');
-        $this->baseNormalizer->expects(self::once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
+
+        $this->nameConverter
+            ->expects(self::exactly(2))
+            ->method('normalize')
+            ->willReturnMap([
+                ['firstName', RegisterShopUser::class, null, [], 'first_name'],
+                ['lastName', RegisterShopUser::class, null, [], 'lastName']
+            ]);
+
+        $this->baseNormalizer
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with($data, '', null, $context)
+            ->willThrowException($exception);
+
         $this->expectException(MissingConstructorArgumentsException::class);
-        $this->commandDenormalizer->expectExceptionMessage('Request does not have the following required fields specified: first_name, lastName.');
+        $this->expectExceptionMessage('Request does not have the following required fields specified: first_name, lastName.');
+
         $this->commandDenormalizer->denormalize($data, '', null, $context);
     }
 
@@ -74,10 +87,22 @@ final class CommandDenormalizerTest extends TestCase
         $exception = new UnexpectedValueException('', 400, $previousException);
         $context = ['input' => ['class' => RegisterShopUser::class]];
         $data = ['firstName' => 1];
-        $this->nameConverter->expects(self::once())->method('normalize')->with('firstName', class: RegisterShopUser::class)->willReturn('first_name');
-        $this->baseNormalizer->expects(self::once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
+
+        $this->nameConverter
+            ->expects(self::once())
+            ->method('normalize')
+            ->with('firstName', class: RegisterShopUser::class)
+            ->willReturn('first_name');
+
+        $this->baseNormalizer
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with($data, '', null, $context)
+            ->willThrowException($exception);
+
         $this->expectException(InvalidRequestArgumentException::class);
-        $this->commandDenormalizer->expectExceptionMessage('Request field "first_name" should be of type "string".');
+        $this->expectExceptionMessage('Request field "first_name" should be of type "string".');
+
         $this->commandDenormalizer->denormalize($data, '', null, $context);
     }
 
@@ -86,9 +111,16 @@ final class CommandDenormalizerTest extends TestCase
         $exception = new UnexpectedValueException('Unexpected value');
         $context = ['input' => ['class' => RegisterShopUser::class]];
         $data = ['firstName' => '1'];
-        $this->baseNormalizer->expects(self::once())->method('denormalize')->with($data, '', null, $context)->willThrowException($exception);
+
+        $this->baseNormalizer
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with($data, '', null, $context)
+            ->willThrowException($exception);
+
         $this->expectException(UnexpectedValueException::class);
-        $this->commandDenormalizer->expectExceptionMessage('Unexpected value');
+        $this->expectExceptionMessage('Unexpected value');
+
         $this->commandDenormalizer->denormalize($data, '', null, $context);
     }
 }

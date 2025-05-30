@@ -51,24 +51,54 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
 
     public function testDoesNothingIfThereIsNoTranslationKey(): void
     {
-        /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->translatableLocaleKeyDenormalizer->setDenormalizer($denormalizerMock);
-        $this->translatableLocaleKeyDenormalizer->denormalize([], TranslatableInterface::class);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with([], TranslatableInterface::class, null, [
-            'sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
-        ]);
+
+        $data = [];
+
+        $denormalizerMock
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with(
+                $data,
+                TranslatableInterface::class,
+                null,
+                ['sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true]
+            );
+
+        $this->translatableLocaleKeyDenormalizer->denormalize($data, TranslatableInterface::class);
     }
 
     public function testChangesKeysOfTranslationsToLocale(): void
     {
-        /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->translatableLocaleKeyDenormalizer->setDenormalizer($denormalizerMock);
-        $originalData = ['translations' => ['en_US' => ['locale' => 'en_US'], 'de_DE' => []]];
-        $updatedData = ['translations' => ['en_US' => ['locale' => 'en_US'], 'de_DE' => ['locale' => 'de_DE']]];
+
+        $originalData = [
+            'translations' => [
+                'en_US' => ['locale' => 'en_US'],
+                'de_DE' => []
+            ]
+        ];
+
+        $expectedData = [
+            'translations' => [
+                'en_US' => ['locale' => 'en_US'],
+                'de_DE' => ['locale' => 'de_DE']
+            ]
+        ];
+
+        $denormalizerMock
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with(
+                $expectedData,
+                TranslatableInterface::class,
+                null,
+                ['sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true]
+            );
+
         $this->translatableLocaleKeyDenormalizer->denormalize($originalData, TranslatableInterface::class);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with($updatedData, TranslatableInterface::class, null, ['sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true]);
     }
 
     public function testThrowsAnExceptionIfLocaleIsNotTheSameAsKey(): void

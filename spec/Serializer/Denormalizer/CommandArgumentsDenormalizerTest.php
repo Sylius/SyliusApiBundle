@@ -70,85 +70,115 @@ final class CommandArgumentsDenormalizerTest extends TestCase
     {
         $context = ['input' => ['class' => AddProductReview::class]];
         $addProductReview = new AddProductReview('Cap', 5, 'ok', 'cap_code', 'john@example.com');
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('Cap')->willReturn(false);
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with(5)->willReturn(false);
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('ok')->willReturn(false);
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('john@example.com')->willReturn(false);
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/shop/products/cap_code')->willReturn(true);
-        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/shop/products/cap_code')->willReturn('cap_code');
-        $this->commandDenormalizer->expects(self::once())->method('denormalize')->with([
-            'title' => 'Cap',
-            'rating' => 5,
-            'comment' => 'ok',
-            'product' => 'cap_code',
-            'email' => 'john@example.com',
-        ], AddProductReview::class, null, $context)
-            ->willReturn($addProductReview)
-        ;
-        self::assertSame($addProductReview, $this->commandArgumentsDenormalizer
-            ->denormalize(
-                [
-                    'title' => 'Cap',
-                    'rating' => 5,
-                    'comment' => 'ok',
-                    'product' => '/api/v2/shop/products/cap_code',
-                    'email' => 'john@example.com',
-                ],
-                AddProductReview::class,
-                null,
-                $context,
-            ))
-        ;
+
+        $this->iriToIdentifierConverter
+            ->expects(self::exactly(4))
+            ->method('isIdentifier')
+            ->willReturnMap([
+                ['Cap', false],
+                ['ok', false],
+                ['/api/v2/shop/products/cap_code', true],
+                ['john@example.com', false]
+            ]);
+
+        $this->iriToIdentifierConverter
+            ->expects(self::once())
+            ->method('getIdentifier')
+            ->with('/api/v2/shop/products/cap_code')
+            ->willReturn('cap_code');
+
+        $this->commandDenormalizer
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with([
+                'title' => 'Cap',
+                'rating' => 5,
+                'comment' => 'ok',
+                'product' => 'cap_code',
+                'email' => 'john@example.com',
+            ], AddProductReview::class, null, $context)
+            ->willReturn($addProductReview);
+
+        $result = $this->commandArgumentsDenormalizer->denormalize(
+            [
+                'title' => 'Cap',
+                'rating' => 5,
+                'comment' => 'ok',
+                'product' => '/api/v2/shop/products/cap_code',
+                'email' => 'john@example.com',
+            ],
+            AddProductReview::class,
+            null,
+            $context
+        );
+
+        self::assertSame($addProductReview, $result);
     }
 
     public function testDenormalizesACommandWithAnArrayOfIris(): void
     {
         $command = new class() implements IriToIdentifierConversionAwareInterface {
             public string $iri = '/api/v2/iri';
-
             public array $arrayIris = [
                 '/api/v2/first-iri',
                 '/api/v2/second-iri',
             ];
-
             public array $arrayField = ['array'];
         };
+
         $context = ['input' => ['class' => $command::class]];
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('array')->willReturn(false);
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/iri')->willReturn(true);
-        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/iri')->willReturn('iri');
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/first-iri')->willReturn(true);
-        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/first-iri')->willReturn('first-iri');
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('')->willReturn(false);
-        $this->iriToIdentifierConverter->expects(self::never())->method('getIdentifier')->with('');
-        $this->iriToIdentifierConverter->expects(self::once())->method('isIdentifier')->with('/api/v2/second-iri')->willReturn(true);
-        $this->iriToIdentifierConverter->expects(self::once())->method('getIdentifier')->with('/api/v2/second-iri')->willReturn('second-iri');
-        $this->commandDenormalizer->expects(self::once())->method('denormalize')->with([
-            'iri' => 'iri',
-            'arrayIris' => [
-                'first-iri',
-                'second-iri',
-                '',
-            ],
-            'arrayField' => ['array'],
-        ], $command::class, null, $context)
-            ->willReturn($command)
-        ;
-        self::assertSame($command, $this->commandArgumentsDenormalizer
-            ->denormalize(
+
+        $this->iriToIdentifierConverter
+            ->method('isIdentifier')
+            ->willReturnCallback(function($value) {
+                return match($value) {
+                    '/api/v2/iri', '/api/v2/first-iri', '/api/v2/second-iri' => true,
+                    'array', '' => false,
+                    default => false,
+                };
+            });
+
+        $this->iriToIdentifierConverter
+            ->method('getIdentifier')
+            ->willReturnCallback(function($value) {
+                return match($value) {
+                    '/api/v2/iri' => 'iri',
+                    '/api/v2/first-iri' => 'first-iri',
+                    '/api/v2/second-iri' => 'second-iri',
+                    default => null,
+                };
+            });
+
+        $this->commandDenormalizer
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with(
                 [
-                    'iri' => '/api/v2/iri',
-                    'arrayIris' => [
-                        '/api/v2/first-iri',
-                        '/api/v2/second-iri',
-                        '',
-                    ],
-                    'arrayField' => ['array'],
+                    'iri' => 'iri',
+                    'arrayIris' => ['first-iri', 'second-iri', ''],
+                    'arrayField' => ['array']
                 ],
                 $command::class,
                 null,
-                $context,
-            ))
-        ;
+                $context
+            )
+            ->willReturn($command);
+
+        $result = $this->commandArgumentsDenormalizer->denormalize(
+            [
+                'iri' => '/api/v2/iri',
+                'arrayIris' => [
+                    '/api/v2/first-iri',
+                    '/api/v2/second-iri',
+                    '',
+                ],
+                'arrayField' => ['array']
+            ],
+            $command::class,
+            null,
+            $context
+        );
+
+        self::assertSame($command, $result);
     }
 }

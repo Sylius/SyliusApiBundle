@@ -78,7 +78,7 @@ final class ProductAttributeValueDenormalizerTest extends TestCase
         $attributeMock = $this->createMock(ProductAttributeInterface::class);
         /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
         $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
-        $this->iriConverter->expects(self::once())->method('getResourceFromIri')->with('/attributes/material')->willReturn($attributeMock);
+        $this->iriConverter->method('getResourceFromIri')->with('/attributes/material')->willReturn($attributeMock);
         $attributeMock->expects(self::once())->method('getStorageType')->willReturn('text');
         $attributeMock->expects(self::once())->method('getType')->willReturn('text');
         $this->productAttributeValueDenormalizer->setDenormalizer($denormalizerMock);

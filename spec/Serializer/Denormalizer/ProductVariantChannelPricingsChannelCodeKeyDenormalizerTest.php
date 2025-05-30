@@ -26,7 +26,6 @@ final class ProductVariantChannelPricingsChannelCodeKeyDenormalizerTest extends 
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->productVariantChannelPricingsChannelCodeKeyDenormalizer = new ProductVariantChannelPricingsChannelCodeKeyDenormalizer();
     }
 
@@ -51,24 +50,60 @@ final class ProductVariantChannelPricingsChannelCodeKeyDenormalizerTest extends 
 
     public function testDoesNothingIfThereIsNoChannelPricingsKey(): void
     {
-        /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->setDenormalizer($denormalizerMock);
-        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->denormalize([], ProductVariantInterface::class);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ProductVariantInterface::class, null, [
-            'sylius_product_variant_channel_pricings_channel_code_key_denormalizer_already_called' => true,
-        ]);
+
+        $originalData = ['someOtherKey' => []];
+
+        $denormalizerMock
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with(
+                $originalData,
+                ProductVariantInterface::class,
+                null,
+                ['sylius_product_variant_channel_pricings_channel_code_key_denormalizer_already_called' => true]
+            );
+
+        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->denormalize(
+            $originalData,
+            ProductVariantInterface::class
+        );
     }
 
     public function testChangesKeysOfChannelPricingsToChannelCode(): void
     {
-        /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->setDenormalizer($denormalizerMock);
-        $originalData = ['channelPricings' => ['WEB' => ['channelCode' => 'WEB'], 'MOBILE' => []]];
-        $updatedData = ['channelPricings' => ['WEB' => ['channelCode' => 'WEB'], 'MOBILE' => ['channelCode' => 'MOBILE']]];
-        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->denormalize($originalData, ProductVariantInterface::class);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with($updatedData, ProductVariantInterface::class, null, ['sylius_product_variant_channel_pricings_channel_code_key_denormalizer_already_called' => true]);
+
+        $originalData = [
+            'channelPricings' => [
+                'WEB' => ['channelCode' => 'WEB'],
+                'MOBILE' => []
+            ]
+        ];
+
+        $expectedData = [
+            'channelPricings' => [
+                'WEB' => ['channelCode' => 'WEB'],
+                'MOBILE' => ['channelCode' => 'MOBILE']
+            ]
+        ];
+
+        $denormalizerMock
+            ->expects(self::once())
+            ->method('denormalize')
+            ->with(
+                $expectedData,
+                ProductVariantInterface::class,
+                null,
+                ['sylius_product_variant_channel_pricings_channel_code_key_denormalizer_already_called' => true]
+            );
+
+        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->denormalize(
+            $originalData,
+            ProductVariantInterface::class
+        );
     }
 
     public function testThrowsAnExceptionIfChannelCodeIsNotTheSameAsKey(): void
