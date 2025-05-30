@@ -75,8 +75,8 @@ final class CommandDenormalizerTest extends TestCase
             ->with($data, '', null, $context)
             ->willThrowException($exception);
 
-        $this->expectException(MissingConstructorArgumentsException::class);
-        $this->expectExceptionMessage('Request does not have the following required fields specified: first_name, lastName.');
+        self::expectException(MissingConstructorArgumentsException::class);
+        self::expectExceptionMessage('Request does not have the following required fields specified: first_name, lastName.');
 
         $this->commandDenormalizer->denormalize($data, '', null, $context);
     }
@@ -100,8 +100,8 @@ final class CommandDenormalizerTest extends TestCase
             ->with($data, '', null, $context)
             ->willThrowException($exception);
 
-        $this->expectException(InvalidRequestArgumentException::class);
-        $this->expectExceptionMessage('Request field "first_name" should be of type "string".');
+        self::expectException(InvalidRequestArgumentException::class);
+        self::expectExceptionMessage('Request field "first_name" should be of type "string".');
 
         $this->commandDenormalizer->denormalize($data, '', null, $context);
     }
@@ -118,8 +118,8 @@ final class CommandDenormalizerTest extends TestCase
             ->with($data, '', null, $context)
             ->willThrowException($exception);
 
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Unexpected value');
+        self::expectException(UnexpectedValueException::class);
+        self::expectExceptionMessage('Unexpected value');
 
         $this->commandDenormalizer->denormalize($data, '', null, $context);
     }

@@ -71,7 +71,7 @@ final class AddPaymentRequestHandlerTest extends TestCase
     #[Test]
     public function it_throws_an_exception_if_there_is_no_payment_for_given_id_and_order_token_value(): void
     {
-        $this->expectException(PaymentNotFoundException::class);
+        self::expectException(PaymentNotFoundException::class);
 
         $this->paymentRepository->findOneByOrderToken(1, 'token')->willReturn(null);
 
@@ -81,7 +81,7 @@ final class AddPaymentRequestHandlerTest extends TestCase
     #[Test]
     public function it_throws_an_exception_if_there_is_no_payment_method_for_given_code(): void
     {
-        $this->expectException(PaymentMethodNotFoundException::class);
+        self::expectException(PaymentMethodNotFoundException::class);
 
         $payment = $this->prophesize(PaymentInterface::class);
 

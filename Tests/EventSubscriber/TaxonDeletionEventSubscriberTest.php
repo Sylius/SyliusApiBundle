@@ -31,7 +31,7 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
 {
     private ChannelRepositoryInterface&MockObject $channelRepository;
 
-    private TaxonInPromotionRuleCheckerInterface&MockObject $taxonInPromotionRuleChecker;
+    private MockObject&TaxonInPromotionRuleCheckerInterface $taxonInPromotionRuleChecker;
 
     private TaxonDeletionEventSubscriber $taxonDeletionEventSubscriber;
 
@@ -90,7 +90,7 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_DELETE);
         $taxonMock->expects(self::once())->method('getCode')->willReturn('WATCHES');
         $this->channelRepository->expects(self::once())->method('findOneBy')->with(['menuTaxon' => $taxonMock])->willReturn($channelMock);
-        $this->expectException(Exception::class);
+        self::expectException(Exception::class);
         $this->taxonDeletionEventSubscriber->protectFromRemovingMenuTaxon(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -164,7 +164,7 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
             $taxonMock,
         );
         $this->taxonInPromotionRuleChecker->expects(self::once())->method('isInUse')->with($taxonMock)->willReturn(true);
-        $this->expectException(ResourceDeleteException::class);
+        self::expectException(ResourceDeleteException::class);
         $this->taxonDeletionEventSubscriber->protectFromRemovingTaxonInUseByPromotionRule($event);
     }
 }

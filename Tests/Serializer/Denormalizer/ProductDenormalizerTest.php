@@ -118,7 +118,7 @@ final class ProductDenormalizerTest extends TestCase
         $productVariantMock = $this->createMock(ProductVariantInterface::class);
         $this->productDenormalizer->setDenormalizer($denormalizerMock);
         $denormalizerMock->expects(self::never())->method('denormalize')->with([], ProductInterface::class, null, [self::ALREADY_CALLED => true]);
-        $this->expectException(\InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->productDenormalizer->denormalize(['options' => ['/options/color']], ProductInterface::class, null, [AbstractNormalizer::OBJECT_TO_POPULATE => $productVariantMock]);
     }
 }

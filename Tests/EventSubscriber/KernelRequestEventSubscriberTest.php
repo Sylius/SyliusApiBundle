@@ -59,7 +59,7 @@ final class KernelRequestEventSubscriberTest extends TestCase
         $this->kernelRequestEventSubscriber = new KernelRequestEventSubscriber(false, '/api/v2');
         $eventMock->method('getRequest')->willReturn($requestMock);
         $requestMock->expects(self::once())->method('getPathInfo')->willReturn('/api/v2/any-endpoint');
-        $this->expectException(NotFoundHttpException::class);
+        self::expectException(NotFoundHttpException::class);
         $this->kernelRequestEventSubscriber->validateApi(new RequestEvent(
             $kernelMock,
             $requestMock,

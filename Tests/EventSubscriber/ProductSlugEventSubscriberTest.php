@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 final class ProductSlugEventSubscriberTest extends TestCase
 {
-    private SlugGeneratorInterface&MockObject $slugGenerator;
+    private MockObject&SlugGeneratorInterface $slugGenerator;
 
     private ProductSlugEventSubscriber $productSlugEventSubscriber;
 

@@ -31,7 +31,7 @@ final class EmptyPropertyListExtractorTest extends TestCase
 
     public function testPropertyListExtractor(): void
     {
-        $this->assertInstanceOf(PropertyListExtractorInterface::class, $this->emptyPropertyListExtractor);
+        self::assertInstanceOf(PropertyListExtractorInterface::class, $this->emptyPropertyListExtractor);
     }
 
     public function testProvidesEmptyListIfRequestedClassExists(): void

@@ -15,10 +15,8 @@ namespace Tests\Sylius\Bundle\ApiBundle\StateProvider\Shop\Order\Payment\Payment
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
 use Sylius\Bundle\ApiBundle\StateProvider\Shop\Order\Payment\PaymentMethod\CollectionProvider;
@@ -33,27 +31,24 @@ use Sylius\Component\Payment\Resolver\PaymentMethodsResolverInterface;
 
 final class CollectionProviderTest extends TestCase
 {
-    /** @var PaymentRepositoryInterface|MockObject */
-    private MockObject $paymentRepositoryMock;
+    private MockObject&PaymentRepositoryInterface $paymentRepository;
 
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private MockObject&SectionProviderInterface $sectionProvider;
 
-    /** @var PaymentMethodsResolverInterface|MockObject */
-    private MockObject $paymentMethodsResolverMock;
+    private MockObject&PaymentMethodsResolverInterface $paymentMethodsResolver;
 
     private CollectionProvider $collectionProvider;
 
     protected function setUp(): void
     {
-        $this->paymentRepositoryMock = $this->createMock(PaymentRepositoryInterface::class);
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->paymentMethodsResolverMock = $this->createMock(PaymentMethodsResolverInterface::class);
-        $this->collectionProvider = new CollectionProvider($this->paymentRepositoryMock, $this->orderRepositoryMock, $this->sectionProviderMock, $this->paymentMethodsResolverMock);
+        parent::setUp();
+        $this->paymentRepository = $this->createMock(PaymentRepositoryInterface::class);
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->paymentMethodsResolver = $this->createMock(PaymentMethodsResolverInterface::class);
+        $this->collectionProvider = new CollectionProvider($this->paymentRepository, $this->orderRepository, $this->sectionProvider, $this->paymentMethodsResolver);
     }
 
     public function testProvidesPaymentMethods(): void
@@ -67,11 +62,11 @@ final class CollectionProviderTest extends TestCase
         /** @var PaymentMethodInterface|MockObject $methodMock */
         $methodMock = $this->createMock(PaymentMethodInterface::class);
         $operation = new GetCollection(class: PaymentMethodInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->orderRepositoryMock->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
         $cartMock->expects(self::once())->method('getTokenValue')->willReturn('TOKEN');
-        $this->paymentRepositoryMock->expects(self::once())->method('findOneByOrderToken')->with(1, 'TOKEN')->willReturn($paymentMock);
-        $this->paymentMethodsResolverMock->expects(self::once())->method('getSupportedMethods')->with($paymentMock)->willReturn([$methodMock]);
+        $this->paymentRepository->expects(self::once())->method('findOneByOrderToken')->with(1, 'TOKEN')->willReturn($paymentMock);
+        $this->paymentMethodsResolver->expects(self::once())->method('getSupportedMethods')->with($paymentMock)->willReturn([$methodMock]);
         self::assertSame([$methodMock], $this->collectionProvider
             ->provide($operation, ['tokenValue' => 'TOKEN', 'paymentId' => 1], ['sylius_api_channel' => $channelMock]))
         ;
@@ -82,8 +77,8 @@ final class CollectionProviderTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(class: PaymentMethodInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->orderRepositoryMock->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn(null);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn(null);
         self::assertSame([], $this->collectionProvider->provide($operation, ['tokenValue' => 'TOKEN', 'paymentId' => 1], ['sylius_api_channel' => $channelMock]));
     }
 
@@ -94,40 +89,40 @@ final class CollectionProviderTest extends TestCase
         /** @var OrderInterface|MockObject $cartMock */
         $cartMock = $this->createMock(OrderInterface::class);
         $operation = new GetCollection(class: PaymentMethodInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->orderRepositoryMock->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
         $cartMock->expects(self::once())->method('getTokenValue')->willReturn('TOKEN');
-        $this->paymentRepositoryMock->expects(self::once())->method('findOneByOrderToken')->with(1, 'TOKEN')->willReturn(null);
+        $this->paymentRepository->expects(self::once())->method('findOneByOrderToken')->with(1, 'TOKEN')->willReturn(null);
         self::assertSame([], $this->collectionProvider->provide($operation, ['tokenValue' => 'TOKEN', 'paymentId' => 1], ['sylius_api_channel' => $channelMock]));
     }
 
     public function testThrowsAnExceptionWhenResourceIsNotAPaymentMethodInterface(): void
     {
-        $operation = new GetCollection(class: stdClass::class);
-        $this->expectException(InvalidArgumentException::class);
+        $operation = new GetCollection(class: \stdClass::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }
 
     public function testThrowsAnExceptionWhenOperationIsNotGetCollection(): void
     {
         $operation = new Get(class: PaymentMethodInterface::class);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }
 
     public function testThrowsAnExceptionWhenOperationIsNotInShopApiSection(): void
     {
         $operation = new GetCollection(class: PaymentMethodInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->expectException(InvalidArgumentException::class);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        self::expectException(\InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }
 
     public function testThrowsAnExceptionWhenUriVariablesDoNotExist(): void
     {
         $operation = new GetCollection(class: PaymentMethodInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->expectException(InvalidArgumentException::class);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::expectException(\InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }
 }

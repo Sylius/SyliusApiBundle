@@ -145,8 +145,8 @@ final class IriToIdentifierConverterTest extends TestCase
     #[Test]
     public function it_throws_invalid_argument_exception_if_no_route_matches(): void
     {
-        $this->expectException(ApiRouteNotFoundException::class);
-        $this->expectExceptionMessage('No route matches "/users/3".');
+        self::expectException(ApiRouteNotFoundException::class);
+        self::expectExceptionMessage('No route matches "/users/3".');
 
         $this->router->match('/users/3')->willThrow(new SymfonyRouteNotFoundException())->shouldBeCalledTimes(1);
 
@@ -156,8 +156,8 @@ final class IriToIdentifierConverterTest extends TestCase
     #[Test]
     public function it_throws_invalid_argument_exception_if_parameter_api_resource_class_does_not_exist(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('No resource associated to "/users/3".');
+        self::expectException(InvalidArgumentException::class);
+        self::expectExceptionMessage('No resource associated to "/users/3".');
 
         $this->router->match('/users/3')->willReturn([
             '_api_operation_name' => 'get',
@@ -169,8 +169,8 @@ final class IriToIdentifierConverterTest extends TestCase
     #[Test]
     public function it_throws_invalid_argument_exception_if_parameter_api_operation_name_does_not_exist(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('No resource associated to "/users/3".');
+        self::expectException(InvalidArgumentException::class);
+        self::expectExceptionMessage('No resource associated to "/users/3".');
 
         $this->router->match('/users/3')->willReturn([
             '_api_resource_class' => AddProductReview::class,
@@ -182,8 +182,8 @@ final class IriToIdentifierConverterTest extends TestCase
     #[Test]
     public function it_throws_invalid_argument_exception_if_converter_returns_more_than_one_identifier(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('IriToIdentifierConverter does not support subresources');
+        self::expectException(InvalidArgumentException::class);
+        self::expectExceptionMessage('IriToIdentifierConverter does not support subresources');
 
         $operation = $this->prophesize(HttpOperation::class);
         $operation->getClass()->willReturn(AddProductReview::class);

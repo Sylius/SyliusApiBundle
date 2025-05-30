@@ -45,7 +45,7 @@ final class DisablingApiTest extends ApiTestCase
     public function it_returns_route_not_found_if_api_is_disabled(): void
     {
         $this->disableApi();
-        $this->expectException(NotFoundHttpException::class);
+        self::expectException(NotFoundHttpException::class);
 
         static::createClient()->request(
             'GET',
@@ -60,7 +60,7 @@ final class DisablingApiTest extends ApiTestCase
     public function it_throws_not_found_exception_for_any_api_endpoint(): void
     {
         $this->disableApi();
-        $this->expectException(NotFoundHttpException::class);
+        self::expectException(NotFoundHttpException::class);
 
         static::createClient()->request(
             'GET',

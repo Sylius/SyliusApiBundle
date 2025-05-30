@@ -106,7 +106,7 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
         /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->translatableLocaleKeyDenormalizer->setDenormalizer($denormalizerMock);
-        $this->expectException(TranslationLocaleMismatchException::class);
+        self::expectException(TranslationLocaleMismatchException::class);
         $this->translatableLocaleKeyDenormalizer->denormalize(['translations' => ['de_DE' => ['locale' => 'en_US']]], TranslatableInterface::class);
     }
 }

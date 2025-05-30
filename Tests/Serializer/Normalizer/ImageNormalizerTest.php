@@ -137,7 +137,7 @@ final class ImageNormalizerTest extends TestCase
             ->with(parse_url('some_path', \PHP_URL_PATH), 'invalid')
             ->willThrowException(new NonExistingFilterException());
 
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $this->imageNormalizer->normalize($imageMock);
     }
 
@@ -161,7 +161,7 @@ final class ImageNormalizerTest extends TestCase
             ->with(parse_url('some_path', \PHP_URL_PATH), 'invalid_filter')
             ->willThrowException(new \OutOfBoundsException());
 
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $this->imageNormalizer->normalize($imageMock);
     }
 

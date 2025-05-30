@@ -91,7 +91,7 @@ final class ApiCartBlamerListenerTest extends TestCase
         $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
         $this->cartContext->expects(self::once())->method('getCart')->willReturn($orderMock);
         $tokenMock->expects(self::once())->method('getUser')->willReturn($userMock);
-        $this->expectException(UnexpectedTypeException::class);
+        self::expectException(UnexpectedTypeException::class);
         $this->apiCartBlamerListener->onLoginSuccess(new LoginSuccessEvent(
             $authenticatorMock,
             $passportMock,

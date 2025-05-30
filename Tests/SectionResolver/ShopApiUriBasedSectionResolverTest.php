@@ -32,7 +32,7 @@ final class ShopApiUriBasedSectionResolverTest extends TestCase
 
     public function testUriBasedSectionResolver(): void
     {
-        $this->assertInstanceOf(UriBasedSectionResolverInterface::class, $this->resolver);
+        self::assertInstanceOf(UriBasedSectionResolverInterface::class, $this->resolver);
     }
 
     public function testReturnsShopApiSectionIfPathStartsWithApiV2Shop(): void
@@ -51,7 +51,7 @@ final class ShopApiUriBasedSectionResolverTest extends TestCase
      */
     public function testThrowsAnExceptionIfPathDoesNotStartWithApiV2Shop(string $path): void
     {
-        $this->expectException(SectionCannotBeResolvedException::class);
+        self::expectException(SectionCannotBeResolvedException::class);
         $this->resolver->getSection($path);
     }
 

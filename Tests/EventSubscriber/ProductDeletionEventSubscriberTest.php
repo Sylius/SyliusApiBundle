@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 final class ProductDeletionEventSubscriberTest extends TestCase
 {
-    private ProductInPromotionRuleCheckerInterface&MockObject $productInPromotionRuleChecker;
+    private MockObject&ProductInPromotionRuleCheckerInterface $productInPromotionRuleChecker;
 
     private ProductDeletionEventSubscriber $productDeletionEventSubscriber;
 
@@ -102,7 +102,7 @@ final class ProductDeletionEventSubscriberTest extends TestCase
             $productMock,
         );
         $this->productInPromotionRuleChecker->expects(self::once())->method('isInUse')->with($productMock)->willReturn(true);
-        $this->expectException(ResourceDeleteException::class);
+        self::expectException(ResourceDeleteException::class);
         $this->productDeletionEventSubscriber->protectFromRemovingProductInUseByPromotionRule($event);
     }
 }

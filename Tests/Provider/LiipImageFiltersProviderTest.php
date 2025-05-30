@@ -33,7 +33,7 @@ final class LiipImageFiltersProviderTest extends TestCase
 
     public function testAnImageFiltersProvider(): void
     {
-        $this->assertInstanceOf(ImageFiltersProviderInterface::class, $this->liipImageFiltersProvider);
+        self::assertInstanceOf(ImageFiltersProviderInterface::class, $this->liipImageFiltersProvider);
     }
 
     public function testReturnsImageFilters(): void

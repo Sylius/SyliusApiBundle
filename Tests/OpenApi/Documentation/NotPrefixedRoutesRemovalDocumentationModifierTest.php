@@ -34,7 +34,7 @@ final class NotPrefixedRoutesRemovalDocumentationModifierTest extends TestCase
     #[Test]
     public function it_implements_the_documentation_modifier_interface(): void
     {
-        $this->assertInstanceOf(DocumentationModifierInterface::class, $this->notApiRoutesRemovalDocumentationModifier);
+        self::assertInstanceOf(DocumentationModifierInterface::class, $this->notApiRoutesRemovalDocumentationModifier);
     }
 
     #[Test]

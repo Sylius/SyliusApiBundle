@@ -66,7 +66,7 @@ final class ProductAttributeValueDenormalizerTest extends TestCase
         $this->productAttributeValueDenormalizer->setDenormalizer($denormalizerMock);
         $denormalizerMock->expects(self::never())->method('denormalize')->with([], ProductAttributeValueInterface::class, null, [self::ALREADY_CALLED => true])
         ;
-        $this->expectException(InvalidProductAttributeValueTypeException::class);
+        self::expectException(InvalidProductAttributeValueTypeException::class);
         $this->productAttributeValueDenormalizer->denormalize(['attribute' => '/attributes/material', 'value' => 4], ProductAttributeValueInterface::class);
     }
 

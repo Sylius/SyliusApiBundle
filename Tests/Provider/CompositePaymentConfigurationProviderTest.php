@@ -22,7 +22,7 @@ use Sylius\Component\Core\Model\PaymentMethodInterface;
 
 final class CompositePaymentConfigurationProviderTest extends TestCase
 {
-    private PaymentConfigurationProviderInterface&MockObject $apiPaymentMethod;
+    private MockObject&PaymentConfigurationProviderInterface $apiPaymentMethod;
 
     private CompositePaymentConfigurationProvider $compositePaymentConfigurationProvider;
 

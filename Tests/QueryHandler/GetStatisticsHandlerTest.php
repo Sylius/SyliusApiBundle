@@ -28,7 +28,7 @@ use Sylius\Component\Core\Statistics\ValueObject\Statistics;
 
 final class GetStatisticsHandlerTest extends TestCase
 {
-    private StatisticsProviderInterface&MockObject $statisticsProvider;
+    private MockObject&StatisticsProviderInterface $statisticsProvider;
 
     private ChannelRepositoryInterface&MockObject $channelRepository;
 
@@ -68,7 +68,7 @@ final class GetStatisticsHandlerTest extends TestCase
             new DateTime('2022-12-31'),
         );
         $this->channelRepository->expects(self::once())->method('findOneByCode')->with('NON_EXISTING_CHANNEL_CODE')->willReturn(null);
-        $this->expectException(ChannelNotFoundException::class);
+        self::expectException(ChannelNotFoundException::class);
         $this->getStatisticsHandler->__invoke(new GetStatistics('day', $datePeriod, 'NON_EXISTING_CHANNEL_CODE'));
     }
 }

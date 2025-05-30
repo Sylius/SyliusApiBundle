@@ -80,7 +80,7 @@ final class ProductOptionValueNormalizerTest extends TestCase
 
     public function testThrowsAnExceptionIfTheGivenObjectIsNotAProductOptionValueInterface(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $this->productOptionValueNormalizer->normalize(new \stdClass());
     }
 
@@ -88,7 +88,7 @@ final class ProductOptionValueNormalizerTest extends TestCase
     {
         /** @var ProductOptionValueInterface|MockObject $productOptionValueMock */
         $productOptionValueMock = $this->createMock(ProductOptionValueInterface::class);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $this->productOptionValueNormalizer->normalize($productOptionValueMock, null, ['sylius_product_option_value_normalizer_already_called' => true]);
     }
 }

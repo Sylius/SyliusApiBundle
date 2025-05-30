@@ -61,7 +61,7 @@ final class ChannelDenormalizerTest extends TestCase
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
         $denormalizerMock->expects(self::once())->method('denormalize')->with([], 'string', null, [self::ALREADY_CALLED => true])->willReturn(new \stdClass());
-        $this->expectException(\InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->channelDenormalizer->denormalize([], 'string');
     }
 

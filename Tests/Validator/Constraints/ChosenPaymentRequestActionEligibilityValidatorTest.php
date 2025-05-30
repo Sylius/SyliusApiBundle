@@ -52,18 +52,18 @@ final class ChosenPaymentRequestActionEligibilityValidatorTest extends TestCase
 
     public function test_it_implements(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->chosenPaymentRequestActionEligibilityValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->chosenPaymentRequestActionEligibilityValidator);
     }
 
     public function test_it_throws_an_exception_if_value_is_not_an_add_payment_request(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->chosenPaymentRequestActionEligibilityValidator->validate('', new ChosenPaymentRequestActionEligibility());
     }
 
     public function test_it_throws_an_exception_if_constraint_is_not_an_instance_of_chosen_payment_request_action_eligibility(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->chosenPaymentRequestActionEligibilityValidator->validate(
             new AddPaymentRequest('ORDER_TOKEN', 123, 'PAYMENT_METHOD_CODE'),
             new class() extends Constraint {

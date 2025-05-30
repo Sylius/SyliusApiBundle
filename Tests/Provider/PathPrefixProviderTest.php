@@ -30,7 +30,7 @@ final class PathPrefixProviderTest extends TestCase
 
     public function testImplementsThePathPrefixProviderInterface(): void
     {
-        $this->assertInstanceOf(PathPrefixProviderInterface::class, $this->pathPrefixProvider);
+        self::assertInstanceOf(PathPrefixProviderInterface::class, $this->pathPrefixProvider);
     }
 
     public function testReturnsNullIfTheGivenPathIsNotApiPath(): void

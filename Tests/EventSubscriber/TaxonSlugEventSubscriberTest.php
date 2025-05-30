@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 final class TaxonSlugEventSubscriberTest extends TestCase
 {
-    private TaxonSlugGeneratorInterface&MockObject $taxonSlugGenerator;
+    private MockObject&TaxonSlugGeneratorInterface $taxonSlugGenerator;
 
     private TaxonSlugEventSubscriber $taxonSlugEventSubscriber;
 

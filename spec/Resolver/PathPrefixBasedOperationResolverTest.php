@@ -24,19 +24,18 @@ use Sylius\Component\Addressing\Model\Country;
 
 final class PathPrefixBasedOperationResolverTest extends TestCase
 {
-    /** @var ResourceMetadataCollectionFactoryInterface|MockObject */
-    private MockObject $resourceMetadataCollectionFactoryMock;
+    private ResourceMetadataCollectionFactoryInterface&MockObject $resourceMetadataCollectionFactory;
 
-    /** @var PathPrefixProviderInterface|MockObject */
-    private MockObject $pathPrefixProviderMock;
+    private PathPrefixProviderInterface&MockObject $pathPrefixProvider;
 
     private PathPrefixBasedOperationResolver $pathPrefixBasedOperationResolver;
 
     protected function setUp(): void
     {
-        $this->resourceMetadataCollectionFactoryMock = $this->createMock(ResourceMetadataCollectionFactoryInterface::class);
-        $this->pathPrefixProviderMock = $this->createMock(PathPrefixProviderInterface::class);
-        $this->pathPrefixBasedOperationResolver = new PathPrefixBasedOperationResolver($this->resourceMetadataCollectionFactoryMock, $this->pathPrefixProviderMock);
+        parent::setUp();
+        $this->resourceMetadataCollectionFactory = $this->createMock(ResourceMetadataCollectionFactoryInterface::class);
+        $this->pathPrefixProvider = $this->createMock(PathPrefixProviderInterface::class);
+        $this->pathPrefixBasedOperationResolver = new PathPrefixBasedOperationResolver($this->resourceMetadataCollectionFactory, $this->pathPrefixProvider);
     }
 
     public function testImplementsTheOperationResolverInterface(): void

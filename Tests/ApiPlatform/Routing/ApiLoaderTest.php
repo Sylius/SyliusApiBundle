@@ -46,7 +46,7 @@ final class ApiLoaderTest extends TestCase
     #[Test]
     public function it_implements_the_loader_interface(): void
     {
-        $this->assertInstanceOf(LoaderInterface::class, $this->apiLoader);
+        self::assertInstanceOf(LoaderInterface::class, $this->apiLoader);
     }
 
     #[Test]

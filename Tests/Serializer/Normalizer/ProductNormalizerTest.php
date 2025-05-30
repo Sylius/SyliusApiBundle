@@ -165,7 +165,7 @@ final class ProductNormalizerTest extends TestCase
             'sylius_product_normalizer_already_called' => true,
             'groups' => ['sylius:product:index'],
         ]);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $this->productNormalizer->normalize($productMock, null, [
             'sylius_product_normalizer_already_called' => true,
             'groups' => ['sylius:product:index'],
@@ -182,7 +182,7 @@ final class ProductNormalizerTest extends TestCase
         $this->normalizer->expects(self::never())->method('normalize')->with($productMock, null, [
             'groups' => ['sylius:product:show'],
         ]);
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         $this->productNormalizer->normalize($productMock, null, [
             'groups' => ['sylius:product:show'],
         ]);

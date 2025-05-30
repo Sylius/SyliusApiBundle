@@ -69,7 +69,7 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
             ->with([], 'string', null, [self::ALREADY_CALLED => true])
             ->willReturn(new \stdClass());
 
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
 
         $this->channelPriceHistoryConfigDenormalizer->denormalize([], 'string');
     }

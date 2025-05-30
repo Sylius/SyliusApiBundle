@@ -67,7 +67,7 @@ final class GetCustomerStatisticsHandlerTest extends TestCase
     {
         $this->customerRepository->expects(self::once())->method('find')->with(1)->willReturn(null);
         $query = new GetCustomerStatistics(1);
-        $this->expectException(CustomerNotFoundException::class);
+        self::expectException(CustomerNotFoundException::class);
         $this->getCustomerStatisticsHandler->__invoke($query);
     }
 }
