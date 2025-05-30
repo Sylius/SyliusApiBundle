@@ -57,12 +57,12 @@ final class BlameCartHandlerTest extends TestCase
         $userMock = $this->createMock(ShopUserInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneByEmail')->with('sylius@example.com')->willReturn($userMock);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('TOKEN')->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getCustomer')->willReturn(null);
-        $userMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $cartMock->expects($this->once())->method('setCustomerWithAuthorization')->with($customerMock);
-        $this->orderProcessorMock->expects($this->once())->method('process')->with($cartMock);
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('sylius@example.com')->willReturn($userMock);
+        $this->orderRepositoryMock->expects(self::once())->method('findCartByTokenValue')->with('TOKEN')->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getCustomer')->willReturn(null);
+        $userMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $cartMock->expects(self::once())->method('setCustomerWithAuthorization')->with($customerMock);
+        $this->orderProcessorMock->expects(self::once())->method('process')->with($cartMock);
         $this(new BlameCart('sylius@example.com', 'TOKEN'));
     }
 
@@ -74,9 +74,9 @@ final class BlameCartHandlerTest extends TestCase
         $userMock = $this->createMock(ShopUserInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneByEmail')->with('sylius@example.com')->willReturn($userMock);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('TOKEN')->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('sylius@example.com')->willReturn($userMock);
+        $this->orderRepositoryMock->expects(self::once())->method('findCartByTokenValue')->with('TOKEN')->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
         $this->expectException(InvalidArgumentException::class);
         $this->blameCartHandler->__invoke(new BlameCart('sylius@example.com', 'TOKEN'));
     }
@@ -85,7 +85,7 @@ final class BlameCartHandlerTest extends TestCase
     {
         /** @var ShopUserInterface|MockObject $userMock */
         $userMock = $this->createMock(ShopUserInterface::class);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneByEmail')->with('sylius@example.com')->willReturn($userMock);
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('sylius@example.com')->willReturn($userMock);
         $this->expectException(InvalidArgumentException::class);
         $this->blameCartHandler->__invoke(new BlameCart('sylius@example.com', 'TOKEN'));
     }

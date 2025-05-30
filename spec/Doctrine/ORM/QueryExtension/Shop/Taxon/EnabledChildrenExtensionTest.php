@@ -45,8 +45,8 @@ final class EnabledChildrenExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $this->enabledChildrenExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, stdClass::class, []);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToItemForAdminApiSection(): void
@@ -57,10 +57,10 @@ final class EnabledChildrenExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
         $this->enabledChildrenExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class, []);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testAppliesExtensionToItemQuery(): void
@@ -71,13 +71,13 @@ final class EnabledChildrenExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['rootAlias']);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('enabled')->willReturn('enabled');
-        $queryNameGeneratorMock->expects($this->once())->method('generateJoinAlias')->with('child')->willReturn('childAlias');
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('childAlias')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('leftJoin')->with('rootAlias.children', 'childAlias', 'WITH', 'childAlias.enabled = :enabled')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('enabled', true)->willReturn($queryBuilderMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['rootAlias']);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('enabled')->willReturn('enabled');
+        $queryNameGeneratorMock->expects(self::once())->method('generateJoinAlias')->with('child')->willReturn('childAlias');
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('childAlias')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('rootAlias.children', 'childAlias', 'WITH', 'childAlias.enabled = :enabled')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('enabled', true)->willReturn($queryBuilderMock);
         $this->enabledChildrenExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, TaxonInterface::class, [], null, []);
     }
 }

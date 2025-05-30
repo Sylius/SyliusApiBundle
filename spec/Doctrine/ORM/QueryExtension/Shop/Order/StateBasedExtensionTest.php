@@ -49,7 +49,7 @@ final class StateBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->stateBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ResourceInterface::class, new Get());
     }
 
@@ -61,8 +61,8 @@ final class StateBasedExtensionTest extends TestCase
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         /** @var AdminApiSection|MockObject $sectionMock */
         $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->stateBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, new Get());
     }
 
@@ -82,14 +82,14 @@ final class StateBasedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var Comparison|MockObject $exprNeqMock */
         $exprNeqMock = $this->createMock(Comparison::class);
-        $userMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('state')->willReturn('state');
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('neq')->with('o.state', ':state')->willReturn($exprNeqMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with($exprNeqMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturn($queryBuilderMock);
+        $userMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('state')->willReturn('state');
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('neq')->with('o.state', ':state')->willReturn($exprNeqMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprNeqMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturn($queryBuilderMock);
         $this->stateBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, new Get());
     }
 
@@ -99,7 +99,7 @@ final class StateBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, ResourceInterface::class, [], new Get());
     }
 
@@ -111,8 +111,8 @@ final class StateBasedExtensionTest extends TestCase
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         /** @var AdminApiSection|MockObject $sectionMock */
         $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, [], new Get());
     }
 
@@ -126,9 +126,9 @@ final class StateBasedExtensionTest extends TestCase
         $sectionMock = $this->createMock(ShopApiSection::class);
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $operationMock->expects($this->once())->method('getName')->willReturn('sylius_api_shop_order_payment_get_configuration');
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $operationMock->expects(self::once())->method('getName')->willReturn('sylius_api_shop_order_payment_get_configuration');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, [], $operationMock);
     }
 
@@ -146,14 +146,14 @@ final class StateBasedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var Comparison|MockObject $exprEqMock */
         $exprEqMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $operationMock->expects($this->once())->method('getName')->willReturn('sylius_api_shop_order_get_custom');
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('state')->willReturn('state');
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('eq')->with('o.state', ':state')->willReturn($exprEqMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with($exprEqMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturn($queryBuilderMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $operationMock->expects(self::once())->method('getName')->willReturn('sylius_api_shop_order_get_custom');
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('state')->willReturn('state');
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('eq')->with('o.state', ':state')->willReturn($exprEqMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprEqMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturn($queryBuilderMock);
         $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, [], $operationMock);
     }
 }

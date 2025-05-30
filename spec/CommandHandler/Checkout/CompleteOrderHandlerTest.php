@@ -72,19 +72,19 @@ final class CompleteOrderHandlerTest extends TestCase
         $customerMock = $this->createMock(CustomerInterface::class);
         $this->completeOrderHandler = new CompleteOrderHandler($this->orderRepositoryMock, $this->stateMachineMock, $this->commandBusMock, $this->eventBusMock, $this->orderPromotionsIntegrityCheckerMock);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->expects($this->once())->method('getTotal')->willReturn(1500);
-        $orderMock->expects($this->never())->method('setNotes')->with(null);
-        $this->orderPromotionsIntegrityCheckerMock->expects($this->once())->method('check')->with($orderMock)->willReturn(null);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete')->willReturn(true);
-        $orderMock->expects($this->once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $orderMock->expects(self::once())->method('getTotal')->willReturn(1500);
+        $orderMock->expects(self::never())->method('setNotes')->with(null);
+        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete')->willReturn(true);
+        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete');
         $orderCompleted = new OrderCompleted('COMPLETED_ORDER_TOKEN');
-        $this->eventBusMock->expects($this->once())->method('dispatch')->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
+        $this->eventBusMock->expects(self::once())->method('dispatch')->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
             ->willReturn(new Envelope($orderCompleted))
         ;
-        $this->assertSame($orderMock, $this($completeOrder));
+        self::assertSame($orderMock, $this($completeOrder));
     }
 
     public function testHandlesOrderCompletionWithNotes(): void
@@ -94,19 +94,19 @@ final class CompleteOrderHandlerTest extends TestCase
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN', notes: 'ThankYou');
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->expects($this->once())->method('getTotal')->willReturn(1500);
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('setNotes')->with('ThankYou');
-        $this->orderPromotionsIntegrityCheckerMock->expects($this->once())->method('check')->with($orderMock)->willReturn(null);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete')->willReturn(true);
-        $orderMock->expects($this->once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete');
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $orderMock->expects(self::once())->method('getTotal')->willReturn(1500);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('setNotes')->with('ThankYou');
+        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete')->willReturn(true);
+        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete');
         $orderCompleted = new OrderCompleted('COMPLETED_ORDER_TOKEN');
-        $this->eventBusMock->expects($this->once())->method('dispatch')->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
+        $this->eventBusMock->expects(self::once())->method('dispatch')->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
             ->willReturn(new Envelope($orderCompleted))
         ;
-        $this->assertSame($orderMock, $this($completeOrder));
+        self::assertSame($orderMock, $this($completeOrder));
     }
 
     public function testDelaysAnInformationAboutCartRecalculate(): void
@@ -118,23 +118,23 @@ final class CompleteOrderHandlerTest extends TestCase
         /** @var PromotionInterface|MockObject $promotionMock */
         $promotionMock = $this->createMock(PromotionInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN', notes: 'ThankYou');
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->expects($this->once())->method('getTotal')->willReturn(1000);
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('setNotes')->with('ThankYou');
-        $this->orderPromotionsIntegrityCheckerMock->expects($this->once())->method('check')->with($orderMock)->willReturn($promotionMock);
-        $promotionMock->expects($this->once())->method('getName')->willReturn('Christmas');
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $orderMock->expects(self::once())->method('getTotal')->willReturn(1000);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('setNotes')->with('ThankYou');
+        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn($promotionMock);
+        $promotionMock->expects(self::once())->method('getName')->willReturn('Christmas');
         $informAboutCartRecalculate = new InformAboutCartRecalculation('Christmas');
-        $this->commandBusMock->expects($this->once())->method('dispatch')->with($informAboutCartRecalculate, [new DispatchAfterCurrentBusStamp()])
+        $this->commandBusMock->expects(self::once())->method('dispatch')->with($informAboutCartRecalculate, [new DispatchAfterCurrentBusStamp()])
             ->willReturn(new Envelope($informAboutCartRecalculate))
         ;
-        $this->assertSame($orderMock, $this($completeOrder));
+        self::assertSame($orderMock, $this($completeOrder));
     }
 
     public function testThrowsAnExceptionIfOrderDoesNotExist(): void
     {
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
         $this->expectException(InvalidArgumentException::class);
         $this->completeOrderHandler->__invoke($completeOrder);
     }
@@ -146,10 +146,10 @@ final class CompleteOrderHandlerTest extends TestCase
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->expects($this->once())->method('getTotal')->willReturn(1500, 2000);
-        $this->orderPromotionsIntegrityCheckerMock->expects($this->once())->method('check')->with($orderMock)->willReturn(null);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $orderMock->expects(self::once())->method('getTotal')->willReturn(1500, 2000);
+        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
         $this->expectException(OrderTotalHasChangedException::class);
         $this->completeOrderHandler->__invoke($completeOrder);
     }
@@ -161,11 +161,11 @@ final class CompleteOrderHandlerTest extends TestCase
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->expects($this->once())->method('getTotal')->willReturn(1500);
-        $this->orderPromotionsIntegrityCheckerMock->expects($this->once())->method('check')->with($orderMock)->willReturn(null);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_COMPLETE)->willReturn(false);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $orderMock->expects(self::once())->method('getTotal')->willReturn(1500);
+        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_COMPLETE)->willReturn(false);
         $this->expectException(InvalidArgumentException::class);
         $this->completeOrderHandler->__invoke($completeOrder);
     }
@@ -175,8 +175,8 @@ final class CompleteOrderHandlerTest extends TestCase
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn(null);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn(null);
         $this->expectException(InvalidArgumentException::class);
         $this->completeOrderHandler->__invoke($completeOrder);
     }

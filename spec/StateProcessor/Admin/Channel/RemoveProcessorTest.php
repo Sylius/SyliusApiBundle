@@ -43,8 +43,8 @@ final class RemoveProcessorTest extends TestCase
 
     public function testThrowsAnExceptionIfObjectIsNotAChannel(): void
     {
-        $this->channelDeletionCheckerMock->expects($this->never())->method('isDeletable');
-        $this->removeProcessorMock->expects($this->never())->method('process')->with($this->any());
+        $this->channelDeletionCheckerMock->expects(self::never())->method('isDeletable');
+        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
         $this->expectException(InvalidArgumentException::class);
         $this->removeProcessor->process(new stdClass(), new Delete(), [], []);
     }
@@ -55,8 +55,8 @@ final class RemoveProcessorTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
         $uriVariables = [];
         $context = [];
-        $this->channelDeletionCheckerMock->expects($this->once())->method('isDeletable')->with($channelMock)->willReturn(false);
-        $this->removeProcessorMock->expects($this->never())->method('process')->with($this->any());
+        $this->channelDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($channelMock)->willReturn(false);
+        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
         $this->expectException(ResourceDeleteException::class);
         $this->removeProcessor->process($channelMock, new Delete(), $uriVariables, $context);
     }
@@ -68,8 +68,8 @@ final class RemoveProcessorTest extends TestCase
         $operation = new Delete();
         $uriVariables = [];
         $context = [];
-        $this->channelDeletionCheckerMock->expects($this->once())->method('isDeletable')->with($channelMock)->willReturn(true);
-        $this->removeProcessorMock->expects($this->once())->method('process')->with($channelMock, $operation, $uriVariables, $context)->willReturn($channelMock);
+        $this->channelDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($channelMock)->willReturn(true);
+        $this->removeProcessorMock->expects(self::once())->method('process')->with($channelMock, $operation, $uriVariables, $context)->willReturn($channelMock);
         $this->removeProcessor->process($channelMock, $operation, $uriVariables, $context);
     }
 }

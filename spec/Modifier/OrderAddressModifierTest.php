@@ -49,17 +49,17 @@ final class OrderAddressModifierTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $orderMock->expects($this->once())->method('getTokenValue')->willReturn('ORDERTOKEN');
-        $orderMock->expects($this->once())->method('getShippingAddress')->willReturn(null);
-        $orderMock->expects($this->once())->method('getBillingAddress')->willReturn(null);
-        $orderMock->expects($this->once())->method('getChannel')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
-        $orderMock->expects($this->once())->method('setBillingAddress')->with($billingAddressMock);
-        $orderMock->expects($this->once())->method('setShippingAddress')->with($this->isInstanceOf(AddressInterface::class));
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('ORDERTOKEN');
+        $orderMock->expects(self::once())->method('getShippingAddress')->willReturn(null);
+        $orderMock->expects(self::once())->method('getBillingAddress')->willReturn(null);
+        $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
+        $orderMock->expects(self::once())->method('setBillingAddress')->with($billingAddressMock);
+        $orderMock->expects(self::once())->method('setShippingAddress')->with($this->isInstanceOf(AddressInterface::class));
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
             ->willReturn(true)
         ;
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
         ;
         $this->orderAddressModifier->modify($orderMock, $billingAddressMock, null);
     }
@@ -72,17 +72,17 @@ final class OrderAddressModifierTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $orderMock->expects($this->once())->method('getTokenValue')->willReturn('ORDERTOKEN');
-        $orderMock->expects($this->once())->method('getShippingAddress')->willReturn(null);
-        $orderMock->expects($this->once())->method('getBillingAddress')->willReturn(null);
-        $orderMock->expects($this->once())->method('getChannel')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isShippingAddressInCheckoutRequired')->willReturn(true);
-        $orderMock->expects($this->once())->method('setShippingAddress')->with($shippingAddressMock);
-        $orderMock->expects($this->once())->method('setBillingAddress')->with($this->isInstanceOf(AddressInterface::class));
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('ORDERTOKEN');
+        $orderMock->expects(self::once())->method('getShippingAddress')->willReturn(null);
+        $orderMock->expects(self::once())->method('getBillingAddress')->willReturn(null);
+        $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isShippingAddressInCheckoutRequired')->willReturn(true);
+        $orderMock->expects(self::once())->method('setShippingAddress')->with($shippingAddressMock);
+        $orderMock->expects(self::once())->method('setBillingAddress')->with($this->isInstanceOf(AddressInterface::class));
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
             ->willReturn(true)
         ;
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
         ;
         $this->orderAddressModifier->modify($orderMock, null, $shippingAddressMock);
     }
@@ -97,17 +97,17 @@ final class OrderAddressModifierTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $orderMock->expects($this->once())->method('getTokenValue')->willReturn('ORDERTOKEN');
-        $orderMock->expects($this->once())->method('getShippingAddress')->willReturn(null);
-        $orderMock->expects($this->once())->method('getBillingAddress')->willReturn(null);
-        $orderMock->expects($this->once())->method('getChannel')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
-        $orderMock->expects($this->once())->method('setBillingAddress')->with($billingAddressMock);
-        $orderMock->expects($this->once())->method('setShippingAddress')->with($shippingAddressMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('ORDERTOKEN');
+        $orderMock->expects(self::once())->method('getShippingAddress')->willReturn(null);
+        $orderMock->expects(self::once())->method('getBillingAddress')->willReturn(null);
+        $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
+        $orderMock->expects(self::once())->method('setBillingAddress')->with($billingAddressMock);
+        $orderMock->expects(self::once())->method('setShippingAddress')->with($shippingAddressMock);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
             ->willReturn(true)
         ;
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
         ;
         $this->orderAddressModifier->modify($orderMock, $billingAddressMock, $shippingAddressMock);
     }
@@ -126,19 +126,19 @@ final class OrderAddressModifierTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $orderMock->expects($this->once())->method('getTokenValue')->willReturn('ORDERTOKEN');
-        $orderMock->expects($this->once())->method('getBillingAddress')->willReturn($oldBillingAddressMock);
-        $orderMock->expects($this->once())->method('getShippingAddress')->willReturn($oldShippingAddressMock);
-        $orderMock->expects($this->once())->method('getChannel')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
-        $this->addressMapperMock->expects($this->once())->method('mapExisting')->with($oldBillingAddressMock, $newBillingAddressMock)->willReturn($oldBillingAddressMock);
-        $this->addressMapperMock->expects($this->once())->method('mapExisting')->with($oldShippingAddressMock, $newShippingAddressMock)->willReturn($oldShippingAddressMock);
-        $orderMock->expects($this->once())->method('setBillingAddress')->with($oldBillingAddressMock);
-        $orderMock->expects($this->once())->method('setShippingAddress')->with($oldShippingAddressMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('ORDERTOKEN');
+        $orderMock->expects(self::once())->method('getBillingAddress')->willReturn($oldBillingAddressMock);
+        $orderMock->expects(self::once())->method('getShippingAddress')->willReturn($oldShippingAddressMock);
+        $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
+        $this->addressMapperMock->expects(self::once())->method('mapExisting')->with($oldBillingAddressMock, $newBillingAddressMock)->willReturn($oldBillingAddressMock);
+        $this->addressMapperMock->expects(self::once())->method('mapExisting')->with($oldShippingAddressMock, $newShippingAddressMock)->willReturn($oldShippingAddressMock);
+        $orderMock->expects(self::once())->method('setBillingAddress')->with($oldBillingAddressMock);
+        $orderMock->expects(self::once())->method('setShippingAddress')->with($oldShippingAddressMock);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
             ->willReturn(true)
         ;
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
         ;
         $this->orderAddressModifier->modify($orderMock, $newBillingAddressMock, $newShippingAddressMock);
     }
@@ -151,7 +151,7 @@ final class OrderAddressModifierTest extends TestCase
         $shippingAddressMock = $this->createMock(AddressInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
+        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_ADDRESS)
             ->willReturn(false)
         ;
         $this->expectException(LogicException::class);

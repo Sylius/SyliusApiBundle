@@ -79,15 +79,15 @@ final class PickupCartHandlerTest extends TestCase
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
         $pickupCart = new PickupCart(channelCode: 'code', localeCode: 'en_US', email: 'sample@email.com');
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('code')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('getDefaultLocale')->willReturn($localeMock);
-        $this->customerRepositoryMock->expects($this->once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
-        $this->cartRepositoryMock->expects($this->once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn(null);
-        $this->generatorMock->expects($this->once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
-        $localeMock->expects($this->once())->method('getCode')->willReturn('en_US');
-        $channelMock->expects($this->once())->method('getLocales')->willReturn(new ArrayCollection([$localeMock]));
-        $this->cartFactoryMock->expects($this->once())->method('createNewCart')->with($channelMock, $customerMock, 'en_US', 'urisafestr')->willReturn($cartMock);
-        $this->orderManagerMock->expects($this->once())->method('persist')->with($cartMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('code')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('getDefaultLocale')->willReturn($localeMock);
+        $this->customerRepositoryMock->expects(self::once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
+        $this->cartRepositoryMock->expects(self::once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn(null);
+        $this->generatorMock->expects(self::once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
+        $localeMock->expects(self::once())->method('getCode')->willReturn('en_US');
+        $channelMock->expects(self::once())->method('getLocales')->willReturn(new ArrayCollection([$localeMock]));
+        $this->cartFactoryMock->expects(self::once())->method('createNewCart')->with($channelMock, $customerMock, 'en_US', 'urisafestr')->willReturn($cartMock);
+        $this->orderManagerMock->expects(self::once())->method('persist')->with($cartMock);
         $this($pickupCart);
     }
 
@@ -102,15 +102,15 @@ final class PickupCartHandlerTest extends TestCase
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
         $pickupCart = new PickupCart(channelCode: 'code', localeCode: 'en_US', email: 'sample@email.com');
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('code')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('getDefaultLocale')->willReturn($localeMock);
-        $this->customerRepositoryMock->expects($this->once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
-        $this->cartRepositoryMock->expects($this->once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn(null);
-        $this->generatorMock->expects($this->once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
-        $localeMock->expects($this->once())->method('getCode')->willReturn('en_US');
-        $channelMock->expects($this->once())->method('getLocales')->willReturn(new ArrayCollection([$localeMock]));
-        $this->cartFactoryMock->expects($this->once())->method('createNewCart')->with($channelMock, $customerMock, 'en_US', 'urisafestr')->willReturn($cartMock);
-        $this->orderManagerMock->expects($this->once())->method('persist')->with($cartMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('code')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('getDefaultLocale')->willReturn($localeMock);
+        $this->customerRepositoryMock->expects(self::once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
+        $this->cartRepositoryMock->expects(self::once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn(null);
+        $this->generatorMock->expects(self::once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
+        $localeMock->expects(self::once())->method('getCode')->willReturn('en_US');
+        $channelMock->expects(self::once())->method('getLocales')->willReturn(new ArrayCollection([$localeMock]));
+        $this->cartFactoryMock->expects(self::once())->method('createNewCart')->with($channelMock, $customerMock, 'en_US', 'urisafestr')->willReturn($cartMock);
+        $this->orderManagerMock->expects(self::once())->method('persist')->with($cartMock);
         $this($pickupCart);
     }
 
@@ -123,11 +123,11 @@ final class PickupCartHandlerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $pickupCart = new PickupCart(channelCode: 'code', localeCode: 'en_US', email: 'sample@email.com');
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('code')->willReturn($channelMock);
-        $this->customerRepositoryMock->expects($this->once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
-        $this->cartRepositoryMock->expects($this->once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getTokenValue')->willReturn('token');
-        $this->orderManagerMock->expects($this->never())->method('persist');
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('code')->willReturn($channelMock);
+        $this->customerRepositoryMock->expects(self::once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
+        $this->cartRepositoryMock->expects(self::once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getTokenValue')->willReturn('token');
+        $this->orderManagerMock->expects(self::never())->method('persist');
         $this($pickupCart);
     }
 
@@ -140,10 +140,10 @@ final class PickupCartHandlerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $pickupCart = new PickupCart(channelCode: 'code', localeCode: 'en_US', email: 'sample@email.com');
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('code')->willReturn($channelMock);
-        $this->customerRepositoryMock->expects($this->once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
-        $this->generatorMock->expects($this->once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
-        $this->cartRepositoryMock->expects($this->once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn($cartMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('code')->willReturn($channelMock);
+        $this->customerRepositoryMock->expects(self::once())->method('findOneBy')->with(['email' => 'sample@email.com'])->willReturn($customerMock);
+        $this->generatorMock->expects(self::once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
+        $this->cartRepositoryMock->expects(self::once())->method('findLatestNotEmptyCartByChannelAndCustomer')->with($channelMock, $customerMock)->willReturn($cartMock);
         $this->orderManagerMock->persist($cartMock);
         $this($pickupCart);
     }
@@ -157,14 +157,14 @@ final class PickupCartHandlerTest extends TestCase
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
         $pickupCart = new PickupCart(channelCode: 'code', localeCode: 'en_US');
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('code')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('getDefaultLocale')->willReturn($localeMock);
-        $this->cartRepositoryMock->expects($this->never())->method('findLatestNotEmptyCartByChannelAndCustomer');
-        $this->generatorMock->expects($this->once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
-        $localeMock->expects($this->once())->method('getCode')->willReturn('en_US');
-        $channelMock->expects($this->once())->method('getLocales')->willReturn(new ArrayCollection([$localeMock]));
-        $this->cartFactoryMock->expects($this->once())->method('createNewCart')->with($channelMock, null, 'en_US', 'urisafestr')->willReturn($cartMock);
-        $this->orderManagerMock->expects($this->once())->method('persist')->with($cartMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('code')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('getDefaultLocale')->willReturn($localeMock);
+        $this->cartRepositoryMock->expects(self::never())->method('findLatestNotEmptyCartByChannelAndCustomer');
+        $this->generatorMock->expects(self::once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
+        $localeMock->expects(self::once())->method('getCode')->willReturn('en_US');
+        $channelMock->expects(self::once())->method('getLocales')->willReturn(new ArrayCollection([$localeMock]));
+        $this->cartFactoryMock->expects(self::once())->method('createNewCart')->with($channelMock, null, 'en_US', 'urisafestr')->willReturn($cartMock);
+        $this->orderManagerMock->expects(self::once())->method('persist')->with($cartMock);
         $this($pickupCart);
     }
 
@@ -177,14 +177,14 @@ final class PickupCartHandlerTest extends TestCase
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
         $pickupCart = new PickupCart(channelCode: 'code', localeCode: 'en_US');
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('code')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('getDefaultLocale')->willReturn($localeMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('code')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('getDefaultLocale')->willReturn($localeMock);
         $localeMock->expects($this->exactly(2))->method('getCode')->willReturnMap([['en_US'], ['en_US']]);
-        $this->cartRepositoryMock->expects($this->never())->method('findLatestNotEmptyCartByChannelAndCustomer');
-        $this->generatorMock->expects($this->once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
-        $localeMock->expects($this->once())->method('getCode')->willReturn('en_US');
-        $this->cartFactoryMock->expects($this->once())->method('createNewCart')->with($channelMock, null, 'en_US', 'urisafestr')->willReturn($cartMock);
-        $this->orderManagerMock->expects($this->once())->method('persist')->with($cartMock);
+        $this->cartRepositoryMock->expects(self::never())->method('findLatestNotEmptyCartByChannelAndCustomer');
+        $this->generatorMock->expects(self::once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
+        $localeMock->expects(self::once())->method('getCode')->willReturn('en_US');
+        $this->cartFactoryMock->expects(self::once())->method('createNewCart')->with($channelMock, null, 'en_US', 'urisafestr')->willReturn($cartMock);
+        $this->orderManagerMock->expects(self::once())->method('persist')->with($cartMock);
         $this($pickupCart);
     }
 
@@ -197,14 +197,14 @@ final class PickupCartHandlerTest extends TestCase
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
         $pickupCart = new PickupCart(channelCode: 'code', localeCode: 'ru_RU');
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('code')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('getDefaultLocale')->willReturn($localeMock);
-        $localeMock->expects($this->once())->method('getCode')->willReturn('en_US');
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('code')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('getDefaultLocale')->willReturn($localeMock);
+        $localeMock->expects(self::once())->method('getCode')->willReturn('en_US');
         $locales = new ArrayCollection([]);
-        $channelMock->expects($this->once())->method('getLocales')->willReturn($locales);
-        $this->cartRepositoryMock->expects($this->never())->method('findLatestNotEmptyCartByChannelAndCustomer');
-        $this->generatorMock->expects($this->once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
-        $this->cartFactoryMock->expects($this->once())->method('createNewCart')->with($channelMock, null, 'en_US', 'urisafestr')->willReturn($cartMock);
+        $channelMock->expects(self::once())->method('getLocales')->willReturn($locales);
+        $this->cartRepositoryMock->expects(self::never())->method('findLatestNotEmptyCartByChannelAndCustomer');
+        $this->generatorMock->expects(self::once())->method('generateUriSafeString')->with(self::TOKEN_LENGTH)->willReturn('urisafestr');
+        $this->cartFactoryMock->expects(self::once())->method('createNewCart')->with($channelMock, null, 'en_US', 'urisafestr')->willReturn($cartMock);
         $this->expectException(InvalidArgumentException::class);
         $this->pickupCartHandler->__invoke($pickupCart);
     }

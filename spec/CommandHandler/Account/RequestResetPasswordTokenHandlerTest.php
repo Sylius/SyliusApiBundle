@@ -60,13 +60,13 @@ final class RequestResetPasswordTokenHandlerTest extends TestCase
     {
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects($this->once())->method('findOneByEmail')->with('test@email.com')->willReturn($shopUserMock);
-        $this->clockMock->expects($this->once())->method('now')->willReturn(new DateTimeImmutable());
-        $this->generatorMock->expects($this->once())->method('generate')->willReturn('TOKEN');
-        $shopUserMock->expects($this->once())->method('setPasswordResetToken')->with('TOKEN');
+        $this->userRepositoryMock->expects(self::once())->method('findOneByEmail')->with('test@email.com')->willReturn($shopUserMock);
+        $this->clockMock->expects(self::once())->method('now')->willReturn(new DateTimeImmutable());
+        $this->generatorMock->expects(self::once())->method('generate')->willReturn('TOKEN');
+        $shopUserMock->expects(self::once())->method('setPasswordResetToken')->with('TOKEN');
         $shopUserMock->setPasswordRequestedAt(Argument::type(DateTimeImmutable::class));
         $sendResetPasswordEmail = new SendResetPasswordEmail('test@email.com', 'WEB', 'en_US');
-        $this->messageBusMock->expects($this->once())->method('dispatch')->with($sendResetPasswordEmail, [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope($sendResetPasswordEmail));
+        $this->messageBusMock->expects(self::once())->method('dispatch')->with($sendResetPasswordEmail, [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope($sendResetPasswordEmail));
         $requestResetPasswordToken = new RequestResetPasswordToken(
             channelCode: 'WEB',
             localeCode: 'en_US',
@@ -77,8 +77,8 @@ final class RequestResetPasswordTokenHandlerTest extends TestCase
 
     public function testDoesNothingWhenShopUserHasNotBeenFound(): void
     {
-        $this->userRepositoryMock->expects($this->once())->method('findOneByEmail')->with('test@email.com')->willReturn(null);
-        $this->messageBusMock->expects($this->never())->method('dispatch');
+        $this->userRepositoryMock->expects(self::once())->method('findOneByEmail')->with('test@email.com')->willReturn(null);
+        $this->messageBusMock->expects(self::never())->method('dispatch');
         $requestResetPasswordToken = new RequestResetPasswordToken(
             channelCode: 'WEB',
             localeCode: 'en_US',

@@ -62,10 +62,10 @@ final class UpdateCartHandlerTest extends TestCase
         $shippingAddressMock = $this->createMock(AddressInterface::class);
         /** @var AddressInterface|MockObject $billingAddressMock */
         $billingAddressMock = $this->createMock(AddressInterface::class);
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn(null);
-        $orderMock->expects($this->never())->method('setCustomer');
-        $this->orderAddressModifierMock->expects($this->never())->method('modify')->with($orderMock, $billingAddressMock, $shippingAddressMock, 'john.doe@email.com');
-        $this->orderPromotionCodeAssignerMock->expects($this->never())->method('assign')->with($orderMock, 'coupon');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn(null);
+        $orderMock->expects(self::never())->method('setCustomer');
+        $this->orderAddressModifierMock->expects(self::never())->method('modify')->with($orderMock, $billingAddressMock, $shippingAddressMock, 'john.doe@email.com');
+        $this->orderPromotionCodeAssignerMock->expects(self::never())->method('assign')->with($orderMock, 'coupon');
         $updateCart = new UpdateCart(
             email: 'john.doe@email.com',
             billingAddress: $billingAddressMock,
@@ -87,15 +87,15 @@ final class UpdateCartHandlerTest extends TestCase
             billingAddress: $billingAddressMock,
             orderTokenValue: 'cart',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
-        $orderMock->expects($this->never())->method('setCustomer');
-        $this->orderAddressModifierMock->expects($this->once())->method('modify')->with($orderMock, $billingAddressMock, null)
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
+        $orderMock->expects(self::never())->method('setCustomer');
+        $this->orderAddressModifierMock->expects(self::once())->method('modify')->with($orderMock, $billingAddressMock, null)
             ->willReturn($orderMock)
         ;
-        $this->orderPromotionCodeAssignerMock->expects($this->once())->method('assign')->with($orderMock, null)
+        $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, null)
             ->willReturn($orderMock)
         ;
-        $this->assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this($updateCart));
     }
 
     public function testModifiesShippingAddress(): void
@@ -108,15 +108,15 @@ final class UpdateCartHandlerTest extends TestCase
             shippingAddress: $shippingAddressMock,
             orderTokenValue: 'cart',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
-        $orderMock->expects($this->never())->method('setCustomer');
-        $this->orderAddressModifierMock->expects($this->once())->method('modify')->with($orderMock, null, $shippingAddressMock)
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
+        $orderMock->expects(self::never())->method('setCustomer');
+        $this->orderAddressModifierMock->expects(self::once())->method('modify')->with($orderMock, null, $shippingAddressMock)
             ->willReturn($orderMock)
         ;
-        $this->orderPromotionCodeAssignerMock->expects($this->once())->method('assign')->with($orderMock, null)
+        $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, null)
             ->willReturn($orderMock)
         ;
-        $this->assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this($updateCart));
     }
 
     public function testAppliesCoupon(): void
@@ -127,13 +127,13 @@ final class UpdateCartHandlerTest extends TestCase
             couponCode: 'couponCode',
             orderTokenValue: 'cart',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
-        $orderMock->expects($this->never())->method('setCustomer');
-        $this->orderAddressModifierMock->expects($this->never())->method('modify');
-        $this->orderPromotionCodeAssignerMock->expects($this->once())->method('assign')->with($orderMock, 'couponCode')
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
+        $orderMock->expects(self::never())->method('setCustomer');
+        $this->orderAddressModifierMock->expects(self::never())->method('modify');
+        $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, 'couponCode')
             ->willReturn($orderMock)
         ;
-        $this->assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this($updateCart));
     }
 
     public function testModifiesAddressAndEmailAndAppliesCoupon(): void
@@ -153,16 +153,16 @@ final class UpdateCartHandlerTest extends TestCase
             couponCode: 'couponCode',
             orderTokenValue: 'cart',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
-        $this->customerResolverMock->expects($this->once())->method('resolve')->with('john.doe@email.com')->willReturn($customerMock);
-        $orderMock->expects($this->once())->method('setCustomer')->with($customerMock);
-        $this->orderAddressModifierMock->expects($this->once())->method('modify')->with($orderMock, $billingAddressMock, $shippingAddressMock)
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
+        $this->customerResolverMock->expects(self::once())->method('resolve')->with('john.doe@email.com')->willReturn($customerMock);
+        $orderMock->expects(self::once())->method('setCustomer')->with($customerMock);
+        $this->orderAddressModifierMock->expects(self::once())->method('modify')->with($orderMock, $billingAddressMock, $shippingAddressMock)
             ->willReturn($orderMock)
         ;
-        $this->orderPromotionCodeAssignerMock->expects($this->once())->method('assign')->with($orderMock, 'couponCode')
+        $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, 'couponCode')
             ->willReturn($orderMock)
         ;
-        $this->assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this($updateCart));
     }
 
     public function testSetsTheCustomerByEmail(): void
@@ -182,15 +182,15 @@ final class UpdateCartHandlerTest extends TestCase
             couponCode: 'couponCode',
             orderTokenValue: 'cart',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
-        $this->customerResolverMock->expects($this->once())->method('resolve')->with('john.doe@email.com')->willReturn($customerMock);
-        $orderMock->expects($this->once())->method('setCustomer')->with($customerMock);
-        $this->orderAddressModifierMock->expects($this->once())->method('modify')->with($orderMock, $billingAddressMock, $shippingAddressMock)
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'cart'])->willReturn($orderMock);
+        $this->customerResolverMock->expects(self::once())->method('resolve')->with('john.doe@email.com')->willReturn($customerMock);
+        $orderMock->expects(self::once())->method('setCustomer')->with($customerMock);
+        $this->orderAddressModifierMock->expects(self::once())->method('modify')->with($orderMock, $billingAddressMock, $shippingAddressMock)
             ->willReturn($orderMock)
         ;
-        $this->orderPromotionCodeAssignerMock->expects($this->once())->method('assign')->with($orderMock, 'couponCode')
+        $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, 'couponCode')
             ->willReturn($orderMock)
         ;
-        $this->assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this($updateCart));
     }
 }

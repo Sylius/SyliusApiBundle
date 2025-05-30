@@ -41,7 +41,7 @@ final class ResourceRemoveProcessorTest extends TestCase
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
         $data = new Promotion();
-        $this->decoratedRemoveProcessorMock->expects($this->once())->method('process')->with($data, $operationMock, [], []);
+        $this->decoratedRemoveProcessorMock->expects(self::once())->method('process')->with($data, $operationMock, [], []);
         $this->resourceRemoveProcessor->process($data, $operationMock, [], []);
     }
 
@@ -50,7 +50,7 @@ final class ResourceRemoveProcessorTest extends TestCase
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
         $data = new ShippingMethod();
-        $this->decoratedRemoveProcessorMock->expects($this->once())->method('process')->with($data, $operationMock, [], [])->willThrowException(ForeignKeyConstraintViolationException::class);
+        $this->decoratedRemoveProcessorMock->expects(self::once())->method('process')->with($data, $operationMock, [], [])->willThrowException(ForeignKeyConstraintViolationException::class);
         $this->expectException(ResourceDeleteException::class);
         $this->resourceRemoveProcessor->process($data, $operationMock, [], []);
     }

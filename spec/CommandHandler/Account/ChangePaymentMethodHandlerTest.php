@@ -49,8 +49,8 @@ final class ChangePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
-        $this->paymentMethodChangerMock->expects($this->never())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $this->isInstanceOf(OrderInterface::class))
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
+        $this->paymentMethodChangerMock->expects(self::never())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $this->isInstanceOf(OrderInterface::class))
         ;
         $this->expectException(InvalidArgumentException::class);
         $this->changePaymentMethodHandler->__invoke($changePaymentMethod);
@@ -65,10 +65,10 @@ final class ChangePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $this->paymentMethodChangerMock->expects($this->once())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $orderMock)
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
+        $this->paymentMethodChangerMock->expects(self::once())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $orderMock)
             ->willReturn($orderMock)
         ;
-        $this->assertSame($orderMock, $this($changePaymentMethod));
+        self::assertSame($orderMock, $this($changePaymentMethod));
     }
 }

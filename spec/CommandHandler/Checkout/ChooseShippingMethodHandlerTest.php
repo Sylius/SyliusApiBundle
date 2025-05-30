@@ -74,16 +74,16 @@ final class ChooseShippingMethodHandlerTest extends TestCase
             shipmentId: 123,
             shippingMethodCode: 'DHL_SHIPPING_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
-        $this->shippingMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn($shippingMethodMock);
-        $cartMock->expects($this->once())->method('getShipments')->willReturn(new ArrayCollection([$shipmentMock]));
-        $cartMock->expects($this->once())->method('getId')->willReturn('111');
-        $this->shipmentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '111')->willReturn($shipmentMock);
-        $this->eligibilityCheckerMock->expects($this->once())->method('isEligible')->with($shipmentMock, $shippingMethodMock)->willReturn(true);
-        $shipmentMock->expects($this->once())->method('setMethod')->with($shippingMethodMock);
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
-        $this->assertSame($cartMock, $this($chooseShippingMethod));
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
+        $this->shippingMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn($shippingMethodMock);
+        $cartMock->expects(self::once())->method('getShipments')->willReturn(new ArrayCollection([$shipmentMock]));
+        $cartMock->expects(self::once())->method('getId')->willReturn('111');
+        $this->shipmentRepositoryMock->expects(self::once())->method('findOneByOrderId')->with('123', '111')->willReturn($shipmentMock);
+        $this->eligibilityCheckerMock->expects(self::once())->method('isEligible')->with($shipmentMock, $shippingMethodMock)->willReturn(true);
+        $shipmentMock->expects(self::once())->method('setMethod')->with($shippingMethodMock);
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
+        self::assertSame($cartMock, $this($chooseShippingMethod));
     }
 
     public function testThrowsAnExceptionIfShippingMethodIsNotEligible(): void
@@ -99,15 +99,15 @@ final class ChooseShippingMethodHandlerTest extends TestCase
             shipmentId: 123,
             shippingMethodCode: 'DHL_SHIPPING_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
-        $this->shippingMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn($shippingMethodMock);
-        $cartMock->expects($this->once())->method('getShipments')->willReturn(new ArrayCollection([$shipmentMock]));
-        $cartMock->expects($this->once())->method('getId')->willReturn('111');
-        $this->shipmentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '111')->willReturn($shipmentMock);
-        $this->eligibilityCheckerMock->expects($this->once())->method('isEligible')->with($shipmentMock, $shippingMethodMock)->willReturn(false);
-        $shipmentMock->expects($this->never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
+        $this->shippingMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn($shippingMethodMock);
+        $cartMock->expects(self::once())->method('getShipments')->willReturn(new ArrayCollection([$shipmentMock]));
+        $cartMock->expects(self::once())->method('getId')->willReturn('111');
+        $this->shipmentRepositoryMock->expects(self::once())->method('findOneByOrderId')->with('123', '111')->willReturn($shipmentMock);
+        $this->eligibilityCheckerMock->expects(self::once())->method('isEligible')->with($shipmentMock, $shippingMethodMock)->willReturn(false);
+        $shipmentMock->expects(self::never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
+        $this->stateMachineMock->expects(self::never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
         $this->expectException(InvalidArgumentException::class);
         $this->chooseShippingMethodHandler->__invoke($chooseShippingMethod);
     }
@@ -121,8 +121,8 @@ final class ChooseShippingMethodHandlerTest extends TestCase
             shipmentId: null,
             shippingMethodCode: 'DHL_SHIPPING_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
-        $shipmentMock->expects($this->never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
+        $shipmentMock->expects(self::never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
         $this->expectException(InvalidArgumentException::class);
         $this->chooseShippingMethodHandler->__invoke($chooseShippingMethod);
     }
@@ -138,11 +138,11 @@ final class ChooseShippingMethodHandlerTest extends TestCase
             shipmentId: null,
             shippingMethodCode: 'DHL_SHIPPING_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $this->shippingMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn(null);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(false);
-        $shipmentMock->expects($this->never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $this->shippingMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn(null);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(false);
+        $shipmentMock->expects(self::never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
+        $this->stateMachineMock->expects(self::never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
         $this->expectException(InvalidArgumentException::class);
         $this->chooseShippingMethodHandler->__invoke($chooseShippingMethod);
     }
@@ -158,11 +158,11 @@ final class ChooseShippingMethodHandlerTest extends TestCase
             shipmentId: 123,
             shippingMethodCode: 'DHL_SHIPPING_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
-        $this->shippingMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn(null);
-        $shipmentMock->expects($this->never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
+        $this->shippingMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn(null);
+        $shipmentMock->expects(self::never())->method('setMethod')->with($this->isInstanceOf(ShippingMethodInterface::class));
+        $this->stateMachineMock->expects(self::never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
         $this->expectException(InvalidArgumentException::class);
         $this->chooseShippingMethodHandler->__invoke($chooseShippingMethod);
     }
@@ -178,12 +178,12 @@ final class ChooseShippingMethodHandlerTest extends TestCase
             shipmentId: 123,
             shippingMethodCode: 'DHL_SHIPPING_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
-        $this->shippingMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn($shippingMethodMock);
-        $cartMock->expects($this->once())->method('getId')->willReturn('111');
-        $this->shipmentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '111')->willReturn(null);
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping')->willReturn(true);
+        $this->shippingMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'DHL_SHIPPING_METHOD'])->willReturn($shippingMethodMock);
+        $cartMock->expects(self::once())->method('getId')->willReturn('111');
+        $this->shipmentRepositoryMock->expects(self::once())->method('findOneByOrderId')->with('123', '111')->willReturn(null);
+        $this->stateMachineMock->expects(self::never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_shipping');
         $this->expectException(InvalidArgumentException::class);
         $this->chooseShippingMethodHandler->__invoke($chooseShippingMethod);
     }

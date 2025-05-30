@@ -49,8 +49,8 @@ final class StateBasedExtensionTest extends TestCase
         $shopApiSectionMock = $this->createMock(ShopApiSection::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->stateBasedExtension->applyToCollection(
             $queryBuilderMock,
             $queryNameGeneratorMock,
@@ -67,8 +67,8 @@ final class StateBasedExtensionTest extends TestCase
         $shopApiSectionMock = $this->createMock(ShopApiSection::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->stateBasedExtension->applyToItem(
             $queryBuilderMock,
             $queryNameGeneratorMock,
@@ -90,13 +90,13 @@ final class StateBasedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var Func|MockObject $exprNotInMock */
         $exprNotInMock = $this->createMock(Func::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('state')->willReturn('state');
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('notIn')->with('o.state', ':state')->willReturn($exprNotInMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with($exprNotInMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('state', ['cart'], ArrayParameterType::STRING)->willReturn($queryBuilderMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('state')->willReturn('state');
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('notIn')->with('o.state', ':state')->willReturn($exprNotInMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprNotInMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('state', ['cart'], ArrayParameterType::STRING)->willReturn($queryBuilderMock);
         $this->stateBasedExtension->applyToCollection(
             $queryBuilderMock,
             $queryNameGeneratorMock,
@@ -118,12 +118,12 @@ final class StateBasedExtensionTest extends TestCase
         /** @var Func|MockObject $exprNotInMock */
         $exprNotInMock = $this->createMock(Func::class);
         $queryBuilderMock->expects($this->exactly(2))->method('getRootAliases')->willReturnMap([[['o']], [['o']]]);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('state')->willReturn('state');
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('notIn')->with('o.state', ':state')->willReturn($exprNotInMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with($exprNotInMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('state', ['cart'], ArrayParameterType::STRING)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('state')->willReturn('state');
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('notIn')->with('o.state', ':state')->willReturn($exprNotInMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprNotInMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('state', ['cart'], ArrayParameterType::STRING)->willReturn($queryBuilderMock);
         $this->stateBasedExtension->applyToItem(
             $queryBuilderMock,
             $queryNameGeneratorMock,

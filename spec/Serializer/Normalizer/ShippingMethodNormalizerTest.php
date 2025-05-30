@@ -14,10 +14,8 @@ declare(strict_types=1);
 namespace Tests\Sylius\Bundle\ApiBundle\Serializer\Normalizer;
 
 use ApiPlatform\Metadata\GetCollection;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
 use Sylius\Bundle\ApiBundle\Serializer\Normalizer\ShippingMethodNormalizer;
@@ -37,81 +35,76 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final class ShippingMethodNormalizerTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private MockObject&SectionProviderInterface $sectionProvider;
 
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
-    /** @var ShipmentRepositoryInterface|MockObject */
-    private MockObject $shipmentRepositoryMock;
+    private MockObject&ShipmentRepositoryInterface $shipmentRepository;
 
-    /** @var ServiceRegistryInterface|MockObject */
-    private MockObject $shippingCalculatorsMock;
+    private MockObject&ServiceRegistryInterface $shippingCalculators;
 
-    /** @var RequestStack|MockObject */
-    private MockObject $requestStackMock;
+    private MockObject&RequestStack $requestStack;
 
-    /** @var NormalizerInterface|MockObject */
-    private MockObject $normalizerMock;
+    private MockObject&NormalizerInterface $normalizer;
 
     private ShippingMethodNormalizer $shippingMethodNormalizer;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->shipmentRepositoryMock = $this->createMock(ShipmentRepositoryInterface::class);
-        $this->shippingCalculatorsMock = $this->createMock(ServiceRegistryInterface::class);
-        $this->requestStackMock = $this->createMock(RequestStack::class);
-        $this->normalizerMock = $this->createMock(NormalizerInterface::class);
-        $this->shippingMethodNormalizer = new ShippingMethodNormalizer($this->sectionProviderMock, $this->orderRepositoryMock, $this->shipmentRepositoryMock, $this->shippingCalculatorsMock, $this->requestStackMock, ['sylius:shipping_method:index']);
-        $this->setNormalizer($this->normalizerMock);
+        parent::setUp();
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->shipmentRepository = $this->createMock(ShipmentRepositoryInterface::class);
+        $this->shippingCalculators = $this->createMock(ServiceRegistryInterface::class);
+        $this->requestStack = $this->createMock(RequestStack::class);
+        $this->normalizer = $this->createMock(NormalizerInterface::class);
+        $this->shippingMethodNormalizer = new ShippingMethodNormalizer($this->sectionProvider, $this->orderRepository, $this->shipmentRepository, $this->shippingCalculators, $this->requestStack, ['sylius:shipping_method:index']);
+        $this->shippingMethodNormalizer->setNormalizer($this->normalizer);
     }
 
     public function testSupportsOnlyShippingMethodInterfaceInShopSectionWithProperData(): void
     {
         /** @var ShippingMethodInterface|MockObject $shippingMethodMock */
         $shippingMethodMock = $this->createMock(ShippingMethodInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertTrue($this->shippingMethodNormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertTrue($this->shippingMethodNormalizer
             ->supportsNormalization($shippingMethodMock, null, [
                 'root_operation' => new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]),
                 'groups' => ['sylius:shipping_method:index'],
             ]))
         ;
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertFalse($this->shippingMethodNormalizer
-            ->supportsNormalization(new stdClass(), null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertFalse($this->shippingMethodNormalizer
+            ->supportsNormalization(new \stdClass(), null, [
                 'root_operation' => new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]),
                 'groups' => ['sylius:shipping_method:index'],
             ]))
         ;
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->assertFalse($this->shippingMethodNormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        self::assertFalse($this->shippingMethodNormalizer
             ->supportsNormalization($shippingMethodMock, null, [
                 'root_operation' => new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]),
                 'groups' => ['sylius:shipping_method:index'],
             ]))
         ;
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertFalse($this->shippingMethodNormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertFalse($this->shippingMethodNormalizer
             ->supportsNormalization($shippingMethodMock, null, [
                 'root_operation' => new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]),
                 'groups' => ['sylius:shipping_method:show'],
             ]))
         ;
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertFalse($this->shippingMethodNormalizer->supportsNormalization($shippingMethodMock));
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertFalse($this->shippingMethodNormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertFalse($this->shippingMethodNormalizer->supportsNormalization($shippingMethodMock));
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertFalse($this->shippingMethodNormalizer
             ->supportsNormalization($shippingMethodMock, null, [
                 'root_operation' => new GetCollection(uriVariables: ['tokenValue' => []]),
                 'groups' => ['sylius:shipping_method:index'],
             ]))
         ;
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertFalse($this->shippingMethodNormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertFalse($this->shippingMethodNormalizer
             ->supportsNormalization($shippingMethodMock, null, [
                 'root_operation' => new GetCollection(uriVariables: ['shipmentId' => []]),
                 'groups' => ['sylius:shipping_method:index'],
@@ -123,8 +116,8 @@ final class ShippingMethodNormalizerTest extends TestCase
     {
         /** @var ShippingMethodInterface|MockObject $shippingMethodMock */
         $shippingMethodMock = $this->createMock(ShippingMethodInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->assertFalse($this->shippingMethodNormalizer
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        self::assertFalse($this->shippingMethodNormalizer
             ->supportsNormalization($shippingMethodMock, null, [
                 'sylius_shipping_method_normalizer_already_called' => true,
                 'root_operation' => new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]),
@@ -147,14 +140,14 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var CalculatorInterface|MockObject $calculatorMock */
         $calculatorMock = $this->createMock(CalculatorInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->requestStackMock->expects($this->once())->method('getCurrentRequest')->willReturn($requestMock);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->requestStack->expects(self::once())->method('getCurrentRequest')->willReturn($requestMock);
         $requestMock->attributes = new ParameterBag(['tokenValue' => 'TOKEN', 'shipmentId' => '123']);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getId')->willReturn('321');
-        $this->shipmentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '321')->willReturn($shipmentMock);
-        $cartMock->expects($this->once())->method('hasShipment')->with($shipmentMock)->willReturn(true);
-        $this->normalizerMock->expects($this->once())->method('normalize')->with($shippingMethodMock, null, [
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getId')->willReturn('321');
+        $this->shipmentRepository->expects(self::once())->method('findOneByOrderId')->with('123', '321')->willReturn($shipmentMock);
+        $cartMock->expects(self::once())->method('hasShipment')->with($shipmentMock)->willReturn(true);
+        $this->normalizer->expects(self::once())->method('normalize')->with($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
             'sylius_shipping_method_normalizer_already_called' => true,
@@ -162,11 +155,11 @@ final class ShippingMethodNormalizerTest extends TestCase
         ])
             ->willReturn([])
         ;
-        $shippingMethodMock->expects($this->once())->method('getCalculator')->willReturn('default_calculator');
-        $shippingMethodMock->expects($this->once())->method('getConfiguration')->willReturn([]);
-        $this->shippingCalculatorsMock->expects($this->once())->method('get')->with('default_calculator')->willReturn($calculatorMock);
-        $calculatorMock->expects($this->once())->method('calculate')->with($shipmentMock, [])->willReturn(1000);
-        $this->assertSame(['price' => 1000], $this->shippingMethodNormalizer
+        $shippingMethodMock->expects(self::once())->method('getCalculator')->willReturn('default_calculator');
+        $shippingMethodMock->expects(self::once())->method('getConfiguration')->willReturn([]);
+        $this->shippingCalculators->expects(self::once())->method('get')->with('default_calculator')->willReturn($calculatorMock);
+        $calculatorMock->expects(self::once())->method('calculate')->with($shipmentMock, [])->willReturn(1000);
+        self::assertSame(['price' => 1000], $this->shippingMethodNormalizer
             ->normalize($shippingMethodMock, null, [
                 'root_operation' => $operation,
                 'sylius_api_channel' => $channelMock,
@@ -180,12 +173,12 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->never())->method('getSection');
-        $this->requestStackMock->expects($this->never())->method('getCurrentRequest');
-        $this->normalizerMock->expects($this->never())->method('normalize')
+        $this->sectionProvider->expects(self::never())->method('getSection');
+        $this->requestStack->expects(self::never())->method('getCurrentRequest');
+        $this->normalizer->expects(self::never())->method('normalize')
         ;
-        $this->expectException(InvalidArgumentException::class);
-        $this->shippingMethodNormalizer->normalize(new stdClass(), null, [
+        $this->expectException(\InvalidArgumentException::class);
+        $this->shippingMethodNormalizer->normalize(new \stdClass(), null, [
             'root_operation' => new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]),
             'sylius_api_channel' => $channelMock,
             'groups' => ['sylius:shipping_method:index'],
@@ -199,16 +192,16 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->never())->method('getSection');
-        $this->requestStackMock->expects($this->never())->method('getCurrentRequest');
-        $this->normalizerMock->expects($this->never())->method('normalize')->with($shippingMethodMock, null, [
+        $this->sectionProvider->expects(self::never())->method('getSection');
+        $this->requestStack->expects(self::never())->method('getCurrentRequest');
+        $this->normalizer->expects(self::never())->method('normalize')->with($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
             'sylius_shipping_method_normalizer_already_called' => true,
             'groups' => ['sylius:shipping_method:index'],
         ])
         ;
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->shippingMethodNormalizer->normalize($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
@@ -224,16 +217,16 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->requestStackMock->expects($this->never())->method('getCurrentRequest');
-        $this->normalizerMock->expects($this->never())->method('normalize')->with($shippingMethodMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+        $this->requestStack->expects(self::never())->method('getCurrentRequest');
+        $this->normalizer->expects(self::never())->method('normalize')->with($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
             'sylius_shipping_method_normalizer_already_called' => true,
             'groups' => ['sylius:shipping_method:index'],
         ])
         ;
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->shippingMethodNormalizer->normalize($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
@@ -248,16 +241,16 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->requestStackMock->expects($this->never())->method('getCurrentRequest');
-        $this->normalizerMock->expects($this->never())->method('normalize')->with($shippingMethodMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->requestStack->expects(self::never())->method('getCurrentRequest');
+        $this->normalizer->expects(self::never())->method('normalize')->with($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
             'sylius_shipping_method_normalizer_already_called' => true,
             'groups' => ['sylius:shipping_method:shop'],
         ])
         ;
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->shippingMethodNormalizer->normalize($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
@@ -274,18 +267,18 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->requestStackMock->expects($this->once())->method('getCurrentRequest')->willReturn($requestMock);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->requestStack->expects(self::once())->method('getCurrentRequest')->willReturn($requestMock);
         $requestMock->attributes = new ParameterBag(['tokenValue' => 'TOKEN', 'shipmentId' => '123']);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn(null);
-        $this->normalizerMock->expects($this->never())->method('normalize')->with($shippingMethodMock, null, [
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn(null);
+        $this->normalizer->expects(self::never())->method('normalize')->with($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
             'sylius_shipping_method_normalizer_already_called' => true,
             'groups' => ['sylius:shipping_method:index'],
         ])
         ;
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->shippingMethodNormalizer->normalize($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
@@ -304,20 +297,20 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var OrderInterface|MockObject $cartMock */
         $cartMock = $this->createMock(OrderInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->requestStackMock->expects($this->once())->method('getCurrentRequest')->willReturn($requestMock);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->requestStack->expects(self::once())->method('getCurrentRequest')->willReturn($requestMock);
         $requestMock->attributes = new ParameterBag(['tokenValue' => 'TOKEN', 'shipmentId' => '123']);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getId')->willReturn('321');
-        $this->shipmentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '321')->willReturn(null);
-        $this->normalizerMock->expects($this->never())->method('normalize')->with($shippingMethodMock, null, [
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getId')->willReturn('321');
+        $this->shipmentRepository->expects(self::once())->method('findOneByOrderId')->with('123', '321')->willReturn(null);
+        $this->normalizer->expects(self::never())->method('normalize')->with($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
             'sylius_shipping_method_normalizer_already_called' => true,
             'groups' => ['sylius:shipping_method:index'],
         ])
         ;
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->shippingMethodNormalizer->normalize($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
@@ -338,14 +331,14 @@ final class ShippingMethodNormalizerTest extends TestCase
         /** @var ShipmentInterface|MockObject $shipmentMock */
         $shipmentMock = $this->createMock(ShipmentInterface::class);
         $operation = new GetCollection(uriVariables: ['tokenValue' => [], 'shipmentId' => []]);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->requestStackMock->expects($this->once())->method('getCurrentRequest')->willReturn($requestMock);
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->requestStack->expects(self::once())->method('getCurrentRequest')->willReturn($requestMock);
         $requestMock->attributes = new ParameterBag(['tokenValue' => 'TOKEN', 'shipmentId' => '123']);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getId')->willReturn('321');
-        $this->shipmentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '321')->willReturn($shipmentMock);
-        $cartMock->expects($this->once())->method('hasShipment')->with($shipmentMock)->willReturn(false);
-        $this->normalizerMock->expects($this->once())->method('normalize')->with($shippingMethodMock, null, [
+        $this->orderRepository->expects(self::once())->method('findCartByTokenValueAndChannel')->with('TOKEN', $channelMock)->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getId')->willReturn('321');
+        $this->shipmentRepository->expects(self::once())->method('findOneByOrderId')->with('123', '321')->willReturn($shipmentMock);
+        $cartMock->expects(self::once())->method('hasShipment')->with($shipmentMock)->willReturn(false);
+        $this->normalizer->expects(self::once())->method('normalize')->with($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,
             'sylius_shipping_method_normalizer_already_called' => true,
@@ -353,9 +346,9 @@ final class ShippingMethodNormalizerTest extends TestCase
         ])
             ->willReturn([])
         ;
-        $shippingMethodMock->expects($this->never())->method('getCalculator');
-        $shippingMethodMock->expects($this->never())->method('getConfiguration');
-        $this->expectException(InvalidArgumentException::class);
+        $shippingMethodMock->expects(self::never())->method('getCalculator');
+        $shippingMethodMock->expects(self::never())->method('getConfiguration');
+        $this->expectException(\InvalidArgumentException::class);
         $this->shippingMethodNormalizer->normalize($shippingMethodMock, null, [
             'root_operation' => $operation,
             'sylius_api_channel' => $channelMock,

@@ -60,10 +60,10 @@ final class CollectionProviderTest extends TestCase
         /** @var ShippingMethodInterface|MockObject $methodMock */
         $methodMock = $this->createMock(ShippingMethodInterface::class);
         $operation = new GetCollection(class: ShippingMethod::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->shipmentRepositoryMock->expects($this->once())->method('findOneByOrderTokenAndChannel')->with(1, 'TOKEN', $channelMock)->willReturn($shipmentMock);
-        $this->shippingMethodsResolverMock->expects($this->once())->method('getSupportedMethods')->with($shipmentMock)->willReturn([$methodMock]);
-        $this->assertSame([$methodMock], $this->collectionProvider
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->shipmentRepositoryMock->expects(self::once())->method('findOneByOrderTokenAndChannel')->with(1, 'TOKEN', $channelMock)->willReturn($shipmentMock);
+        $this->shippingMethodsResolverMock->expects(self::once())->method('getSupportedMethods')->with($shipmentMock)->willReturn([$methodMock]);
+        self::assertSame([$methodMock], $this->collectionProvider
             ->provide($operation, ['tokenValue' => 'TOKEN', 'shipmentId' => 1], ['sylius_api_channel' => $channelMock]))
         ;
     }
@@ -85,7 +85,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenOperationIsNotInShopApiSection(): void
     {
         $operation = new GetCollection(class: ShippingMethod::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }
@@ -93,7 +93,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenUriVariablesDoNotExist(): void
     {
         $operation = new GetCollection(class: ShippingMethod::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }

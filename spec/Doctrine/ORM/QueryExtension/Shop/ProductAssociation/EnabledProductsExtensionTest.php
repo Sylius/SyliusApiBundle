@@ -45,8 +45,8 @@ final class EnabledProductsExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->never())->method('getSection');
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::never())->method('getSection');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->enabledProductsExtension->applyToItem(
             $queryBuilderMock,
             $queryNameGeneratorMock,
@@ -64,7 +64,7 @@ final class EnabledProductsExtensionTest extends TestCase
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         /** @var AdminApiSection|MockObject $sectionMock */
         $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
         $this->enabledProductsExtension->applyToItem(
             $queryBuilderMock,
             $queryNameGeneratorMock,
@@ -84,13 +84,13 @@ final class EnabledProductsExtensionTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
         /** @var ShopApiSection|MockObject $sectionMock */
         $sectionMock = $this->createMock(ShopApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
         $queryNameGeneratorMock->expects($this->exactly(2))->method('generateParameterName')->willReturnMap([['enabled', 'enabled'], ['channel', 'channel']]);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('associatedProduct')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('leftJoin')->with('o.associatedProducts', 'associatedProduct', 'WITH', 'associatedProduct.enabled = :enabled')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('innerJoin')->with('associatedProduct.channels', 'channel', 'WITH', 'channel = :channel')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('enabled', true)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('associatedProduct')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('o.associatedProducts', 'associatedProduct', 'WITH', 'associatedProduct.enabled = :enabled')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('associatedProduct.channels', 'channel', 'WITH', 'channel = :channel')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('enabled', true)->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([['enabled', true, $queryBuilderMock], ['channel', $channelMock, $queryBuilderMock]]);
     }
 }

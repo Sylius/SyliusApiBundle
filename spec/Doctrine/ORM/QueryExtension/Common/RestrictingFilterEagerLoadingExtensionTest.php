@@ -47,7 +47,7 @@ final class RestrictingFilterEagerLoadingExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $args = [$queryBuilderMock, $queryNameGeneratorMock, Product::class, new Get(name: 'shop_get')];
-        $this->decoratedExtensionMock->expects($this->never())->method('applyToCollection')->with(...$args);
+        $this->decoratedExtensionMock->expects(self::never())->method('applyToCollection')->with(...$args);
         $this->restrictingFilterEagerLoadingExtension->applyToCollection(...$args);
     }
 
@@ -58,7 +58,7 @@ final class RestrictingFilterEagerLoadingExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $args = [$queryBuilderMock, $queryNameGeneratorMock, Order::class, new Get(name: 'shop_get'), []];
-        $this->decoratedExtensionMock->expects($this->once())->method('applyToCollection')->with(...$args);
+        $this->decoratedExtensionMock->expects(self::once())->method('applyToCollection')->with(...$args);
         $this->restrictingFilterEagerLoadingExtension->applyToCollection(...$args);
     }
 
@@ -69,7 +69,7 @@ final class RestrictingFilterEagerLoadingExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $args = [$queryBuilderMock, $queryNameGeneratorMock, Product::class, new Get(name: 'admin_get'), []];
-        $this->decoratedExtensionMock->expects($this->once())->method('applyToCollection')->with(...$args);
+        $this->decoratedExtensionMock->expects(self::once())->method('applyToCollection')->with(...$args);
         $this->restrictingFilterEagerLoadingExtension->applyToCollection(...$args);
     }
 
@@ -80,7 +80,7 @@ final class RestrictingFilterEagerLoadingExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $args = [$queryBuilderMock, $queryNameGeneratorMock, ProductReview::class, new Get(name: 'admin_get'), []];
-        $this->decoratedExtensionMock->expects($this->once())->method('applyToCollection')->with(...$args);
+        $this->decoratedExtensionMock->expects(self::once())->method('applyToCollection')->with(...$args);
         $this->restrictingFilterEagerLoadingExtension->applyToCollection(...$args);
     }
 }

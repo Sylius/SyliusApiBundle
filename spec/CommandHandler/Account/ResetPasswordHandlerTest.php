@@ -37,7 +37,7 @@ final class ResetPasswordHandlerTest extends TestCase
 
     public function testDelegatesPasswordResetting(): void
     {
-        $this->userPasswordResetterMock->expects($this->once())->method('reset')->with('TOKEN', 'newPassword');
+        $this->userPasswordResetterMock->expects(self::once())->method('reset')->with('TOKEN', 'newPassword');
         $this(new ResetPassword('TOKEN', 'newPassword', 'newPassword'));
     }
 }

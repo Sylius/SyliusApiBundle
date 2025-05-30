@@ -48,8 +48,8 @@ final class PathPrefixBasedOperationResolverTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getName')->willReturn(null);
-        $this->assertSame($operationMock, $this->pathPrefixBasedOperationResolver
+        $operationMock->expects(self::once())->method('getName')->willReturn(null);
+        self::assertSame($operationMock, $this->pathPrefixBasedOperationResolver
             ->resolve(Country::class, 'api/v2/shop/countries/CODE', $operationMock))
         ;
     }

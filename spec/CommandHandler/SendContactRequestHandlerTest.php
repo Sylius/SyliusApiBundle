@@ -51,8 +51,8 @@ final class SendContactRequestHandlerTest extends TestCase
             email: 'adam@sylius.com',
             message: 'message',
         );
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('CODE')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('getContactEmail')->willReturn('channel@contact.com');
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CODE')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('getContactEmail')->willReturn('channel@contact.com');
         $this->contactEmailManagerMock->sendContactRequest(
             ['message' => 'message', 'email' => 'adam@sylius.com'],
             ['channel@contact.com'],
@@ -70,7 +70,7 @@ final class SendContactRequestHandlerTest extends TestCase
             email: 'adam@sylius.com',
             message: 'message',
         );
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('CODE')->willReturn(null);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CODE')->willReturn(null);
         $this->expectException(ChannelNotFoundException::class);
         $this->sendContactRequestHandler->__invoke($command);
     }

@@ -51,19 +51,19 @@ final class TaxonFilterTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->iriConverterMock->expects($this->once())->method('getResourceFromIri')->with('api/taxon')->willReturn($taxonMock);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('distinct')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
+        $this->iriConverterMock->expects(self::once())->method('getResourceFromIri')->with('api/taxon')->willReturn($taxonMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('distinct')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('innerJoin')->willReturnMap([['o.productTaxons', 'productTaxon', $queryBuilderMock], ['productTaxon.taxon', 'taxon', $queryBuilderMock]]);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with('taxon.left >= :taxonLeft')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with('taxon.left >= :taxonLeft')->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(3))->method('andWhere')->willReturnMap([['taxon.left >= :taxonLeft', $queryBuilderMock], ['taxon.right <= :taxonRight', $queryBuilderMock], ['taxon.root = :taxonRoot', $queryBuilderMock]]);
-        $taxonMock->expects($this->once())->method('getRoot')->willReturn($taxonRootMock);
-        $taxonMock->expects($this->once())->method('getLeft')->willReturn(3);
-        $taxonMock->expects($this->once())->method('getRight')->willReturn(5);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('taxonLeft', 3)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('taxonRight', 5)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('taxonRoot', $taxonRootMock)->willReturn($queryBuilderMock);
+        $taxonMock->expects(self::once())->method('getRoot')->willReturn($taxonRootMock);
+        $taxonMock->expects(self::once())->method('getLeft')->willReturn(3);
+        $taxonMock->expects(self::once())->method('getRight')->willReturn(5);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonLeft', 3)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonRight', 5)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonRoot', $taxonRootMock)->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(3))->method('setParameter')->willReturnMap([['taxonLeft', 3, $queryBuilderMock], ['taxonRight', 5, $queryBuilderMock], ['taxonRoot', $taxonRootMock, $queryBuilderMock]]);
     }
 
@@ -78,17 +78,17 @@ final class TaxonFilterTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $context['filters']['order'] = ['differentOrderParameter' => 'asc'];
-        $this->iriConverterMock->expects($this->once())->method('getResourceFromIri')->with('api/taxon')->willReturn($taxonMock);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('distinct')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
+        $this->iriConverterMock->expects(self::once())->method('getResourceFromIri')->with('api/taxon')->willReturn($taxonMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('distinct')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('innerJoin')->willReturnMap([['o.productTaxons', 'productTaxon', $queryBuilderMock], ['productTaxon.taxon', 'taxon', $queryBuilderMock]]);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with('taxon.root = :taxonRoot')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->never())->method('addOrderBy')->with('productTaxon.position');
-        $taxonMock->expects($this->once())->method('getRoot')->willReturn($taxonRootMock);
-        $taxonMock->expects($this->once())->method('getLeft')->willReturn(null);
-        $taxonMock->expects($this->once())->method('getRight')->willReturn(null);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('taxonRoot', $taxonRootMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with('taxon.root = :taxonRoot')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::never())->method('addOrderBy')->with('productTaxon.position');
+        $taxonMock->expects(self::once())->method('getRoot')->willReturn($taxonRootMock);
+        $taxonMock->expects(self::once())->method('getLeft')->willReturn(null);
+        $taxonMock->expects(self::once())->method('getRight')->willReturn(null);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonRoot', $taxonRootMock)->willReturn($queryBuilderMock);
         $this->taxonFilter->filterProperty(
             'taxon',
             'api/taxon',
@@ -107,15 +107,15 @@ final class TaxonFilterTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->iriConverterMock->expects($this->once())->method('getResourceFromIri')->with('api/taxon')->willThrowException(ItemNotFoundException::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('distinct')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
+        $this->iriConverterMock->expects(self::once())->method('getResourceFromIri')->with('api/taxon')->willThrowException(ItemNotFoundException::class);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('distinct')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('innerJoin')->willReturnMap([['o.productTaxons', 'productTaxon', $queryBuilderMock], ['productTaxon.taxon', 'taxon', $queryBuilderMock]]);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with('taxon.root = :taxonRoot')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->never())->method('addOrderBy')->with('productTaxon.position');
-        $taxonMock->expects($this->never())->method('getRoot');
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('taxonRoot', null)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with('taxon.root = :taxonRoot')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::never())->method('addOrderBy')->with('productTaxon.position');
+        $taxonMock->expects(self::never())->method('getRoot');
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonRoot', null)->willReturn($queryBuilderMock);
         $this->taxonFilter->filterProperty(
             'taxon',
             'api/taxon',
@@ -133,15 +133,15 @@ final class TaxonFilterTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->iriConverterMock->expects($this->once())->method('getResourceFromIri')->with('non-existing-taxon')->willThrowException(InvalidArgumentException::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('distinct')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
+        $this->iriConverterMock->expects(self::once())->method('getResourceFromIri')->with('non-existing-taxon')->willThrowException(InvalidArgumentException::class);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('distinct')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('productTaxon')->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('innerJoin')->willReturnMap([['o.productTaxons', 'productTaxon', $queryBuilderMock], ['productTaxon.taxon', 'taxon', $queryBuilderMock]]);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with('taxon.root = :taxonRoot')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->never())->method('addOrderBy')->with('productTaxon.position');
-        $taxonMock->expects($this->never())->method('getRoot');
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('taxonRoot', null)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with('taxon.root = :taxonRoot')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::never())->method('addOrderBy')->with('productTaxon.position');
+        $taxonMock->expects(self::never())->method('getRoot');
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonRoot', null)->willReturn($queryBuilderMock);
         $this->taxonFilter->filterProperty(
             'taxon',
             'non-existing-taxon',

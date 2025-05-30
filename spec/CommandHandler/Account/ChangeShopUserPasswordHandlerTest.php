@@ -46,9 +46,9 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
     {
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('setPlainPassword')->with('PLAIN_PASSWORD');
-        $this->passwordUpdaterMock->expects($this->once())->method('updatePassword')->with($shopUserMock);
+        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('setPlainPassword')->with('PLAIN_PASSWORD');
+        $this->passwordUpdaterMock->expects(self::once())->method('updatePassword')->with($shopUserMock);
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
             confirmNewPassword: 'PLAIN_PASSWORD',
@@ -62,9 +62,9 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
     {
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects($this->never())->method('find');
-        $shopUserMock->expects($this->never())->method('setPlainPassword');
-        $this->passwordUpdaterMock->expects($this->never())->method('updatePassword');
+        $this->userRepositoryMock->expects(self::never())->method('find');
+        $shopUserMock->expects(self::never())->method('setPlainPassword');
+        $this->passwordUpdaterMock->expects(self::never())->method('updatePassword');
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
             confirmNewPassword: 'WRONG_PASSWORD',
@@ -79,9 +79,9 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
     {
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn(null);
-        $shopUserMock->expects($this->never())->method('setPlainPassword');
-        $this->passwordUpdaterMock->expects($this->never())->method('updatePassword');
+        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn(null);
+        $shopUserMock->expects(self::never())->method('setPlainPassword');
+        $this->passwordUpdaterMock->expects(self::never())->method('updatePassword');
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
             confirmNewPassword: 'PLAIN_PASSWORD',

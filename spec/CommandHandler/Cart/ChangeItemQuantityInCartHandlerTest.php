@@ -53,11 +53,11 @@ final class ChangeItemQuantityInCartHandlerTest extends TestCase
         $cartMock = $this->createMock(OrderInterface::class);
         /** @var OrderItemInterface|MockObject $cartItemMock */
         $cartItemMock = $this->createMock(OrderItemInterface::class);
-        $this->orderItemRepositoryMock->expects($this->once())->method('findOneByIdAndCartTokenValue')->with(123, 'TOKEN_VALUE')->willReturn($cartItemMock);
-        $cartItemMock->expects($this->once())->method('getOrder')->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getTokenValue')->willReturn('TOKEN_VALUE');
-        $this->orderItemQuantityModifierMock->expects($this->once())->method('modify')->with($cartItemMock, 5);
-        $this->orderProcessorMock->expects($this->once())->method('process')->with($cartMock);
+        $this->orderItemRepositoryMock->expects(self::once())->method('findOneByIdAndCartTokenValue')->with(123, 'TOKEN_VALUE')->willReturn($cartItemMock);
+        $cartItemMock->expects(self::once())->method('getOrder')->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getTokenValue')->willReturn('TOKEN_VALUE');
+        $this->orderItemQuantityModifierMock->expects(self::once())->method('modify')->with($cartItemMock, 5);
+        $this->orderProcessorMock->expects(self::once())->method('process')->with($cartMock);
         $this(new ChangeItemQuantityInCart(orderTokenValue: 'TOKEN_VALUE', orderItemId: 123, quantity: 5));
     }
 }

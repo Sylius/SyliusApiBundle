@@ -44,8 +44,8 @@ final class CollectionProviderTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(class: Channel::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->collectionProvider->expects($this->once())->method('provide')->with($operation, [], ['sylius_api_channel' => $channelMock])
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->collectionProvider->expects(self::once())->method('provide')->with($operation, [], ['sylius_api_channel' => $channelMock])
             ->shouldBeLike([$channelMock])
         ;
     }
@@ -54,7 +54,7 @@ final class CollectionProviderTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(stdClass::class);
+        $operationMock->expects(self::once())->method('getClass')->willReturn(stdClass::class);
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operationMock);
     }
@@ -63,8 +63,8 @@ final class CollectionProviderTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(Channel::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
+        $operationMock->expects(self::once())->method('getClass')->willReturn(Channel::class);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operationMock);
     }
@@ -74,7 +74,7 @@ final class CollectionProviderTest extends TestCase
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
         $operation = new GetCollection(class: Channel::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operation, [], ['sylius_api_channel' => $channelMock]);
     }
@@ -82,7 +82,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenContextDoesNotHaveChannel(): void
     {
         $operation = new GetCollection(class: Channel::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operation, [], []);
     }

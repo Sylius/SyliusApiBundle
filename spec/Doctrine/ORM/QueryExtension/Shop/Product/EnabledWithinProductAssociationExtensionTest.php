@@ -57,8 +57,8 @@ final class EnabledWithinProductAssociationExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->never())->method('getSection');
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::never())->method('getSection');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->enabledWithinProductAssociationExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, TaxonInterface::class, new Get(name: Request::METHOD_GET));
     }
 
@@ -70,8 +70,8 @@ final class EnabledWithinProductAssociationExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->enabledWithinProductAssociationExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ProductInterface::class, new Get(name: Request::METHOD_GET));
     }
 
@@ -89,14 +89,14 @@ final class EnabledWithinProductAssociationExtensionTest extends TestCase
         $comparisonMock = $this->createMock(Comparison::class);
         /** @var Andx|MockObject $andxMock */
         $andxMock = $this->createMock(Andx::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
         $queryNameGeneratorMock->expects($this->exactly(2))->method('generateJoinAlias')->willReturnMap([['association', 'association'], ['associatedProduct', 'associatedProduct']]);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('o')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('o')->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('addSelect')->willReturnMap([['o', $queryBuilderMock], ['association', $queryBuilderMock]]);
-        $exprMock->expects($this->once())->method('andX')->with($this->isInstanceOf(Comparison::class), $this->isInstanceOf(Comparison::class))->willReturn($andxMock);
+        $exprMock->expects(self::once())->method('andX')->with($this->isInstanceOf(Comparison::class), $this->isInstanceOf(Comparison::class))->willReturn($andxMock);
         $queryBuilderMock->expects($this->exactly(2))->method('leftJoin')->willReturnMap([['o.associations', 'association', $queryBuilderMock], ['association.associatedProducts', 'associatedProduct', 'WITH', Argument::type(Andx::class), $queryBuilderMock]]);
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
         $exprMock->expects($this->exactly(2))->method('eq')->willReturnMap([['associatedProduct.enabled', 'true', $comparisonMock], ['association.owner', 'o', $comparisonMock]]);
         $this->enabledWithinProductAssociationExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ProductInterface::class, new Get(name: Request::METHOD_GET));
     }

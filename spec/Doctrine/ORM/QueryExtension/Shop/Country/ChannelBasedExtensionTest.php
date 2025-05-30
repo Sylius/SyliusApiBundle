@@ -50,8 +50,8 @@ final class ChannelBasedExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
@@ -62,10 +62,10 @@ final class ChannelBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
         $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, CountryInterface::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testThrowsAnExceptionIfContextHasNotChannel(): void
@@ -76,7 +76,7 @@ final class ChannelBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
         $this->expectException(InvalidArgumentException::class);
         $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, CountryInterface::class, new Get());
     }
@@ -93,13 +93,13 @@ final class ChannelBasedExtensionTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
         /** @var CountryInterface|MockObject $countryMock */
         $countryMock = $this->createMock(CountryInterface::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with('o.id in (:countries)')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with('o.id in (:countries)')->willReturn($queryBuilderMock);
         $countriesCollection = new ArrayCollection([$countryMock]);
-        $channelMock->expects($this->once())->method('getCountries')->willReturn($countriesCollection);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('countries')->willReturn('countries');
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('countries', $countriesCollection)->willReturn($queryBuilderMock);
+        $channelMock->expects(self::once())->method('getCountries')->willReturn($countriesCollection);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('countries')->willReturn('countries');
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('countries', $countriesCollection)->willReturn($queryBuilderMock);
         $this->channelBasedExtension->applyToCollection(
             $queryBuilderMock,
             $queryNameGeneratorMock,

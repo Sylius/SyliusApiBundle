@@ -16,7 +16,6 @@ namespace Tests\Sylius\Bundle\ApiBundle\Serializer\Normalizer;
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\UrlGeneratorInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
@@ -35,17 +34,13 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final class ProductVariantNormalizerTest extends TestCase
 {
-    /** @var ProductVariantPricesCalculatorInterface|MockObject */
-    private MockObject $pricesCalculatorMock;
+    private MockObject&ProductVariantPricesCalculatorInterface $pricesCalculator;
 
-    /** @var AvailabilityCheckerInterface|MockObject */
-    private MockObject $availabilityCheckerMock;
+    private AvailabilityCheckerInterface&MockObject $availabilityChecker;
 
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private MockObject&SectionProviderInterface $sectionProvider;
 
-    /** @var IriConverterInterface|MockObject */
-    private MockObject $iriConverterMock;
+    private IriConverterInterface&MockObject $iriConverter;
 
     private ProductVariantNormalizer $productVariantNormalizer;
 
@@ -53,11 +48,12 @@ final class ProductVariantNormalizerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pricesCalculatorMock = $this->createMock(ProductVariantPricesCalculatorInterface::class);
-        $this->availabilityCheckerMock = $this->createMock(AvailabilityCheckerInterface::class);
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->iriConverterMock = $this->createMock(IriConverterInterface::class);
-        $this->productVariantNormalizer = new ProductVariantNormalizer($this->pricesCalculatorMock, $this->availabilityCheckerMock, $this->sectionProviderMock, $this->iriConverterMock, ['sylius:product_variant:index']);
+        parent::setUp();
+        $this->pricesCalculator = $this->createMock(ProductVariantPricesCalculatorInterface::class);
+        $this->availabilityChecker = $this->createMock(AvailabilityCheckerInterface::class);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->productVariantNormalizer = new ProductVariantNormalizer($this->pricesCalculator, $this->availabilityChecker, $this->sectionProvider, $this->iriConverter, ['sylius:product_variant:index']);
     }
 
     public function testSupportsOnlyProductVariantInterface(): void
@@ -68,9 +64,9 @@ final class ProductVariantNormalizerTest extends TestCase
         $variantMock = $this->createMock(ProductVariantInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->assertTrue($this->productVariantNormalizer->supportsNormalization($variantMock, null, ['groups' => ['sylius:product_variant:index']]));
-        $this->assertFalse($this->productVariantNormalizer->supportsNormalization($orderMock, null, ['groups' => ['sylius:product_variant:index']]));
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        self::assertTrue($this->productVariantNormalizer->supportsNormalization($variantMock, null, ['groups' => ['sylius:product_variant:index']]));
+        self::assertFalse($this->productVariantNormalizer->supportsNormalization($orderMock, null, ['groups' => ['sylius:product_variant:index']]));
     }
 
     public function testSupportsNormalizationIfSectionIsNotAdminGet(): void
@@ -79,8 +75,8 @@ final class ProductVariantNormalizerTest extends TestCase
         $variantMock = $this->createMock(ProductVariantInterface::class);
         /** @var ShopApiSection|MockObject $shopApiSectionMock */
         $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->assertTrue($this->productVariantNormalizer->supportsNormalization($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        self::assertTrue($this->productVariantNormalizer->supportsNormalization($variantMock, null, [
                 'groups' => ['sylius:product_variant:index'],
             ]))
         ;
@@ -92,8 +88,8 @@ final class ProductVariantNormalizerTest extends TestCase
         $variantMock = $this->createMock(ProductVariantInterface::class);
         /** @var AdminApiSection|MockObject $adminApiSectionMock */
         $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->assertFalse($this->productVariantNormalizer->supportsNormalization($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
+        self::assertFalse($this->productVariantNormalizer->supportsNormalization($variantMock, null, [
                 'groups' => ['sylius:product_variant:index'],
             ]))
         ;
@@ -105,8 +101,8 @@ final class ProductVariantNormalizerTest extends TestCase
         $variantMock = $this->createMock(ProductVariantInterface::class);
         /** @var ShopApiSection|MockObject $shopApiSectionMock */
         $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->assertFalse($this->productVariantNormalizer->supportsNormalization($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        self::assertFalse($this->productVariantNormalizer->supportsNormalization($variantMock, null, [
                 'groups' => ['sylius:product_variant:show'],
             ]))
         ;
@@ -116,7 +112,7 @@ final class ProductVariantNormalizerTest extends TestCase
     {
         /** @var ProductVariantInterface|MockObject $variantMock */
         $variantMock = $this->createMock(ProductVariantInterface::class);
-        $this->assertFalse($this->productVariantNormalizer
+        self::assertFalse($this->productVariantNormalizer
             ->supportsNormalization($variantMock, null, [
                 'sylius_product_variant_normalizer_already_called' => true,
                 'groups' => ['sylius:product_variant:index'],
@@ -135,18 +131,18 @@ final class ProductVariantNormalizerTest extends TestCase
         /** @var ProductVariantInterface|MockObject $variantMock */
         $variantMock = $this->createMock(ProductVariantInterface::class);
         $this->productVariantNormalizer->setNormalizer($normalizerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $normalizerMock->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $normalizerMock->expects(self::once())->method('normalize')->with($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ])->willReturn([]);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculateLowestPriceBeforeDiscount')->with($variantMock, ['channel' => $channelMock])->willReturn(500);
-        $variantMock->expects($this->once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection());
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
-        $this->productVariantNormalizer->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->pricesCalculator->expects(self::once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
+        $this->pricesCalculator->expects(self::once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
+        $this->pricesCalculator->expects(self::once())->method('calculateLowestPriceBeforeDiscount')->with($variantMock, ['channel' => $channelMock])->willReturn(500);
+        $variantMock->expects(self::once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection());
+        $this->availabilityChecker->expects(self::once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
+        $this->productVariantNormalizer->expects(self::once())->method('normalize')->with($variantMock, null, [
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ])
@@ -165,18 +161,18 @@ final class ProductVariantNormalizerTest extends TestCase
         /** @var ProductVariantInterface|MockObject $variantMock */
         $variantMock = $this->createMock(ProductVariantInterface::class);
         $this->productVariantNormalizer->setNormalizer($normalizerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $normalizerMock->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $normalizerMock->expects(self::once())->method('normalize')->with($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ])->willReturn([]);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willReturn(500);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculateLowestPriceBeforeDiscount')->with($variantMock, ['channel' => $channelMock])->willReturn(100);
-        $variantMock->expects($this->once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection());
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
-        $this->productVariantNormalizer->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->pricesCalculator->expects(self::once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willReturn(500);
+        $this->pricesCalculator->expects(self::once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
+        $this->pricesCalculator->expects(self::once())->method('calculateLowestPriceBeforeDiscount')->with($variantMock, ['channel' => $channelMock])->willReturn(100);
+        $variantMock->expects(self::once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection());
+        $this->availabilityChecker->expects(self::once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
+        $this->productVariantNormalizer->expects(self::once())->method('normalize')->with($variantMock, null, [
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ])
@@ -197,22 +193,22 @@ final class ProductVariantNormalizerTest extends TestCase
         /** @var CatalogPromotionInterface|MockObject $catalogPromotionMock */
         $catalogPromotionMock = $this->createMock(CatalogPromotionInterface::class);
         $this->productVariantNormalizer->setNormalizer($normalizerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $normalizerMock->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $normalizerMock->expects(self::once())->method('normalize')->with($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ])->willReturn([]);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willReturn(500);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculateLowestPriceBeforeDiscount')->with($variantMock, ['channel' => $channelMock])->willReturn(100);
-        $catalogPromotionMock->expects($this->once())->method('getCode')->willReturn('winter_sale');
-        $variantMock->expects($this->once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection([$catalogPromotionMock]));
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
-        $this->iriConverterMock->expects($this->once())->method('getIriFromResource')->with($catalogPromotionMock, UrlGeneratorInterface::ABS_PATH, null, [ContextKeys::CHANNEL => $channelMock, self::ALREADY_CALLED => true, 'groups' => ['sylius:product_variant:index']])
+        $this->pricesCalculator->expects(self::once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willReturn(500);
+        $this->pricesCalculator->expects(self::once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willReturn(1000);
+        $this->pricesCalculator->expects(self::once())->method('calculateLowestPriceBeforeDiscount')->with($variantMock, ['channel' => $channelMock])->willReturn(100);
+        $catalogPromotionMock->expects(self::once())->method('getCode')->willReturn('winter_sale');
+        $variantMock->expects(self::once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection([$catalogPromotionMock]));
+        $this->availabilityChecker->expects(self::once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
+        $this->iriConverter->expects(self::once())->method('getIriFromResource')->with($catalogPromotionMock, UrlGeneratorInterface::ABS_PATH, null, [ContextKeys::CHANNEL => $channelMock, self::ALREADY_CALLED => true, 'groups' => ['sylius:product_variant:index']])
             ->willReturn('/api/v2/shop/catalog-promotions/winter_sale')
         ;
-        $this->productVariantNormalizer->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->productVariantNormalizer->expects(self::once())->method('normalize')->with($variantMock, null, [
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ])
@@ -235,16 +231,16 @@ final class ProductVariantNormalizerTest extends TestCase
         /** @var ProductVariantInterface|MockObject $variantMock */
         $variantMock = $this->createMock(ProductVariantInterface::class);
         $this->productVariantNormalizer->setNormalizer($normalizerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $normalizerMock->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $normalizerMock->expects(self::once())->method('normalize')->with($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             'groups' => ['sylius:product_variant:index'],
         ])->willReturn([]);
-        $this->pricesCalculatorMock->expects($this->never())->method('calculate')->with($this->any());
-        $this->pricesCalculatorMock->expects($this->never())->method('calculateOriginal')->with($this->any());
-        $variantMock->expects($this->never())->method('getAppliedPromotionsForChannel');
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
-        $this->assertSame(['inStock' => true], $this->productVariantNormalizer->normalize($variantMock, null, ['groups' => ['sylius:product_variant:index']]));
+        $this->pricesCalculator->expects(self::never())->method('calculate')->with($this->any());
+        $this->pricesCalculator->expects(self::never())->method('calculateOriginal')->with($this->any());
+        $variantMock->expects(self::never())->method('getAppliedPromotionsForChannel');
+        $this->availabilityChecker->expects(self::once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
+        self::assertSame(['inStock' => true], $this->productVariantNormalizer->normalize($variantMock, null, ['groups' => ['sylius:product_variant:index']]));
     }
 
     public function testDoesntReturnPricesAndPromotionsWhenChannelFromContextIsNull(): void
@@ -256,17 +252,17 @@ final class ProductVariantNormalizerTest extends TestCase
         /** @var ProductVariantInterface|MockObject $variantMock */
         $variantMock = $this->createMock(ProductVariantInterface::class);
         $this->productVariantNormalizer->setNormalizer($normalizerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $normalizerMock->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $normalizerMock->expects(self::once())->method('normalize')->with($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             ContextKeys::CHANNEL => null,
             'groups' => ['sylius:product_variant:index'],
         ])->willReturn([]);
-        $this->pricesCalculatorMock->expects($this->never())->method('calculate')->with($this->any());
-        $this->pricesCalculatorMock->expects($this->never())->method('calculateOriginal')->with($this->any());
-        $variantMock->expects($this->never())->method('getAppliedPromotionsForChannel');
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
-        $this->assertSame(['inStock' => true], $this->productVariantNormalizer->normalize($variantMock, null, [
+        $this->pricesCalculator->expects(self::never())->method('calculate')->with($this->any());
+        $this->pricesCalculator->expects(self::never())->method('calculateOriginal')->with($this->any());
+        $variantMock->expects(self::never())->method('getAppliedPromotionsForChannel');
+        $this->availabilityChecker->expects(self::once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
+        self::assertSame(['inStock' => true], $this->productVariantNormalizer->normalize($variantMock, null, [
             ContextKeys::CHANNEL => null,
             'groups' => ['sylius:product_variant:index'],
         ]));
@@ -283,17 +279,17 @@ final class ProductVariantNormalizerTest extends TestCase
         /** @var ProductVariantInterface|MockObject $variantMock */
         $variantMock = $this->createMock(ProductVariantInterface::class);
         $this->productVariantNormalizer->setNormalizer($normalizerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $normalizerMock->expects($this->once())->method('normalize')->with($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $normalizerMock->expects(self::once())->method('normalize')->with($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ])->willReturn([]);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willThrowException(MissingChannelConfigurationException::class);
-        $this->pricesCalculatorMock->expects($this->once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willThrowException(MissingChannelConfigurationException::class);
-        $variantMock->expects($this->once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection());
-        $this->availabilityCheckerMock->expects($this->once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
-        $this->assertSame(['inStock' => true], $this->productVariantNormalizer->normalize($variantMock, null, [
+        $this->pricesCalculator->expects(self::once())->method('calculate')->with($variantMock, ['channel' => $channelMock])->willThrowException(MissingChannelConfigurationException::class);
+        $this->pricesCalculator->expects(self::once())->method('calculateOriginal')->with($variantMock, ['channel' => $channelMock])->willThrowException(MissingChannelConfigurationException::class);
+        $variantMock->expects(self::once())->method('getAppliedPromotionsForChannel')->with($channelMock)->willReturn(new ArrayCollection());
+        $this->availabilityChecker->expects(self::once())->method('isStockAvailable')->with($variantMock)->willReturn(true);
+        self::assertSame(['inStock' => true], $this->productVariantNormalizer->normalize($variantMock, null, [
             ContextKeys::CHANNEL => $channelMock,
             'groups' => ['sylius:product_variant:index'],
         ]));
@@ -308,12 +304,12 @@ final class ProductVariantNormalizerTest extends TestCase
         /** @var ProductVariantInterface|MockObject $variantMock */
         $variantMock = $this->createMock(ProductVariantInterface::class);
         $this->productVariantNormalizer->setNormalizer($normalizerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $normalizerMock->expects($this->never())->method('normalize')->with($variantMock, null, [
+        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $normalizerMock->expects(self::never())->method('normalize')->with($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             'groups' => ['sylius:product_variant:index'],
         ]);
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->productVariantNormalizer->normalize($variantMock, null, [
             'sylius_product_variant_normalizer_already_called' => true,
             'groups' => ['sylius:product_variant:index'],

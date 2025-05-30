@@ -53,10 +53,10 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isAccountVerificationRequired')->willReturn(false);
-        $this->accountRegistrationEmailManagerMock->expects($this->once())->method('sendAccountRegistrationEmail')->with($shopUserMock, $channelMock, 'en_US')
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(false);
+        $this->accountRegistrationEmailManagerMock->expects(self::once())->method('sendAccountRegistrationEmail')->with($shopUserMock, $channelMock, 'en_US')
         ;
         $this(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
     }
@@ -67,11 +67,11 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isAccountVerificationRequired')->willReturn(true);
-        $shopUserMock->expects($this->once())->method('isEnabled')->willReturn(true);
-        $this->accountRegistrationEmailManagerMock->expects($this->once())->method('sendAccountRegistrationEmail')->with($shopUserMock, $channelMock, 'en_US')
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(true);
+        $shopUserMock->expects(self::once())->method('isEnabled')->willReturn(true);
+        $this->accountRegistrationEmailManagerMock->expects(self::once())->method('sendAccountRegistrationEmail')->with($shopUserMock, $channelMock, 'en_US')
         ;
         $this(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
     }
@@ -82,11 +82,11 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isAccountVerificationRequired')->willReturn(true);
-        $shopUserMock->expects($this->once())->method('isEnabled')->willReturn(false);
-        $this->accountRegistrationEmailManagerMock->expects($this->never())->method('sendAccountRegistrationEmail')->with($this->any());
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(true);
+        $shopUserMock->expects(self::once())->method('isEnabled')->willReturn(false);
+        $this->accountRegistrationEmailManagerMock->expects(self::never())->method('sendAccountRegistrationEmail')->with($this->any());
         $this(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 }

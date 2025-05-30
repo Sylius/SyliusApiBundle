@@ -53,7 +53,7 @@ final class RequestShopUserVerificationHandlerTest extends TestCase
 
     public function testThrowsExceptionIfShopUserDoesNotExist(): void
     {
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn(null);
+        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn(null);
         $resendVerificationEmail = new RequestShopUserVerification(
             shopUserId: 42,
             channelCode: 'WEB',
@@ -69,13 +69,13 @@ final class RequestShopUserVerificationHandlerTest extends TestCase
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $customerMock->expects($this->once())->method('getEmail')->willReturn('test@email.com');
-        $this->generatorMock->expects($this->once())->method('generate')->willReturn('TOKEN');
-        $shopUserMock->expects($this->once())->method('setEmailVerificationToken')->with('TOKEN');
+        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $customerMock->expects(self::once())->method('getEmail')->willReturn('test@email.com');
+        $this->generatorMock->expects(self::once())->method('generate')->willReturn('TOKEN');
+        $shopUserMock->expects(self::once())->method('setEmailVerificationToken')->with('TOKEN');
         $sendAccountVerificationEmail = new SendShopUserVerificationEmail('test@email.com', 'en_US', 'WEB');
-        $this->messageBusMock->expects($this->once())->method('dispatch')->with($sendAccountVerificationEmail, [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope($sendAccountVerificationEmail));
+        $this->messageBusMock->expects(self::once())->method('dispatch')->with($sendAccountVerificationEmail, [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope($sendAccountVerificationEmail));
         $resendVerificationEmail = new RequestShopUserVerification(
             shopUserId: 42,
             channelCode: 'WEB',

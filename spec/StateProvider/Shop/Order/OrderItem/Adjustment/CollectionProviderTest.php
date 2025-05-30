@@ -56,25 +56,25 @@ final class CollectionProviderTest extends TestCase
     public function testReturnsAnEmptyArrayWhenUriVariablesHaveNoId(): void
     {
         $operation = new GetCollection(class: AdjustmentInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->orderItemRepositoryMock->expects($this->never())->method('findOneByIdAndOrderTokenValue')->with($this->any());
-        $this->assertSame([], $this->collectionProvider->provide($operation, ['tokenValue' => '42']));
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->orderItemRepositoryMock->expects(self::never())->method('findOneByIdAndOrderTokenValue')->with($this->any());
+        self::assertSame([], $this->collectionProvider->provide($operation, ['tokenValue' => '42']));
     }
 
     public function testReturnsAnEmptyArrayWhenUriVariablesHaveNoTokenValue(): void
     {
         $operation = new GetCollection(class: AdjustmentInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->orderItemRepositoryMock->expects($this->never())->method('findOneByIdAndOrderTokenValue')->with($this->any());
-        $this->assertSame([], $this->collectionProvider->provide($operation, ['id' => 42]));
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->orderItemRepositoryMock->expects(self::never())->method('findOneByIdAndOrderTokenValue')->with($this->any());
+        self::assertSame([], $this->collectionProvider->provide($operation, ['id' => 42]));
     }
 
     public function testReturnsAnEmptyArrayWhenNoOrderItemCanBeFound(): void
     {
         $operation = new GetCollection(class: AdjustmentInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->orderItemRepositoryMock->expects($this->once())->method('findOneByIdAndOrderTokenValue')->with(42, 'token')->willReturn(null);
-        $this->assertSame([], $this->collectionProvider->provide($operation, ['id' => '42', 'tokenValue' => 'token']));
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->orderItemRepositoryMock->expects(self::once())->method('findOneByIdAndOrderTokenValue')->with(42, 'token')->willReturn(null);
+        self::assertSame([], $this->collectionProvider->provide($operation, ['id' => '42', 'tokenValue' => 'token']));
     }
 
     public function testReturnsAdjustmentsRecursively(): void
@@ -88,22 +88,22 @@ final class CollectionProviderTest extends TestCase
         /** @var AdjustmentInterface|MockObject $secondAdjustmentMock */
         $secondAdjustmentMock = $this->createMock(AdjustmentInterface::class);
         $operation = new GetCollection(class: AdjustmentInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
         $requestMock->query = new InputBag(['type' => 'type']);
         $adjustments = new ArrayCollection([
             $firstAdjustmentMock,
             $secondAdjustmentMock,
         ]);
-        $orderItemMock->expects($this->once())->method('getAdjustmentsRecursively')->with('type')->willReturn($adjustments);
-        $this->orderItemRepositoryMock->expects($this->once())->method('findOneByIdAndOrderTokenValue')->with(42, 'token')->willReturn($orderItemMock);
-        $this->assertSame($adjustments, $this->collectionProvider->provide($operation, ['id' => '42', 'tokenValue' => 'token'], ['request' => $requestMock]));
+        $orderItemMock->expects(self::once())->method('getAdjustmentsRecursively')->with('type')->willReturn($adjustments);
+        $this->orderItemRepositoryMock->expects(self::once())->method('findOneByIdAndOrderTokenValue')->with(42, 'token')->willReturn($orderItemMock);
+        self::assertSame($adjustments, $this->collectionProvider->provide($operation, ['id' => '42', 'tokenValue' => 'token'], ['request' => $requestMock]));
     }
 
     public function testThrowsAnExceptionWhenOperationClassIsNotAdjustment(): void
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(stdClass::class);
+        $operationMock->expects(self::once())->method('getClass')->willReturn(stdClass::class);
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operationMock);
     }
@@ -112,8 +112,8 @@ final class CollectionProviderTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(AdjustmentInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
+        $operationMock->expects(self::once())->method('getClass')->willReturn(AdjustmentInterface::class);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operationMock);
     }
@@ -121,7 +121,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenOperationIsNotInShopApiSection(): void
     {
         $operation = new GetCollection(class: AdjustmentInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }

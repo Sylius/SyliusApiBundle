@@ -39,7 +39,7 @@ final class RemoveShopUserHandlerTest extends TestCase
 
     public function testThrowsAnExceptionIfUserHasNotBeenFound(): void
     {
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn(null);
+        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn(null);
         $this->expectException(UserNotFoundException::class);
         $this->removeShopUserHandler->__invoke(new RemoveShopUser(42));
     }
@@ -48,9 +48,9 @@ final class RemoveShopUserHandlerTest extends TestCase
     {
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects($this->once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('setCustomer')->with(null);
-        $this->userRepositoryMock->expects($this->once())->method('remove')->with($shopUserMock);
+        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('setCustomer')->with(null);
+        $this->userRepositoryMock->expects(self::once())->method('remove')->with($shopUserMock);
         $this->removeShopUserHandler->__invoke(new RemoveShopUser(42));
     }
 }

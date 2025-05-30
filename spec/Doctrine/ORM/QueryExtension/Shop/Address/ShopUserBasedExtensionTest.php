@@ -62,8 +62,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToItemForUnsupportedResource(): void
@@ -73,8 +73,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, stdClass::class, []);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
@@ -85,10 +85,10 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
         $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToItemForAdminApiSection(): void
@@ -99,10 +99,10 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
         $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class, []);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToCollectionIfUserIsNotShopUser(): void
@@ -115,11 +115,11 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($adminUserMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($adminUserMock);
         $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToItemIfUserIsNotShopUser(): void
@@ -132,11 +132,11 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($adminUserMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($adminUserMock);
         $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class, []);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testAppliesConditionsToCollectionForShopApiSection(): void
@@ -155,17 +155,17 @@ final class ShopUserBasedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var Comparison|MockObject $exprComparisonMock */
         $exprComparisonMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with(':customer')->willReturn(':customer');
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('eq')->with('o.customer', ':customer')->willReturn($exprComparisonMock);
-        $queryBuilderMock->expects($this->once())->method('innerJoin')->with('o.customer', 'customer')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with($exprComparisonMock)->willReturn($queryBuilderMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with(':customer')->willReturn(':customer');
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('eq')->with('o.customer', ':customer')->willReturn($exprComparisonMock);
+        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.customer', 'customer')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprComparisonMock)->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([[':customer', $customerMock, $queryBuilderMock], [':customer', $customerMock]]);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with(':customer', $customerMock)->shouldHaveBeenCalledOnce();
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with(':customer', $customerMock)->shouldHaveBeenCalledOnce();
     }
 
     public function testAppliesConditionsToItemForShopApiSection(): void
@@ -184,16 +184,16 @@ final class ShopUserBasedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var Comparison|MockObject $exprComparisonMock */
         $exprComparisonMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with(':customer')->willReturn(':customer');
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('eq')->with('o.customer', ':customer')->willReturn($exprComparisonMock);
-        $queryBuilderMock->expects($this->once())->method('innerJoin')->with('o.customer', 'customer')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with($exprComparisonMock)->willReturn($queryBuilderMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with(':customer')->willReturn(':customer');
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('eq')->with('o.customer', ':customer')->willReturn($exprComparisonMock);
+        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.customer', 'customer')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprComparisonMock)->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([[':customer', $customerMock, $queryBuilderMock], [':customer', $customerMock]]);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with(':customer', $customerMock)->shouldHaveBeenCalledOnce();
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with(':customer', $customerMock)->shouldHaveBeenCalledOnce();
     }
 }

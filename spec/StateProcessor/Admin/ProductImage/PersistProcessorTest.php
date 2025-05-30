@@ -72,22 +72,22 @@ final class PersistProcessorTest extends TestCase
         /** @var ConstraintViolationListInterface|MockObject $constraintViolationListMock */
         $constraintViolationListMock = $this->createMock(ConstraintViolationListInterface::class);
         $operation = new Post(validationContext: ['groups' => ['sylius']]);
-        $attributesMock->expects($this->once())->method('get')->with('code', '')->willReturn('code');
+        $attributesMock->expects(self::once())->method('get')->with('code', '')->willReturn('code');
         $requestMock->attributes = $attributesMock;
         $file = new SplFileInfo(__FILE__);
-        $filesMock->expects($this->once())->method('get')->with('file')->willReturn($file);
+        $filesMock->expects(self::once())->method('get')->with('file')->willReturn($file);
         $requestMock->files = $filesMock;
         $requestParams = new InputBag([
             'type' => 'type',
             'productVariants' => ['/api/v2/admin/product-variants/MUG'],
         ]);
         $requestMock->request = $requestParams;
-        $this->productImageCreatorMock->expects($this->once())->method('create')->with('code', $file, 'type', ['productVariants' => ['/api/v2/admin/product-variants/MUG']])
+        $this->productImageCreatorMock->expects(self::once())->method('create')->with('code', $file, 'type', ['productVariants' => ['/api/v2/admin/product-variants/MUG']])
             ->willReturn($productImageMock)
         ;
-        $this->validatorMock->expects($this->once())->method('validate')->with($productImageMock, null, ['sylius'])->willReturn($constraintViolationListMock);
-        $constraintViolationListMock->expects($this->once())->method('count')->willReturn(0);
-        $this->processorMock->expects($this->once())->method('process')->with($productImageMock, $operation, [], ['request' => $requestMock])
+        $this->validatorMock->expects(self::once())->method('validate')->with($productImageMock, null, ['sylius'])->willReturn($constraintViolationListMock);
+        $constraintViolationListMock->expects(self::once())->method('count')->willReturn(0);
+        $this->processorMock->expects(self::once())->method('process')->with($productImageMock, $operation, [], ['request' => $requestMock])
         ;
         $this->persistProcessor->process(null, $operation, [], ['request' => $requestMock]);
     }
@@ -107,27 +107,27 @@ final class PersistProcessorTest extends TestCase
         /** @var ConstraintViolationInterface|MockObject $constraintViolationMock */
         $constraintViolationMock = $this->createMock(ConstraintViolationInterface::class);
         $operation = new Post(validationContext: ['groups' => ['sylius']]);
-        $attributesMock->expects($this->once())->method('get')->with('code', '')->willReturn('code');
+        $attributesMock->expects(self::once())->method('get')->with('code', '')->willReturn('code');
         $requestMock->attributes = $attributesMock;
         $file = new SplFileInfo(__FILE__);
-        $filesMock->expects($this->once())->method('get')->with('file')->willReturn($file);
+        $filesMock->expects(self::once())->method('get')->with('file')->willReturn($file);
         $requestMock->files = $filesMock;
         $requestParams = new InputBag([
             'type' => 'type',
             'productVariants' => ['/api/v2/admin/product-variants/MUG'],
         ]);
         $requestMock->request = $requestParams;
-        $this->productImageCreatorMock->expects($this->once())->method('create')->with('code', $file, 'type', ['productVariants' => ['/api/v2/admin/product-variants/MUG']])
+        $this->productImageCreatorMock->expects(self::once())->method('create')->with('code', $file, 'type', ['productVariants' => ['/api/v2/admin/product-variants/MUG']])
             ->willReturn($productImageMock)
         ;
-        $this->validatorMock->expects($this->once())->method('validate')->with($productImageMock, null, ['sylius'])->willReturn($constraintViolationListMock);
-        $constraintViolationListMock->expects($this->once())->method('count')->willReturn(1);
-        $constraintViolationListMock->expects($this->once())->method('rewind');
-        $constraintViolationListMock->expects($this->once())->method('valid')->willReturn(false);
-        $constraintViolationListMock->expects($this->once())->method('current')->willReturn($constraintViolationMock);
-        $constraintViolationMock->expects($this->once())->method('getPropertyPath')->willReturn('productVariants');
-        $constraintViolationMock->expects($this->once())->method('getMessage')->willReturn('message');
-        $this->processorMock->expects($this->never())->method('process')->with($productImageMock, $operation, [], ['request' => $requestMock])
+        $this->validatorMock->expects(self::once())->method('validate')->with($productImageMock, null, ['sylius'])->willReturn($constraintViolationListMock);
+        $constraintViolationListMock->expects(self::once())->method('count')->willReturn(1);
+        $constraintViolationListMock->expects(self::once())->method('rewind');
+        $constraintViolationListMock->expects(self::once())->method('valid')->willReturn(false);
+        $constraintViolationListMock->expects(self::once())->method('current')->willReturn($constraintViolationMock);
+        $constraintViolationMock->expects(self::once())->method('getPropertyPath')->willReturn('productVariants');
+        $constraintViolationMock->expects(self::once())->method('getMessage')->willReturn('message');
+        $this->processorMock->expects(self::never())->method('process')->with($productImageMock, $operation, [], ['request' => $requestMock])
         ;
         $this->expectException(ValidationException::class);
         $this->persistProcessor->process($productImageMock, $operation, [], ['request' => $requestMock]);

@@ -67,15 +67,15 @@ final class AddItemToCartHandlerTest extends TestCase
         $cartItemMock = $this->createMock(OrderItemInterface::class);
         /** @var ProductVariantInterface|MockObject $productVariantMock */
         $productVariantMock = $this->createMock(ProductVariantInterface::class);
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('TOKEN')->willReturn($cartMock);
-        $this->productVariantRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'PRODUCT_VARIANT_CODE'])
+        $this->orderRepositoryMock->expects(self::once())->method('findCartByTokenValue')->with('TOKEN')->willReturn($cartMock);
+        $this->productVariantRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'PRODUCT_VARIANT_CODE'])
             ->willReturn($productVariantMock)
         ;
-        $this->cartItemFactoryMock->expects($this->once())->method('createNew')->willReturn($cartItemMock);
-        $cartItemMock->expects($this->once())->method('setVariant')->with($productVariantMock);
-        $this->orderItemQuantityModifierMock->expects($this->once())->method('modify')->with($cartItemMock, 5);
-        $this->orderModifierMock->expects($this->once())->method('addToOrder')->with($cartMock, $cartItemMock);
-        $this->assertSame($cartMock, $this(new AddItemToCart(
+        $this->cartItemFactoryMock->expects(self::once())->method('createNew')->willReturn($cartItemMock);
+        $cartItemMock->expects(self::once())->method('setVariant')->with($productVariantMock);
+        $this->orderItemQuantityModifierMock->expects(self::once())->method('modify')->with($cartItemMock, 5);
+        $this->orderModifierMock->expects(self::once())->method('addToOrder')->with($cartMock, $cartItemMock);
+        self::assertSame($cartMock, $this(new AddItemToCart(
             orderTokenValue: 'TOKEN',
             productVariantCode: 'PRODUCT_VARIANT_CODE',
             quantity: 5,
@@ -84,8 +84,8 @@ final class AddItemToCartHandlerTest extends TestCase
 
     public function testThrowsAnExceptionIfProductIsNotFound(): void
     {
-        $this->productVariantRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'PRODUCT_VARIANT_CODE'])->willReturn(null);
-        $this->cartItemFactoryMock->expects($this->never())->method('createNew');
+        $this->productVariantRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'PRODUCT_VARIANT_CODE'])->willReturn(null);
+        $this->cartItemFactoryMock->expects(self::never())->method('createNew');
         $this->expectException(InvalidArgumentException::class);
         $this->addItemToCartHandler->__invoke(new AddItemToCart(
             orderTokenValue: 'TOKEN',
@@ -98,11 +98,11 @@ final class AddItemToCartHandlerTest extends TestCase
     {
         /** @var ProductVariantInterface|MockObject $productVariantMock */
         $productVariantMock = $this->createMock(ProductVariantInterface::class);
-        $this->productVariantRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'PRODUCT_VARIANT_CODE'])
+        $this->productVariantRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'PRODUCT_VARIANT_CODE'])
             ->willReturn($productVariantMock)
         ;
-        $this->orderRepositoryMock->expects($this->once())->method('findCartByTokenValue')->with('TOKEN')->willReturn(null);
-        $this->cartItemFactoryMock->expects($this->never())->method('createNew');
+        $this->orderRepositoryMock->expects(self::once())->method('findCartByTokenValue')->with('TOKEN')->willReturn(null);
+        $this->cartItemFactoryMock->expects(self::never())->method('createNew');
         $this->expectException(InvalidArgumentException::class);
         $this->addItemToCartHandler->__invoke(new AddItemToCart(
             orderTokenValue: 'TOKEN',

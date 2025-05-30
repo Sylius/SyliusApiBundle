@@ -54,13 +54,13 @@ final class SendShipmentConfirmationEmailHandlerTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
-        $this->shipmentRepositoryMock->expects($this->once())->method('find')->with(123)->willReturn($shipmentMock);
-        $shipmentMock->expects($this->once())->method('getOrder')->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getChannel')->willReturn($channelMock);
-        $orderMock->expects($this->once())->method('getLocaleCode')->willReturn('pl_PL');
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $customerMock->expects($this->once())->method('getEmail')->willReturn('johnny.bravo@email.com');
-        $this->shipmentEmailManagerMock->expects($this->once())->method('sendConfirmationEmail')->with($shipmentMock);
+        $this->shipmentRepositoryMock->expects(self::once())->method('find')->with(123)->willReturn($shipmentMock);
+        $shipmentMock->expects(self::once())->method('getOrder')->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
+        $orderMock->expects(self::once())->method('getLocaleCode')->willReturn('pl_PL');
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $customerMock->expects(self::once())->method('getEmail')->willReturn('johnny.bravo@email.com');
+        $this->shipmentEmailManagerMock->expects(self::once())->method('sendConfirmationEmail')->with($shipmentMock);
         $this(new SendShipmentConfirmationEmail(123));
     }
 }

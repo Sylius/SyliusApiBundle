@@ -44,8 +44,8 @@ final class RemoveProcessorTest extends TestCase
 
     public function testThrowsAnExceptionIfObjectIsNotALocale(): void
     {
-        $this->removeProcessorMock->expects($this->never())->method('process')->with($this->any());
-        $this->localeUsageCheckerMock->expects($this->never())->method('isUsed');
+        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
+        $this->localeUsageCheckerMock->expects(self::never())->method('isUsed');
         $this->expectException(InvalidArgumentException::class);
         $this->removeProcessor->process(new stdClass(), new Delete());
     }
@@ -54,8 +54,8 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
-        $this->removeProcessorMock->expects($this->never())->method('process')->with($this->any());
-        $this->localeUsageCheckerMock->expects($this->never())->method('isUsed');
+        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
+        $this->localeUsageCheckerMock->expects(self::never())->method('isUsed');
         $this->expectException(InvalidArgumentException::class);
         $this->removeProcessor->process($localeMock, new Post());
     }
@@ -64,9 +64,9 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
-        $localeMock->expects($this->once())->method('getCode')->willReturn('pl_PL');
-        $this->localeUsageCheckerMock->expects($this->once())->method('isUsed')->with('pl_PL')->willReturn(true);
-        $this->removeProcessorMock->expects($this->never())->method('process')->with($this->any());
+        $localeMock->expects(self::once())->method('getCode')->willReturn('pl_PL');
+        $this->localeUsageCheckerMock->expects(self::once())->method('isUsed')->with('pl_PL')->willReturn(true);
+        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
         $this->expectException(LocaleIsUsedException::class);
         $this->removeProcessor->process($localeMock, new Delete());
     }
@@ -76,9 +76,9 @@ final class RemoveProcessorTest extends TestCase
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
         $operation = new Delete();
-        $localeMock->expects($this->once())->method('getCode')->willReturn('pl_PL');
-        $this->localeUsageCheckerMock->expects($this->once())->method('isUsed')->with('pl_PL')->willReturn(false);
-        $this->removeProcessorMock->expects($this->once())->method('process')->with($localeMock, $operation, [], []);
+        $localeMock->expects(self::once())->method('getCode')->willReturn('pl_PL');
+        $this->localeUsageCheckerMock->expects(self::once())->method('isUsed')->with('pl_PL')->willReturn(false);
+        $this->removeProcessorMock->expects(self::once())->method('process')->with($localeMock, $operation, [], []);
         $this->removeProcessor->process($localeMock, $operation);
     }
 }

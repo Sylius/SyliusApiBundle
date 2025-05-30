@@ -49,8 +49,8 @@ final class ChannelAndLocaleBasedExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $this->channelAndLocaleBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
@@ -61,10 +61,10 @@ final class ChannelAndLocaleBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
         $this->channelAndLocaleBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testThrowsAnExceptionIfContextHasNoChannelForShopUser(): void
@@ -75,7 +75,7 @@ final class ChannelAndLocaleBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
         $this->expectException(InvalidArgumentException::class);
         $this->channelAndLocaleBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ProductInterface::class, new Get());
     }
@@ -90,7 +90,7 @@ final class ChannelAndLocaleBasedExtensionTest extends TestCase
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
         $this->expectException(InvalidArgumentException::class);
         $this->channelAndLocaleBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ProductInterface::class, new Get(), [ContextKeys::CHANNEL => $channelMock]);
     }
@@ -105,15 +105,15 @@ final class ChannelAndLocaleBasedExtensionTest extends TestCase
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
         $queryNameGeneratorMock->expects($this->exactly(2))->method('generateParameterName')->willReturnMap([['channel', 'channel'], ['localeCode', 'localeCode']]);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('translation')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('innerJoin')->with('o.translations', 'translation', 'WITH', 'translation.locale = :localeCode')
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('translation')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.translations', 'translation', 'WITH', 'translation.locale = :localeCode')
             ->willReturn($queryBuilderMock)
         ;
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with(':channel MEMBER OF o.channels')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('channel', $channelMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with(':channel MEMBER OF o.channels')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('channel', $channelMock)->willReturn($queryBuilderMock);
         $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([['channel', $channelMock, $queryBuilderMock], ['localeCode', 'en_US', $queryBuilderMock]]);
     }
 }

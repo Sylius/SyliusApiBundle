@@ -85,28 +85,28 @@ final class RegisterShopUserHandlerTest extends TestCase
             password: 'iamrobot',
             subscribedToNewsletter: true,
         );
-        $this->shopUserFactoryMock->expects($this->once())->method('createNew')->willReturn($shopUserMock);
-        $this->customerResolverMock->expects($this->once())->method('resolve')->with('WILL.SMITH@example.com')->willReturn($customerMock);
-        $customerMock->expects($this->once())->method('getUser')->willReturn(null);
-        $shopUserMock->expects($this->once())->method('setPlainPassword')->with('iamrobot');
-        $customerMock->expects($this->once())->method('setFirstName')->with('Will');
-        $customerMock->expects($this->once())->method('setLastName')->with('Smith');
-        $customerMock->expects($this->once())->method('setSubscribedToNewsletter')->with(true);
-        $customerMock->expects($this->once())->method('setUser')->with($shopUserMock);
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('CHANNEL_CODE')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isAccountVerificationRequired')->willReturn(true);
-        $this->generatorMock->expects($this->once())->method('generate')->willReturn('TOKEN');
-        $shopUserMock->expects($this->once())->method('setEmailVerificationToken')->with('TOKEN');
-        $this->shopUserManagerMock->expects($this->once())->method('persist')->with($shopUserMock);
+        $this->shopUserFactoryMock->expects(self::once())->method('createNew')->willReturn($shopUserMock);
+        $this->customerResolverMock->expects(self::once())->method('resolve')->with('WILL.SMITH@example.com')->willReturn($customerMock);
+        $customerMock->expects(self::once())->method('getUser')->willReturn(null);
+        $shopUserMock->expects(self::once())->method('setPlainPassword')->with('iamrobot');
+        $customerMock->expects(self::once())->method('setFirstName')->with('Will');
+        $customerMock->expects(self::once())->method('setLastName')->with('Smith');
+        $customerMock->expects(self::once())->method('setSubscribedToNewsletter')->with(true);
+        $customerMock->expects(self::once())->method('setUser')->with($shopUserMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CHANNEL_CODE')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(true);
+        $this->generatorMock->expects(self::once())->method('generate')->willReturn('TOKEN');
+        $shopUserMock->expects(self::once())->method('setEmailVerificationToken')->with('TOKEN');
+        $this->shopUserManagerMock->expects(self::once())->method('persist')->with($shopUserMock);
         $sendRegistrationEmailCommand = new SendAccountRegistrationEmail('WILL.SMITH@example.com', 'en_US', 'CHANNEL_CODE');
-        $this->commandBusMock->expects($this->once())->method('dispatch')->with($sendRegistrationEmailCommand, [new DispatchAfterCurrentBusStamp()])
+        $this->commandBusMock->expects(self::once())->method('dispatch')->with($sendRegistrationEmailCommand, [new DispatchAfterCurrentBusStamp()])
             ->willReturn(new Envelope($sendRegistrationEmailCommand))
         ;
         $sendVerificationEmailCommand = new SendShopUserVerificationEmail('WILL.SMITH@example.com', 'en_US', 'CHANNEL_CODE');
-        $this->commandBusMock->expects($this->once())->method('dispatch')->with($sendVerificationEmailCommand, [new DispatchAfterCurrentBusStamp()])
+        $this->commandBusMock->expects(self::once())->method('dispatch')->with($sendVerificationEmailCommand, [new DispatchAfterCurrentBusStamp()])
             ->willReturn(new Envelope($sendVerificationEmailCommand))
         ;
-        $this->assertSame($shopUserMock, $this($command));
+        self::assertSame($shopUserMock, $this($command));
     }
 
     public function testCreatesAShopUserWithGivenDataAndVerifiesIt(): void
@@ -126,23 +126,23 @@ final class RegisterShopUserHandlerTest extends TestCase
             password: 'iamrobot',
             subscribedToNewsletter: true,
         );
-        $this->shopUserFactoryMock->expects($this->once())->method('createNew')->willReturn($shopUserMock);
-        $this->customerResolverMock->expects($this->once())->method('resolve')->with('WILL.SMITH@example.com')->willReturn($customerMock);
-        $customerMock->expects($this->once())->method('getUser')->willReturn(null);
-        $shopUserMock->expects($this->once())->method('setPlainPassword')->with('iamrobot');
-        $customerMock->expects($this->once())->method('setFirstName')->with('Will');
-        $customerMock->expects($this->once())->method('setLastName')->with('Smith');
-        $customerMock->expects($this->once())->method('setSubscribedToNewsletter')->with(true);
-        $customerMock->expects($this->once())->method('setUser')->with($shopUserMock);
-        $this->shopUserManagerMock->expects($this->once())->method('persist')->with($shopUserMock);
+        $this->shopUserFactoryMock->expects(self::once())->method('createNew')->willReturn($shopUserMock);
+        $this->customerResolverMock->expects(self::once())->method('resolve')->with('WILL.SMITH@example.com')->willReturn($customerMock);
+        $customerMock->expects(self::once())->method('getUser')->willReturn(null);
+        $shopUserMock->expects(self::once())->method('setPlainPassword')->with('iamrobot');
+        $customerMock->expects(self::once())->method('setFirstName')->with('Will');
+        $customerMock->expects(self::once())->method('setLastName')->with('Smith');
+        $customerMock->expects(self::once())->method('setSubscribedToNewsletter')->with(true);
+        $customerMock->expects(self::once())->method('setUser')->with($shopUserMock);
+        $this->shopUserManagerMock->expects(self::once())->method('persist')->with($shopUserMock);
         $sendRegistrationEmailCommand = new SendAccountRegistrationEmail('WILL.SMITH@example.com', 'en_US', 'CHANNEL_CODE');
-        $this->commandBusMock->expects($this->once())->method('dispatch')->with($sendRegistrationEmailCommand, [new DispatchAfterCurrentBusStamp()])
+        $this->commandBusMock->expects(self::once())->method('dispatch')->with($sendRegistrationEmailCommand, [new DispatchAfterCurrentBusStamp()])
             ->willReturn(new Envelope($sendRegistrationEmailCommand))
         ;
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('CHANNEL_CODE')->willReturn($channelMock);
-        $channelMock->expects($this->once())->method('isAccountVerificationRequired')->willReturn(false);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CHANNEL_CODE')->willReturn($channelMock);
+        $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(false);
         $shopUserMock->setEnabled(true);
-        $this->assertSame($shopUserMock, $this($command));
+        self::assertSame($shopUserMock, $this($command));
     }
 
     public function testThrowsAnExceptionIfCustomerWithUserAlreadyExists(): void
@@ -153,12 +153,12 @@ final class RegisterShopUserHandlerTest extends TestCase
         $customerMock = $this->createMock(CustomerInterface::class);
         /** @var ShopUserInterface|MockObject $existingShopUserMock */
         $existingShopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->shopUserFactoryMock->expects($this->once())->method('createNew')->willReturn($shopUserMock);
-        $this->customerResolverMock->expects($this->once())->method('resolve')->with('WILL.SMITH@example.com')->willReturn($customerMock);
-        $customerMock->expects($this->once())->method('getUser')->willReturn($existingShopUserMock);
-        $this->shopUserManagerMock->expects($this->never())->method('persist')->with($shopUserMock);
+        $this->shopUserFactoryMock->expects(self::once())->method('createNew')->willReturn($shopUserMock);
+        $this->customerResolverMock->expects(self::once())->method('resolve')->with('WILL.SMITH@example.com')->willReturn($customerMock);
+        $customerMock->expects(self::once())->method('getUser')->willReturn($existingShopUserMock);
+        $this->shopUserManagerMock->expects(self::never())->method('persist')->with($shopUserMock);
         $sendRegistrationEmailCommand = new SendAccountRegistrationEmail('WILL.SMITH@example.com', 'en_US', 'CHANNEL_CODE');
-        $this->commandBusMock->expects($this->never())->method('dispatch')->with($sendRegistrationEmailCommand)->willReturn(new Envelope($sendRegistrationEmailCommand));
+        $this->commandBusMock->expects(self::never())->method('dispatch')->with($sendRegistrationEmailCommand)->willReturn(new Envelope($sendRegistrationEmailCommand));
         $this->expectException(DomainException::class);
         $this->registerShopUserHandler->__invoke(new RegisterShopUser(
             channelCode: 'CHANNEL_CODE',

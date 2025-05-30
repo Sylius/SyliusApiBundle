@@ -77,16 +77,16 @@ final class ChoosePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getCheckoutState')->willReturn(OrderCheckoutStates::STATE_SHIPPING_SELECTED);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment')->willReturn(true);
-        $this->stateMachineMock->expects($this->once())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
-        $this->paymentMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn($paymentMethodMock);
-        $cartMock->expects($this->once())->method('getId')->willReturn('111');
-        $this->paymentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '111')->willReturn($paymentMock);
-        $cartMock->expects($this->once())->method('getState')->willReturn(OrderInterface::STATE_CART);
-        $paymentMock->expects($this->once())->method('setMethod')->with($paymentMethodMock);
-        $this->assertSame($cartMock, $this($choosePaymentMethod));
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getCheckoutState')->willReturn(OrderCheckoutStates::STATE_SHIPPING_SELECTED);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment')->willReturn(true);
+        $this->stateMachineMock->expects(self::once())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
+        $this->paymentMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn($paymentMethodMock);
+        $cartMock->expects(self::once())->method('getId')->willReturn('111');
+        $this->paymentRepositoryMock->expects(self::once())->method('findOneByOrderId')->with('123', '111')->willReturn($paymentMock);
+        $cartMock->expects(self::once())->method('getState')->willReturn(OrderInterface::STATE_CART);
+        $paymentMock->expects(self::once())->method('setMethod')->with($paymentMethodMock);
+        self::assertSame($cartMock, $this($choosePaymentMethod));
     }
 
     public function testThrowsAnExceptionIfOrderWithGivenTokenHasNotBeenFound(): void
@@ -98,8 +98,8 @@ final class ChoosePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
-        $paymentMock->expects($this->never())->method('setMethod')->with($this->isInstanceOf(PaymentMethodInterface::class));
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
+        $paymentMock->expects(self::never())->method('setMethod')->with($this->isInstanceOf(PaymentMethodInterface::class));
         $this->expectException(InvalidArgumentException::class);
         $this->choosePaymentMethodHandler->__invoke($choosePaymentMethod);
     }
@@ -115,12 +115,12 @@ final class ChoosePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getState')->willReturn(OrderInterface::STATE_CART);
-        $this->paymentMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn(null);
-        $this->stateMachineMock->expects($this->once())->method('can')->with('select_payment')->willReturn(false);
-        $paymentMock->expects($this->never())->method('setMethod')->with($this->isInstanceOf(PaymentMethodInterface::class));
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getState')->willReturn(OrderInterface::STATE_CART);
+        $this->paymentMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn(null);
+        $this->stateMachineMock->expects(self::once())->method('can')->with('select_payment')->willReturn(false);
+        $paymentMock->expects(self::never())->method('setMethod')->with($this->isInstanceOf(PaymentMethodInterface::class));
+        $this->stateMachineMock->expects(self::never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
         $this->expectException(InvalidArgumentException::class);
         $this->choosePaymentMethodHandler->__invoke($choosePaymentMethod);
     }
@@ -136,12 +136,12 @@ final class ChoosePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getState')->willReturn(OrderInterface::STATE_CART);
-        $this->paymentMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn(null);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment')->willReturn(true);
-        $paymentMock->expects($this->never())->method('setMethod')->with($this->isInstanceOf(PaymentMethodInterface::class));
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getState')->willReturn(OrderInterface::STATE_CART);
+        $this->paymentMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn(null);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment')->willReturn(true);
+        $paymentMock->expects(self::never())->method('setMethod')->with($this->isInstanceOf(PaymentMethodInterface::class));
+        $this->stateMachineMock->expects(self::never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
         $this->expectException(InvalidArgumentException::class);
         $this->choosePaymentMethodHandler->__invoke($choosePaymentMethod);
     }
@@ -157,13 +157,13 @@ final class ChoosePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getState')->willReturn(OrderInterface::STATE_CART);
-        $this->stateMachineMock->expects($this->once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment')->willReturn(true);
-        $this->paymentMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn($paymentMethodMock);
-        $cartMock->expects($this->once())->method('getId')->willReturn('111');
-        $this->paymentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '111')->willReturn(null);
-        $this->stateMachineMock->expects($this->never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getState')->willReturn(OrderInterface::STATE_CART);
+        $this->stateMachineMock->expects(self::once())->method('can')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment')->willReturn(true);
+        $this->paymentMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn($paymentMethodMock);
+        $cartMock->expects(self::once())->method('getId')->willReturn('111');
+        $this->paymentRepositoryMock->expects(self::once())->method('findOneByOrderId')->with('123', '111')->willReturn(null);
+        $this->stateMachineMock->expects(self::never())->method('apply')->with($cartMock, OrderCheckoutTransitions::GRAPH, 'select_payment');
         $this->expectException(InvalidArgumentException::class);
         $this->choosePaymentMethodHandler->__invoke($choosePaymentMethod);
     }
@@ -181,13 +181,13 @@ final class ChoosePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $this->paymentMethodRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn($paymentMethodMock);
-        $cartMock->expects($this->once())->method('getCheckoutState')->willReturn(OrderCheckoutStates::STATE_COMPLETED);
-        $cartMock->expects($this->once())->method('getId')->willReturn('111');
-        $this->paymentRepositoryMock->expects($this->once())->method('findOneByOrderId')->with('123', '111')->willReturn($paymentMock);
-        $cartMock->expects($this->once())->method('getState')->willReturn(OrderInterface::STATE_FULFILLED);
-        $paymentMock->expects($this->once())->method('getState')->willReturn(PaymentInterface::STATE_CANCELLED);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $this->paymentMethodRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])->willReturn($paymentMethodMock);
+        $cartMock->expects(self::once())->method('getCheckoutState')->willReturn(OrderCheckoutStates::STATE_COMPLETED);
+        $cartMock->expects(self::once())->method('getId')->willReturn('111');
+        $this->paymentRepositoryMock->expects(self::once())->method('findOneByOrderId')->with('123', '111')->willReturn($paymentMock);
+        $cartMock->expects(self::once())->method('getState')->willReturn(OrderInterface::STATE_FULFILLED);
+        $paymentMock->expects(self::once())->method('getState')->willReturn(PaymentInterface::STATE_CANCELLED);
         $this->expectException(PaymentMethodCannotBeChangedException::class);
         $this->choosePaymentMethodHandler->__invoke($choosePaymentMethod);
     }
@@ -201,12 +201,12 @@ final class ChoosePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects($this->once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
-        $cartMock->expects($this->once())->method('getState')->willReturn(OrderInterface::STATE_NEW);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($cartMock);
+        $cartMock->expects(self::once())->method('getState')->willReturn(OrderInterface::STATE_NEW);
         $this->paymentMethodChangerMock->changePaymentMethod('CASH_ON_DELIVERY_METHOD', 123, $cartMock);
-        $this->paymentMethodRepositoryMock->expects($this->never())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])
+        $this->paymentMethodRepositoryMock->expects(self::never())->method('findOneBy')->with(['code' => 'CASH_ON_DELIVERY_METHOD'])
             ->willReturn(Argument::type(PaymentMethodInterface::class))
         ;
-        $this->assertSame($cartMock, $this($choosePaymentMethod));
+        self::assertSame($cartMock, $this($choosePaymentMethod));
     }
 }

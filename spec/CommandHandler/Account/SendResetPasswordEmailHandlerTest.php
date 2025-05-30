@@ -53,9 +53,9 @@ final class SendResetPasswordEmailHandlerTest extends TestCase
         $userMock = $this->createMock(UserInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->userRepositoryMock->expects($this->once())->method('findOneByEmail')->with('iAmAnEmail@spaghettiCode.php')->willReturn($userMock);
-        $this->channelRepositoryMock->expects($this->once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
-        $this->resetPasswordEmailManagerMock->expects($this->once())->method('sendResetPasswordEmail')->with($userMock, $channelMock, 'en_US');
+        $this->userRepositoryMock->expects(self::once())->method('findOneByEmail')->with('iAmAnEmail@spaghettiCode.php')->willReturn($userMock);
+        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
+        $this->resetPasswordEmailManagerMock->expects(self::once())->method('sendResetPasswordEmail')->with($userMock, $channelMock, 'en_US');
         $this(new SendResetPasswordEmail('iAmAnEmail@spaghettiCode.php', 'WEB', 'en_US'));
     }
 }

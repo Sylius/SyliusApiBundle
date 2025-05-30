@@ -63,16 +63,16 @@ final class AddProductReviewHandlerTest extends TestCase
         $customerMock = $this->createMock(CustomerInterface::class);
         /** @var ReviewInterface|MockObject $reviewMock */
         $reviewMock = $this->createMock(ReviewInterface::class);
-        $this->productRepositoryMock->expects($this->once())->method('findOneByCode')->with('winter_cap')->willReturn($productMock);
-        $this->customerResolverMock->expects($this->once())->method('resolve')->with('mark@example.com')->willReturn($customerMock);
-        $this->productReviewFactoryMock->expects($this->once())->method('createNew')->willReturn($reviewMock);
-        $reviewMock->expects($this->once())->method('setTitle')->with('Good stuff');
-        $reviewMock->expects($this->once())->method('setRating')->with(5);
-        $reviewMock->expects($this->once())->method('setComment')->with('Really good stuff');
-        $reviewMock->expects($this->once())->method('setReviewSubject')->with($productMock);
-        $reviewMock->expects($this->once())->method('setAuthor')->with($customerMock);
+        $this->productRepositoryMock->expects(self::once())->method('findOneByCode')->with('winter_cap')->willReturn($productMock);
+        $this->customerResolverMock->expects(self::once())->method('resolve')->with('mark@example.com')->willReturn($customerMock);
+        $this->productReviewFactoryMock->expects(self::once())->method('createNew')->willReturn($reviewMock);
+        $reviewMock->expects(self::once())->method('setTitle')->with('Good stuff');
+        $reviewMock->expects(self::once())->method('setRating')->with(5);
+        $reviewMock->expects(self::once())->method('setComment')->with('Really good stuff');
+        $reviewMock->expects(self::once())->method('setReviewSubject')->with($productMock);
+        $reviewMock->expects(self::once())->method('setAuthor')->with($customerMock);
         $this->productReviewRepositoryMock->add($reviewMock);
-        $productMock->expects($this->once())->method('addReview')->with($reviewMock);
+        $productMock->expects(self::once())->method('addReview')->with($reviewMock);
         $this(new AddProductReview(
             title: 'Good stuff',
             rating: 5,
@@ -86,7 +86,7 @@ final class AddProductReviewHandlerTest extends TestCase
     {
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
-        $this->productRepositoryMock->expects($this->once())->method('findOneByCode')->with('winter_cap')->willReturn($productMock);
+        $this->productRepositoryMock->expects(self::once())->method('findOneByCode')->with('winter_cap')->willReturn($productMock);
         $this->expectException(InvalidArgumentException::class);
         $this->addProductReviewHandler->__invoke(new AddProductReview(
             title: 'Good stuff',
@@ -98,7 +98,7 @@ final class AddProductReviewHandlerTest extends TestCase
 
     public function testThrowsAnExceptionIfProductHasNotBeenFound(): void
     {
-        $this->productRepositoryMock->expects($this->once())->method('findOneByCode')->with('winter_cap')->willReturn(null);
+        $this->productRepositoryMock->expects(self::once())->method('findOneByCode')->with('winter_cap')->willReturn(null);
         $this->expectException(ProductNotFoundException::class);
         $this->addProductReviewHandler->__invoke(new AddProductReview(
             title: 'Good stuff',

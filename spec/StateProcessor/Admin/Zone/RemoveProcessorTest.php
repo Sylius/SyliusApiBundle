@@ -47,8 +47,8 @@ final class RemoveProcessorTest extends TestCase
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
         $operationMock->implement(DeleteOperationInterface::class);
-        $this->zoneDeletionCheckerMock->expects($this->never())->method('isDeletable');
-        $this->removeProcessorMock->expects($this->never())->method('process')->with($this->any());
+        $this->zoneDeletionCheckerMock->expects(self::never())->method('isDeletable');
+        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
         $this->expectException(InvalidArgumentException::class);
         $this->removeProcessor->process(new stdClass(), $operationMock, [], []);
     }
@@ -60,8 +60,8 @@ final class RemoveProcessorTest extends TestCase
         /** @var ZoneInterface|MockObject $zoneMock */
         $zoneMock = $this->createMock(ZoneInterface::class);
         $operationMock->implement(DeleteOperationInterface::class);
-        $this->zoneDeletionCheckerMock->expects($this->once())->method('isDeletable')->with($zoneMock)->willReturn(false);
-        $this->removeProcessorMock->expects($this->never())->method('process')->with($this->any());
+        $this->zoneDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($zoneMock)->willReturn(false);
+        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
         $this->expectException(ResourceDeleteException::class);
         $this->removeProcessor->process($zoneMock, $operationMock, [], []);
     }
@@ -73,8 +73,8 @@ final class RemoveProcessorTest extends TestCase
         /** @var ZoneInterface|MockObject $zoneMock */
         $zoneMock = $this->createMock(ZoneInterface::class);
         $operationMock->implement(DeleteOperationInterface::class);
-        $this->zoneDeletionCheckerMock->expects($this->once())->method('isDeletable')->with($zoneMock)->willReturn(true);
-        $this->removeProcessorMock->expects($this->once())->method('process')->with($zoneMock, $operationMock, [], [])->willReturn($zoneMock);
+        $this->zoneDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($zoneMock)->willReturn(true);
+        $this->removeProcessorMock->expects(self::once())->method('process')->with($zoneMock, $operationMock, [], [])->willReturn($zoneMock);
         $this->removeProcessor->process($zoneMock, $operationMock);
     }
 }

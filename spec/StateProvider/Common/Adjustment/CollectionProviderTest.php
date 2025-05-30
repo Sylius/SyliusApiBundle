@@ -41,7 +41,7 @@ final class CollectionProviderTest extends TestCase
     protected function setUp(): void
     {
         $this->repositoryMock = $this->createMock(RepositoryInterface::class);
-        $this->repositoryMock->expects($this->once())->method('getClassName')->willReturn(OrderItem::class);
+        $this->repositoryMock->expects(self::once())->method('getClassName')->willReturn(OrderItem::class);
         $this->collectionProvider = new CollectionProvider($this->repositoryMock, self::IDENTIFIER);
     }
 
@@ -52,7 +52,7 @@ final class CollectionProviderTest extends TestCase
 
     public function testThrowsLogicExceptionWhenRepositoryIsNotForARecursiveAdjustmentsAwareResource(): void
     {
-        $this->repositoryMock->expects($this->once())->method('getClassName')->willReturn(stdClass::class);
+        $this->repositoryMock->expects(self::once())->method('getClassName')->willReturn(stdClass::class);
         $this->expectException(LogicException::class);
         $this->collectionProvider->instantiation();
     }
@@ -60,7 +60,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsExceptionWhenIdentifierIsMissingFromUriVariables(): void
     {
         $operation = new GetCollection(class: AdjustmentInterface::class);
-        $this->repositoryMock->expects($this->never())->method('findOneBy');
+        $this->repositoryMock->expects(self::never())->method('findOneBy');
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operation, []);
     }
@@ -68,7 +68,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsExceptionWhenResourceCannotBeFound(): void
     {
         $operation = new GetCollection(class: AdjustmentInterface::class);
-        $this->repositoryMock->expects($this->once())->method('findOneBy')->with([self::IDENTIFIER => 1])->willReturn(null);
+        $this->repositoryMock->expects(self::once())->method('findOneBy')->with([self::IDENTIFIER => 1])->willReturn(null);
         $this->expectException(RuntimeException::class);
         $this->collectionProvider->provide($operation, [self::IDENTIFIER => 1]);
     }
@@ -89,8 +89,8 @@ final class CollectionProviderTest extends TestCase
             $firstAdjustmentMock,
             $secondAdjustmentMock,
         ]);
-        $orderItemMock->expects($this->once())->method('getAdjustmentsRecursively')->with('type')->willReturn($adjustments);
-        $this->repositoryMock->expects($this->once())->method('findOneBy')->with([self::IDENTIFIER => 1])->willReturn($orderItemMock);
-        $this->assertSame($adjustments, $this->collectionProvider->provide($operation, [self::IDENTIFIER => 1], ['request' => $requestMock]));
+        $orderItemMock->expects(self::once())->method('getAdjustmentsRecursively')->with('type')->willReturn($adjustments);
+        $this->repositoryMock->expects(self::once())->method('findOneBy')->with([self::IDENTIFIER => 1])->willReturn($orderItemMock);
+        self::assertSame($adjustments, $this->collectionProvider->provide($operation, [self::IDENTIFIER => 1], ['request' => $requestMock]));
     }
 }

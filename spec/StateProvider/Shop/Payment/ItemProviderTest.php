@@ -61,7 +61,7 @@ final class ItemProviderTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(stdClass::class);
+        $operationMock->expects(self::once())->method('getClass')->willReturn(stdClass::class);
         $this->expectException(InvalidArgumentException::class);
         $this->itemProvider->provide($operationMock);
     }
@@ -70,7 +70,7 @@ final class ItemProviderTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(stdClass::class);
+        $operationMock->expects(self::once())->method('getClass')->willReturn(stdClass::class);
         $this->expectException(InvalidArgumentException::class);
         $this->itemProvider->provide($operationMock);
     }
@@ -78,7 +78,7 @@ final class ItemProviderTest extends TestCase
     public function testThrowsAnExceptionIfSectionIsNotShopApiSection(): void
     {
         $operation = new Get(class: PaymentInterface::class, name: 'get');
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->itemProvider->provide($operation, [], []);
     }
@@ -88,9 +88,9 @@ final class ItemProviderTest extends TestCase
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         $operation = new Get(class: PaymentInterface::class, name: 'get');
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($adminUserMock);
-        $this->paymentRepositoryMock->expects($this->never())->method('findOneByCustomerAndOrderToken')->with($this->any());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($adminUserMock);
+        $this->paymentRepositoryMock->expects(self::never())->method('findOneByCustomerAndOrderToken')->with($this->any());
         $this->assertNull($this->itemProvider->provide($operation, [], []));
     }
 
@@ -99,10 +99,10 @@ final class ItemProviderTest extends TestCase
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         $operation = new Get(class: PaymentInterface::class, name: 'get');
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn(null);
-        $this->paymentRepositoryMock->expects($this->never())->method('findOneByCustomerAndOrderToken')->with($this->any());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn(null);
+        $this->paymentRepositoryMock->expects(self::never())->method('findOneByCustomerAndOrderToken')->with($this->any());
         $this->assertNull($this->itemProvider->provide($operation, [], []));
     }
 
@@ -115,12 +115,12 @@ final class ItemProviderTest extends TestCase
         /** @var PaymentInterface|MockObject $paymentMock */
         $paymentMock = $this->createMock(PaymentInterface::class);
         $operation = new Get(class: PaymentInterface::class, name: 'get');
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
         $paymentId = 1;
-        $this->paymentRepositoryMock->expects($this->once())->method('findOneByCustomerAndOrderToken')->with($paymentId, $customerMock, 'token')->willReturn($paymentMock);
-        $this->assertSame($paymentMock, $this->itemProvider->provide($operation, ['paymentId' => $paymentId, 'tokenValue' => 'token'], []));
+        $this->paymentRepositoryMock->expects(self::once())->method('findOneByCustomerAndOrderToken')->with($paymentId, $customerMock, 'token')->willReturn($paymentMock);
+        self::assertSame($paymentMock, $this->itemProvider->provide($operation, ['paymentId' => $paymentId, 'tokenValue' => 'token'], []));
     }
 
     public function testReturnsNothingIfPaymentByCustomerAndOrderTokenIsNotFound(): void
@@ -130,11 +130,11 @@ final class ItemProviderTest extends TestCase
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
         $operation = new Get(class: PaymentInterface::class, name: 'get');
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
+        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
         $paymentId = 1;
-        $this->paymentRepositoryMock->expects($this->once())->method('findOneByCustomerAndOrderToken')->with($paymentId, $customerMock, 'token')->willReturn(null);
+        $this->paymentRepositoryMock->expects(self::once())->method('findOneByCustomerAndOrderToken')->with($paymentId, $customerMock, 'token')->willReturn(null);
         $this->assertNull($this->itemProvider->provide($operation, ['paymentId' => $paymentId, 'tokenValue' => 'token'], []));
     }
 }

@@ -48,11 +48,11 @@ final class SendOrderConfirmationHandlerTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
-        $this->orderRepositoryMock->expects($this->once())->method('findOneByTokenValue')->with('TOKEN')->willReturn($orderMock);
-        $orderMock->expects($this->once())->method('getLocaleCode')->willReturn('pl_PL');
-        $orderMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $customerMock->expects($this->once())->method('getEmail')->willReturn('johnny.bravo@email.com');
-        $this->orderEmailManagerMock->expects($this->once())->method('sendConfirmationEmail')->with($orderMock);
+        $this->orderRepositoryMock->expects(self::once())->method('findOneByTokenValue')->with('TOKEN')->willReturn($orderMock);
+        $orderMock->expects(self::once())->method('getLocaleCode')->willReturn('pl_PL');
+        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $customerMock->expects(self::once())->method('getEmail')->willReturn('johnny.bravo@email.com');
+        $this->orderEmailManagerMock->expects(self::once())->method('sendConfirmationEmail')->with($orderMock);
         $this(new SendOrderConfirmation('TOKEN'));
     }
 }

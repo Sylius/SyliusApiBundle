@@ -52,8 +52,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->userContextMock->expects($this->never())->method('getUser');
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->userContextMock->expects(self::never())->method('getUser');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ResourceInterface::class, new Get());
     }
 
@@ -65,9 +65,9 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         /** @var AdminApiSection|MockObject $sectionMock */
         $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $this->userContextMock->expects($this->never())->method('getUser');
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $this->userContextMock->expects(self::never())->method('getUser');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, CustomerInterface::class, new Get());
     }
 
@@ -85,15 +85,15 @@ final class ShopUserBasedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var Comparison|MockObject $exprComparisonMock */
         $exprComparisonMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($userMock);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects($this->once())->method('generateJoinAlias')->with('user')->willReturn('user');
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('user')->willReturn('user');
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('eq')->with('user.id', ':user')->willReturn($exprComparisonMock);
-        $queryBuilderMock->expects($this->once())->method('innerJoin')->with('o.user', 'user', 'WITH', $exprComparisonMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('user', $userMock)->willReturn($queryBuilderMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($userMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryNameGeneratorMock->expects(self::once())->method('generateJoinAlias')->with('user')->willReturn('user');
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('user')->willReturn('user');
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('eq')->with('user.id', ':user')->willReturn($exprComparisonMock);
+        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.user', 'user', 'WITH', $exprComparisonMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('user', $userMock)->willReturn($queryBuilderMock);
         $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, CustomerInterface::class, new Get());
     }
 
@@ -103,8 +103,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->userContextMock->expects($this->never())->method('getUser');
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->userContextMock->expects(self::never())->method('getUser');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, ResourceInterface::class, [], new Get());
     }
 
@@ -116,9 +116,9 @@ final class ShopUserBasedExtensionTest extends TestCase
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         /** @var AdminApiSection|MockObject $sectionMock */
         $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $this->userContextMock->expects($this->never())->method('getUser');
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $this->userContextMock->expects(self::never())->method('getUser');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, CustomerInterface::class, [], new Get());
     }
 
@@ -138,16 +138,16 @@ final class ShopUserBasedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var Comparison|MockObject $exprComparisonMock */
         $exprComparisonMock = $this->createMock(Comparison::class);
-        $userMock->expects($this->once())->method('getCustomer')->willReturn($customerMock);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($sectionMock);
-        $this->userContextMock->expects($this->once())->method('getUser')->willReturn($userMock);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects($this->once())->method('generateJoinAlias')->with('user')->willReturn('user');
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('user')->willReturn('user');
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->once())->method('eq')->with('user.id', ':user')->willReturn($exprComparisonMock);
-        $queryBuilderMock->expects($this->once())->method('innerJoin')->with('o.user', 'user', 'WITH', $exprComparisonMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('user', $userMock)->willReturn($queryBuilderMock);
+        $userMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
+        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($userMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryNameGeneratorMock->expects(self::once())->method('generateJoinAlias')->with('user')->willReturn('user');
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('user')->willReturn('user');
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $exprMock->expects(self::once())->method('eq')->with('user.id', ':user')->willReturn($exprComparisonMock);
+        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.user', 'user', 'WITH', $exprComparisonMock)->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('user', $userMock)->willReturn($queryBuilderMock);
         $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, CustomerInterface::class, [], new Get());
     }
 }

@@ -48,7 +48,7 @@ final class MessengerPersistProcessorTest extends TestCase
         $envelope = new Envelope($command);
         $operation = new Post();
         $exception = new DelayedMessageHandlingException([new RuntimeException('Delayed message exception')], $envelope);
-        $this->decoratedProcessorMock->expects($this->once())->method('process')->with($envelope, $operation, [], [])->willThrowException($exception);
+        $this->decoratedProcessorMock->expects(self::once())->method('process')->with($envelope, $operation, [], [])->willThrowException($exception);
         $this->expectException(RuntimeException::class);
         $this->messengerPersistProcessor->expectExceptionMessage('Delayed message exception');
         $this->messengerPersistProcessor->process($envelope, $operation, [], []);
@@ -59,7 +59,7 @@ final class MessengerPersistProcessorTest extends TestCase
         $command = new CompleteOrder('ThankYou', 'token');
         $envelope = new Envelope($command);
         $operation = new Post();
-        $this->decoratedProcessorMock->expects($this->once())->method('process')->with($envelope, $operation, [], [])->willThrowException(
+        $this->decoratedProcessorMock->expects(self::once())->method('process')->with($envelope, $operation, [], [])->willThrowException(
             new HandlerFailedException(
                 $envelope,
                 [new RuntimeException('Delayed message exception')],

@@ -59,28 +59,28 @@ final class PostResultExtensionTest extends TestCase
 
     public function testDoesNotSupportIfOperationIsNotPost(): void
     {
-        $this->assertFalse($this->postResultExtension->supportsResult(stdClass::class, null, []));
+        self::assertFalse($this->postResultExtension->supportsResult(stdClass::class, null, []));
     }
 
     public function testDoesNotSupportIfSectionIsNotAdminApiSection(): void
     {
         /** @var ShopApiSection|MockObject $shopApiSectionMock */
         $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->assertFalse($this->postResultExtension->supportsResult(stdClass::class, new Post(), []));
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        self::assertFalse($this->postResultExtension->supportsResult(stdClass::class, new Post(), []));
     }
 
     public function testDoesNotSupportIfResourceClassIsNotPromotionCouponInterface(): void
     {
-        $this->assertFalse($this->postResultExtension->supportsResult(stdClass::class, new Post(), []));
+        self::assertFalse($this->postResultExtension->supportsResult(stdClass::class, new Post(), []));
     }
 
     public function testSupportsResultIfOperationIsPostAndResourceClassIsPromotionCouponInterface(): void
     {
         /** @var AdminApiSection|MockObject $adminApiSectionMock */
         $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->assertTrue($this->postResultExtension->supportsResult(PromotionCouponInterface::class, new Post(), []));
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
+        self::assertTrue($this->postResultExtension->supportsResult(PromotionCouponInterface::class, new Post(), []));
     }
 
     public function testReturnsNullResult(): void

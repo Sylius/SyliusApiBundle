@@ -76,15 +76,15 @@ final class CollectionProviderTest extends TestCase
         /** @var QueryBuilder|MockObject $queryBuilderMock */
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         $operation = new GetCollection(class: ProductAttributeValueInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->localeContextMock->expects($this->once())->method('getLocaleCode')->willReturn('en_US');
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en_US');
-        $this->attributeValueRepositoryMock->expects($this->once())->method('createByProductCodeAndLocaleQueryBuilder')->with('PRODUCT_CODE', 'en_US', 'en_US', 'en_US')
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->localeContextMock->expects(self::once())->method('getLocaleCode')->willReturn('en_US');
+        $this->localeProviderMock->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en_US');
+        $this->attributeValueRepositoryMock->expects(self::once())->method('createByProductCodeAndLocaleQueryBuilder')->with('PRODUCT_CODE', 'en_US', 'en_US', 'en_US')
             ->willReturn($queryBuilderMock);
-        $this->extensionMock->expects($this->once())->method('applyToCollection')->with($queryBuilderMock, new QueryNameGenerator(), ProductAttributeValueInterface::class, $operation, []);
-        $this->extensionMock->expects($this->once())->method('supportsResult')->with(ProductAttributeValueInterface::class, $operation)
+        $this->extensionMock->expects(self::once())->method('applyToCollection')->with($queryBuilderMock, new QueryNameGenerator(), ProductAttributeValueInterface::class, $operation, []);
+        $this->extensionMock->expects(self::once())->method('supportsResult')->with(ProductAttributeValueInterface::class, $operation)
             ->willReturn(true);
-        $this->extensionMock->expects($this->once())->method('getResult')->with($queryBuilderMock)
+        $this->extensionMock->expects(self::once())->method('getResult')->with($queryBuilderMock)
             ->willReturn(new ArrayIterator([new ProductAttributeValue()]));
         $this->assertInstanceOf(ArrayIterator::class, $this->collectionProvider->provide($operation, ['code' => 'PRODUCT_CODE'], []));
     }
@@ -96,24 +96,24 @@ final class CollectionProviderTest extends TestCase
         /** @var Query|MockObject $queryMock */
         $queryMock = $this->createMock(Query::class);
         $operation = new GetCollection(class: ProductAttributeValueInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->localeContextMock->expects($this->once())->method('getLocaleCode')->willReturn('en_US');
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en_US');
-        $this->attributeValueRepositoryMock->expects($this->once())->method('createByProductCodeAndLocaleQueryBuilder')->with('PRODUCT_CODE', 'en_US', 'en_US', 'en_US')
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->localeContextMock->expects(self::once())->method('getLocaleCode')->willReturn('en_US');
+        $this->localeProviderMock->expects(self::once())->method('getDefaultLocaleCode')->willReturn('en_US');
+        $this->attributeValueRepositoryMock->expects(self::once())->method('createByProductCodeAndLocaleQueryBuilder')->with('PRODUCT_CODE', 'en_US', 'en_US', 'en_US')
             ->willReturn($queryBuilderMock);
-        $this->extensionMock->expects($this->once())->method('applyToCollection')->with($queryBuilderMock, new QueryNameGenerator(), ProductAttributeValueInterface::class, $operation, []);
-        $this->extensionMock->expects($this->once())->method('supportsResult')->with(ProductAttributeValueInterface::class, $operation)
+        $this->extensionMock->expects(self::once())->method('applyToCollection')->with($queryBuilderMock, new QueryNameGenerator(), ProductAttributeValueInterface::class, $operation, []);
+        $this->extensionMock->expects(self::once())->method('supportsResult')->with(ProductAttributeValueInterface::class, $operation)
             ->willReturn(false);
-        $queryBuilderMock->expects($this->once())->method('getQuery')->willReturn($queryMock);
-        $queryMock->expects($this->once())->method('getResult')->willReturn([$productAttributeValue = new ProductAttributeValue()]);
-        $this->assertSame([$productAttributeValue], $this->collectionProvider->provide($operation, ['code' => 'PRODUCT_CODE'], []));
+        $queryBuilderMock->expects(self::once())->method('getQuery')->willReturn($queryMock);
+        $queryMock->expects(self::once())->method('getResult')->willReturn([$productAttributeValue = new ProductAttributeValue()]);
+        self::assertSame([$productAttributeValue], $this->collectionProvider->provide($operation, ['code' => 'PRODUCT_CODE'], []));
     }
 
     public function testThrowsAnExceptionWhenOperationClassIsNotProductAttributeValue(): void
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(stdClass::class);
+        $operationMock->expects(self::once())->method('getClass')->willReturn(stdClass::class);
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operationMock);
     }
@@ -122,8 +122,8 @@ final class CollectionProviderTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
-        $operationMock->expects($this->once())->method('getClass')->willReturn(ProductAttributeValueInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new ShopApiSection());
+        $operationMock->expects(self::once())->method('getClass')->willReturn(ProductAttributeValueInterface::class);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operationMock);
     }
@@ -131,7 +131,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenOperationIsNotInShopApiSection(): void
     {
         $operation = new GetCollection(class: ProductAttributeValueInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn(new AdminApiSection());
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
         $this->expectException(InvalidArgumentException::class);
         $this->collectionProvider->provide($operation);
     }

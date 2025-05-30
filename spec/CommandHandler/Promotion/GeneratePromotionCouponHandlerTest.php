@@ -45,7 +45,7 @@ final class GeneratePromotionCouponHandlerTest extends TestCase
 
     public function testThrowsExceptionIfPromotionIsNotFound(): void
     {
-        $this->promotionRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'promotion_code'])->willReturn(null);
+        $this->promotionRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'promotion_code'])->willReturn(null);
         $generatePromotionCoupon = new GeneratePromotionCoupon('promotion_code');
         $this->expectException(PromotionNotFoundException::class);
         $this->generatePromotionCouponHandler->__invoke($generatePromotionCoupon);
@@ -59,9 +59,9 @@ final class GeneratePromotionCouponHandlerTest extends TestCase
         $promotionCouponOneMock = $this->createMock(PromotionCouponInterface::class);
         /** @var PromotionCouponInterface|MockObject $promotionCouponTwoMock */
         $promotionCouponTwoMock = $this->createMock(PromotionCouponInterface::class);
-        $this->promotionRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'promotion_code'])->willReturn($promotionMock);
+        $this->promotionRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'promotion_code'])->willReturn($promotionMock);
         $generatePromotionCoupon = new GeneratePromotionCoupon('promotion_code');
-        $this->promotionCouponGeneratorMock->expects($this->once())->method('generate')->with($promotionMock, $generatePromotionCoupon)->willReturn([$promotionCouponOneMock, $promotionCouponTwoMock]);
+        $this->promotionCouponGeneratorMock->expects(self::once())->method('generate')->with($promotionMock, $generatePromotionCoupon)->willReturn([$promotionCouponOneMock, $promotionCouponTwoMock]);
         $this($generatePromotionCoupon)->shouldIterateAs([$promotionCouponOneMock, $promotionCouponTwoMock]);
     }
 }

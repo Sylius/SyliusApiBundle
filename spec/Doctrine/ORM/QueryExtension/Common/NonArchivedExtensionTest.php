@@ -39,8 +39,8 @@ final class NonArchivedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
-        $queryBuilderMock->expects($this->never())->method('andWhere');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
+        $queryBuilderMock->expects(self::never())->method('andWhere');
         $this->nonArchivedExtension->applyToCollection(
             $queryBuilderMock,
             $queryNameGeneratorMock,
@@ -55,8 +55,8 @@ final class NonArchivedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
-        $queryBuilderMock->expects($this->never())->method('andWhere');
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
+        $queryBuilderMock->expects(self::never())->method('andWhere');
         $this->nonArchivedExtension->applyToCollection(
             $queryBuilderMock,
             $queryNameGeneratorMock,
@@ -74,10 +74,10 @@ final class NonArchivedExtensionTest extends TestCase
         $exprMock = $this->createMock(Expr::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $exprMock->expects($this->once())->method('isNull')->with('o.archivedAt')->willReturn('o.archivedAt IS NULL');
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $queryBuilderMock->expects($this->once())->method('andWhere')->with('o.archivedAt IS NULL')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $exprMock->expects(self::once())->method('isNull')->with('o.archivedAt')->willReturn('o.archivedAt IS NULL');
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $queryBuilderMock->expects(self::once())->method('andWhere')->with('o.archivedAt IS NULL')->willReturn($queryBuilderMock);
         $this->nonArchivedExtension->applyToCollection(
             $queryBuilderMock,
             $queryNameGeneratorMock,

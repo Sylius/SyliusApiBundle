@@ -51,8 +51,8 @@ final class TaxonBasedExtensionTest extends TestCase
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
         $this->taxonBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
@@ -63,10 +63,10 @@ final class TaxonBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($adminApiSectionMock);
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
         $this->taxonBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects($this->once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
+        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
     }
 
     public function testDoesNothingIfFilterIsNotSet(): void
@@ -77,8 +77,8 @@ final class TaxonBasedExtensionTest extends TestCase
         $queryBuilderMock = $this->createMock(QueryBuilder::class);
         /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
         $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryBuilderMock->expects($this->never())->method('getRootAliases');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $queryBuilderMock->expects(self::never())->method('getRootAliases');
         $this->taxonBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ProductInterface::class, new Get());
     }
 
@@ -98,22 +98,22 @@ final class TaxonBasedExtensionTest extends TestCase
         $exprEqMock = $this->createMock(Comparison::class);
         /** @var Andx|MockObject $exprAndxMock */
         $exprAndxMock = $this->createMock(Andx::class);
-        $this->sectionProviderMock->expects($this->once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryNameGeneratorMock->expects($this->once())->method('generateParameterName')->with('taxonCode')->willReturn('taxonCode');
+        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('taxonCode')->willReturn('taxonCode');
         $queryNameGeneratorMock->expects($this->exactly(2))->method('generateJoinAlias')->willReturnMap([['productTaxons', 'productTaxons'], ['taxon', 'taxon']]);
-        $queryBuilderMock->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects($this->once())->method('addSelect')->with('productTaxons')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('leftJoin')->with('o.productTaxons', 'productTaxons', 'WITH', 'productTaxons.product = o.id')
+        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
+        $queryBuilderMock->expects(self::once())->method('addSelect')->with('productTaxons')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('o.productTaxons', 'productTaxons', 'WITH', 'productTaxons.product = o.id')
             ->willReturn($queryBuilderMock)
         ;
         $queryBuilderMock->expects($this->exactly(2))->method('leftJoin')->willReturnMap([['o.productTaxons', 'productTaxons', 'WITH', 'productTaxons.product = o.id', $queryBuilderMock], ['productTaxons.taxon', 'taxon', 'WITH', Argument::type(Andx::class), $queryBuilderMock]]);
-        $exprMock->expects($this->once())->method('eq')->with('taxon.enabled', 'true')->willReturn($exprEqMock);
-        $queryBuilderMock->expects($this->once())->method('expr')->willReturn($exprMock);
-        $queryBuilderMock->expects($this->once())->method('leftJoin')->with('productTaxons.taxon', 'taxon', 'WITH', $this->isInstanceOf(Andx::class))
+        $exprMock->expects(self::once())->method('eq')->with('taxon.enabled', 'true')->willReturn($exprEqMock);
+        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
+        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('productTaxons.taxon', 'taxon', 'WITH', $this->isInstanceOf(Andx::class))
             ->willReturn($queryBuilderMock)
         ;
-        $queryBuilderMock->expects($this->once())->method('orderBy')->with('productTaxons.position', 'ASC')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->once())->method('setParameter')->with('taxonCode', ['t_shirts'])->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('orderBy')->with('productTaxons.position', 'ASC')->willReturn($queryBuilderMock);
+        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonCode', ['t_shirts'])->willReturn($queryBuilderMock);
         $this->taxonBasedExtension->applyToCollection(
             $queryBuilderMock,
             $queryNameGeneratorMock,

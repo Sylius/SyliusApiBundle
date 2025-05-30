@@ -56,19 +56,19 @@ final class VerifyShopUserHandlerTest extends TestCase
     {
         /** @var UserInterface|MockObject $userMock */
         $userMock = $this->createMock(UserInterface::class);
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneBy')->with(['emailVerificationToken' => 'ToKeN'])->willReturn($userMock);
-        $this->clockMock->expects($this->once())->method('now')->willReturn(new DateTimeImmutable());
-        $userMock->expects($this->once())->method('getEmail')->willReturn('shop@example.com');
-        $userMock->expects($this->once())->method('setVerifiedAt')->with($this->isInstanceOf(DateTimeImmutable::class));
-        $userMock->expects($this->once())->method('setEmailVerificationToken')->with(null);
-        $userMock->expects($this->once())->method('enable');
-        $this->commandBusMock->expects($this->once())->method('dispatch')->with(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'), [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope(new stdClass()));
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneBy')->with(['emailVerificationToken' => 'ToKeN'])->willReturn($userMock);
+        $this->clockMock->expects(self::once())->method('now')->willReturn(new DateTimeImmutable());
+        $userMock->expects(self::once())->method('getEmail')->willReturn('shop@example.com');
+        $userMock->expects(self::once())->method('setVerifiedAt')->with($this->isInstanceOf(DateTimeImmutable::class));
+        $userMock->expects(self::once())->method('setEmailVerificationToken')->with(null);
+        $userMock->expects(self::once())->method('enable');
+        $this->commandBusMock->expects(self::once())->method('dispatch')->with(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'), [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope(new stdClass()));
         $this(new VerifyShopUser(channelCode: 'WEB', localeCode:  'en_US', token: 'ToKeN'));
     }
 
     public function testThrowsErrorIfUserDoesNotExist(): void
     {
-        $this->shopUserRepositoryMock->expects($this->once())->method('findOneBy')->with(['emailVerificationToken' => 'ToKeN'])->willReturn(null);
+        $this->shopUserRepositoryMock->expects(self::once())->method('findOneBy')->with(['emailVerificationToken' => 'ToKeN'])->willReturn(null);
         $this->expectException(InvalidArgumentException::class);
         $this->verifyShopUserHandler->__invoke(new VerifyShopUser(channelCode: 'WEB', localeCode:  'en_US', token: 'ToKeN'));
     }

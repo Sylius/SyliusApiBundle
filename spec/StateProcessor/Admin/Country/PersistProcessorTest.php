@@ -46,8 +46,8 @@ final class PersistProcessorTest extends TestCase
     {
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
-        $this->countryProvincesDeletionCheckerMock->expects($this->never())->method('isDeletable');
-        $this->persistProcessorMock->expects($this->never())->method('process')->with($this->any());
+        $this->countryProvincesDeletionCheckerMock->expects(self::never())->method('isDeletable');
+        $this->persistProcessorMock->expects(self::never())->method('process')->with($this->any());
         $this->expectException(InvalidArgumentException::class);
         $this->persistProcessor->process(new stdClass(), $operationMock, [], []);
     }
@@ -59,9 +59,9 @@ final class PersistProcessorTest extends TestCase
         $operation = new Post();
         $uriVariables = [];
         $context = [];
-        $this->countryProvincesDeletionCheckerMock->expects($this->once())->method('isDeletable')->with($countryMock)->willReturn(true);
-        $this->persistProcessorMock->expects($this->once())->method('process')->with($countryMock, $operation, $uriVariables, $context)->willReturn($countryMock);
-        $this->assertSame($countryMock, $this->persistProcessor->process($countryMock, $operation, $uriVariables, $context));
+        $this->countryProvincesDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($countryMock)->willReturn(true);
+        $this->persistProcessorMock->expects(self::once())->method('process')->with($countryMock, $operation, $uriVariables, $context)->willReturn($countryMock);
+        self::assertSame($countryMock, $this->persistProcessor->process($countryMock, $operation, $uriVariables, $context));
     }
 
     public function testThrowsAnErrorIfTheProvinceWithinACountryIsInUse(): void
@@ -72,8 +72,8 @@ final class PersistProcessorTest extends TestCase
         $operationMock = $this->createMock(HttpOperation::class);
         $uriVariables = [];
         $context = [];
-        $this->countryProvincesDeletionCheckerMock->expects($this->once())->method('isDeletable')->with($countryMock)->willReturn(false);
-        $this->persistProcessorMock->expects($this->never())->method('process')->with($this->any());
+        $this->countryProvincesDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($countryMock)->willReturn(false);
+        $this->persistProcessorMock->expects(self::never())->method('process')->with($this->any());
         $this->expectException(ResourceDeleteException::class);
         $this->persistProcessor->process($countryMock, $operationMock, $uriVariables, $context);
     }
