@@ -61,7 +61,7 @@ final class EnabledVariantsExtensionTest extends TestCase
             $queryBuilder,
             $this->createMock(QueryNameGeneratorInterface::class),
             TaxonInterface::class,
-            new Get(name: Request::METHOD_GET)
+            new Get(name: Request::METHOD_GET),
         );
     }
 
@@ -81,7 +81,7 @@ final class EnabledVariantsExtensionTest extends TestCase
             $queryBuilder,
             $this->createMock(QueryNameGeneratorInterface::class),
             ProductInterface::class,
-            new Get(name: Request::METHOD_GET)
+            new Get(name: Request::METHOD_GET),
         );
     }
 
