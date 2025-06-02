@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Doctrine\ORM\Filter;
@@ -36,7 +45,7 @@ final class OwnerBasedProductAssociationTypesFilter extends AbstractFilter
         QueryNameGeneratorInterface $queryNameGenerator,
         string $resourceClass,
         ?Operation $operation = null,
-        array $context = []
+        array $context = [],
     ): void {
         if (!is_a($resourceClass, ProductAssociationTypeInterface::class, true)) {
             return;

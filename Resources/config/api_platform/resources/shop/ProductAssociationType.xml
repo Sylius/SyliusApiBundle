@@ -33,7 +33,7 @@
                     </values>
                 </normalizationContext>
                 <filters>
-                    <filter>sylius_api.search_filter.shop.product_attribute_type</filter>
+                    <filter>sylius_api.search_filter.shop.product_association_type.owner_based</filter>
                 </filters>
             </operation>
 

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Doctrine\ORM\Filter;
@@ -16,7 +25,6 @@ use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Product\Model\ProductAssociation;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
-use Symfony\Component\TypeInfo\TypeIdentifier;
 
 final class ProductByAssociationFilter extends AbstractFilter
 {
@@ -37,7 +45,7 @@ final class ProductByAssociationFilter extends AbstractFilter
         QueryNameGeneratorInterface $queryNameGenerator,
         string $resourceClass,
         ?Operation $operation = null,
-        array $context = []
+        array $context = [],
     ): void {
         if (!is_a($resourceClass, ProductInterface::class, true)) {
             return;
@@ -55,8 +63,8 @@ final class ProductByAssociationFilter extends AbstractFilter
         $ownerCode = $value['ownerCode'] ?? '';
 
         if (
-            (!is_string($associationTypeCode) && !is_string($ownerCode))
-            || ($associationTypeCode === '' && $ownerCode === '')
+            (!is_string($associationTypeCode) && !is_string($ownerCode)) ||
+            ($associationTypeCode === '' && $ownerCode === '')
         ) {
             return;
         }
@@ -69,11 +77,11 @@ final class ProductByAssociationFilter extends AbstractFilter
                 ProductAssociation::class,
                 $associationAlias,
                 Join::WITH,
-                sprintf('%s MEMBER OF %s.associatedProducts', $rootAlias, $associationAlias)
+                sprintf('%s MEMBER OF %s.associatedProducts', $rootAlias, $associationAlias),
             )
         ;
 
-        if (is_string($associationTypeCode) && $associationTypeCode !== '' ) {
+        if (is_string($associationTypeCode) && $associationTypeCode !== '') {
             $associationTypeJoinAlias = $queryNameGenerator->generateJoinAlias('associationType');
             $typeCodeParameter = $queryNameGenerator->generateParameterName('typeCode');
 
@@ -93,7 +101,7 @@ final class ProductByAssociationFilter extends AbstractFilter
                     sprintf('%s.owner', $associationAlias),
                     $associationOwnerAlias,
                     Join::WITH,
-                    sprintf('%s.code = :%s', $associationOwnerAlias, $ownerCodeParameter)
+                    sprintf('%s.code = :%s', $associationOwnerAlias, $ownerCodeParameter),
                 )
                 ->setParameter($ownerCodeParameter, $ownerCode)
             ;
@@ -105,13 +113,13 @@ final class ProductByAssociationFilter extends AbstractFilter
         return [
             'association[typeCode]' => [
                 'property' => 'association',
-                'type' => TypeIdentifier::STRING,
+                'type' => 'string',
                 'required' => false,
                 'description' => 'Filter by association type code.',
             ],
             'association[ownerCode]' => [
                 'property' => 'association',
-                'type' => TypeIdentifier::STRING,
+                'type' => 'string',
                 'required' => false,
                 'description' => 'Filter by association owner code.',
             ],
