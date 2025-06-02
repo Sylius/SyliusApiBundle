@@ -20,10 +20,10 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use Sylius\Component\Product\Model\ProductOptionInterface;
+use Sylius\Component\Product\Model\ProductOptionValueInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
-final class ProductBasedProductOptionFilter extends AbstractFilter
+final class ProductBasedProductOptionValueFilter extends AbstractFilter
 {
     public function __construct(
         private string $productClass,
@@ -44,7 +44,7 @@ final class ProductBasedProductOptionFilter extends AbstractFilter
         ?Operation $operation = null,
         array $context = [],
     ): void {
-        if (!is_a($resourceClass, ProductOptionInterface::class, true)) {
+        if (!is_a($resourceClass, ProductOptionValueInterface::class, true)) {
             return;
         }
         if ('productCode' !== $property || $value === null || $value === '') {
@@ -54,17 +54,19 @@ final class ProductBasedProductOptionFilter extends AbstractFilter
         $rootAlias = $queryBuilder->getRootAliases()[0];
 
         $productJoinAlias = $queryNameGenerator->generateJoinAlias('product');
+        $productOptionJoinAlias = $queryNameGenerator->generateJoinAlias('option');
 
         $productCodeParameter = $queryNameGenerator->generateParameterName('productCode');
 
         $queryBuilder
+            ->innerJoin($rootAlias . '.option', $productOptionJoinAlias)
             ->innerJoin(
                 $this->productClass,
                 $productJoinAlias,
                 Join::WITH,
                 sprintf('%s.code = :%s', $productJoinAlias, $productCodeParameter),
             )
-            ->andWhere(sprintf('%s MEMBER OF %s.options', $rootAlias, $productJoinAlias))
+            ->andWhere(sprintf('%s MEMBER OF %s.options', $productOptionJoinAlias, $productJoinAlias))
             ->setParameter($productCodeParameter, $value)
         ;
     }
@@ -76,9 +78,7 @@ final class ProductBasedProductOptionFilter extends AbstractFilter
                 'property' => 'productCode',
                 'type' => 'string',
                 'required' => false,
-                'swagger' => [
-                    'description' => 'Filter by product code',
-                ],
+                'description' => 'Filter product option values by product code.',
             ],
         ];
     }
