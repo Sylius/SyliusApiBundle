@@ -18,7 +18,6 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\ProcessorInterface;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\StateProcessor\Admin\AdminUser\PersistProcessor;
@@ -27,19 +26,18 @@ use Sylius\Component\User\Security\PasswordUpdaterInterface;
 
 final class PersistProcessorTest extends TestCase
 {
-    /** @var ProcessorInterface|MockObject */
-    private MockObject $persistProcessorMock;
+    private MockObject&ProcessorInterface $processor;
 
-    /** @var PasswordUpdaterInterface|MockObject */
-    private MockObject $passwordUpdaterMock;
+    private MockObject&PasswordUpdaterInterface $passwordUpdater;
 
     private PersistProcessor $persistProcessor;
 
     protected function setUp(): void
     {
-        $this->persistProcessorMock = $this->createMock(ProcessorInterface::class);
-        $this->passwordUpdaterMock = $this->createMock(PasswordUpdaterInterface::class);
-        $this->persistProcessor = new PersistProcessor($this->persistProcessorMock, $this->passwordUpdaterMock);
+        parent::setUp();
+        $this->processor = $this->createMock(ProcessorInterface::class);
+        $this->passwordUpdater = $this->createMock(PasswordUpdaterInterface::class);
+        $this->persistProcessor = new PersistProcessor($this->processor, $this->passwordUpdater);
     }
 
     public function testDoesNotProcessDeleteOperation(): void
@@ -47,9 +45,9 @@ final class PersistProcessorTest extends TestCase
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         $operation = new Delete();
-        $this->passwordUpdaterMock->expects(self::never())->method('updatePassword')->with($adminUserMock);
-        $this->persistProcessorMock->expects(self::never())->method('process')->with($adminUserMock, $operation, [], []);
-        $this->expectException(InvalidArgumentException::class);
+        $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($adminUserMock);
+        $this->processor->expects(self::never())->method('process')->with($adminUserMock, $operation, [], []);
+        $this->expectException(\InvalidArgumentException::class);
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -58,8 +56,8 @@ final class PersistProcessorTest extends TestCase
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         $operation = new Post();
-        $this->passwordUpdaterMock->expects(self::never())->method('updatePassword')->with($adminUserMock);
-        $this->persistProcessorMock->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+        $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($adminUserMock);
+        $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -68,8 +66,8 @@ final class PersistProcessorTest extends TestCase
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         $operation = new Patch();
-        $this->passwordUpdaterMock->expects(self::never())->method('updatePassword')->with($adminUserMock);
-        $this->persistProcessorMock->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+        $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($adminUserMock);
+        $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -78,8 +76,8 @@ final class PersistProcessorTest extends TestCase
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         $operation = new Put();
-        $this->passwordUpdaterMock->expects(self::once())->method('updatePassword')->with($adminUserMock);
-        $this->persistProcessorMock->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+        $this->passwordUpdater->expects(self::once())->method('updatePassword')->with($adminUserMock);
+        $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 }

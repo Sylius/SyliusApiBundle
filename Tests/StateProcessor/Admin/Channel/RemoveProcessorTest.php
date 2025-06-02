@@ -18,7 +18,6 @@ use ApiPlatform\State\ProcessorInterface;
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\StateProcessor\Admin\Channel\RemoveProcessor;
 use Sylius\Component\Channel\Checker\ChannelDeletionCheckerInterface;
 use Sylius\Component\Core\Exception\ResourceDeleteException;
@@ -26,27 +25,26 @@ use Sylius\Component\Core\Model\ChannelInterface;
 
 final class RemoveProcessorTest extends TestCase
 {
-    /** @var ProcessorInterface|MockObject */
-    private MockObject $removeProcessorMock;
+    private MockObject&ProcessorInterface $processor;
 
-    /** @var ChannelDeletionCheckerInterface|MockObject */
-    private MockObject $channelDeletionCheckerMock;
+    private ChannelDeletionCheckerInterface&MockObject $channelDeletionChecker;
 
     private RemoveProcessor $removeProcessor;
 
     protected function setUp(): void
     {
-        $this->removeProcessorMock = $this->createMock(ProcessorInterface::class);
-        $this->channelDeletionCheckerMock = $this->createMock(ChannelDeletionCheckerInterface::class);
-        $this->removeProcessor = new RemoveProcessor($this->removeProcessorMock, $this->channelDeletionCheckerMock);
+        parent::setUp();
+        $this->processor = $this->createMock(ProcessorInterface::class);
+        $this->channelDeletionChecker = $this->createMock(ChannelDeletionCheckerInterface::class);
+        $this->removeProcessor = new RemoveProcessor($this->processor, $this->channelDeletionChecker);
     }
 
     public function testThrowsAnExceptionIfObjectIsNotAChannel(): void
     {
-        $this->channelDeletionCheckerMock->expects(self::never())->method('isDeletable');
-        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
+        $this->channelDeletionChecker->expects(self::never())->method('isDeletable');
+        $this->processor->expects(self::never())->method('process')->with($this->any());
         $this->expectException(InvalidArgumentException::class);
-        $this->removeProcessor->process(new stdClass(), new Delete(), [], []);
+        $this->removeProcessor->process(new \stdClass(), new Delete(), [], []);
     }
 
     public function testThrowsExceptionIfChannelIsNotDeletable(): void
@@ -55,8 +53,11 @@ final class RemoveProcessorTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
         $uriVariables = [];
         $context = [];
-        $this->channelDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($channelMock)->willReturn(false);
-        $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
+        $this->channelDeletionChecker->expects(self::once())
+            ->method('isDeletable')
+            ->with($channelMock)
+            ->willReturn(false);
+        $this->processor->expects(self::never())->method('process')->with($this->any());
         $this->expectException(ResourceDeleteException::class);
         $this->removeProcessor->process($channelMock, new Delete(), $uriVariables, $context);
     }
@@ -68,8 +69,11 @@ final class RemoveProcessorTest extends TestCase
         $operation = new Delete();
         $uriVariables = [];
         $context = [];
-        $this->channelDeletionCheckerMock->expects(self::once())->method('isDeletable')->with($channelMock)->willReturn(true);
-        $this->removeProcessorMock->expects(self::once())->method('process')->with($channelMock, $operation, $uriVariables, $context)->willReturn($channelMock);
+        $this->channelDeletionChecker->expects(self::once())->method('isDeletable')->with($channelMock)->willReturn(true);
+        $this->processor->expects(self::once())
+            ->method('process')
+            ->with($channelMock, $operation, $uriVariables, $context)
+            ->willReturn($channelMock);
         $this->removeProcessor->process($channelMock, $operation, $uriVariables, $context);
     }
 }

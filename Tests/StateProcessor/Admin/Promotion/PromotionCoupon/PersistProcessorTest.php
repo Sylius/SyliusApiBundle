@@ -28,28 +28,29 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class PersistProcessorTest extends TestCase
 {
-    /** @var ProcessorInterface|MockObject */
-    private MockObject $persistProcessorMock;
+    private MockObject&ProcessorInterface $processor;
 
-    /** @var UriTemplateParentResourceResolverInterface|MockObject */
-    private MockObject $uriTemplateParentResourceResolverMock;
+    private MockObject&UriTemplateParentResourceResolverInterface $uriTemplateParentResourceResolver;
 
-    /** @var ValidatorInterface|MockObject */
-    private MockObject $validatorMock;
+    private MockObject&ValidatorInterface $validator;
 
     private PersistProcessor $persistProcessor;
 
     protected function setUp(): void
     {
-        $this->persistProcessorMock = $this->createMock(ProcessorInterface::class);
-        $this->uriTemplateParentResourceResolverMock = $this->createMock(UriTemplateParentResourceResolverInterface::class);
-        $this->validatorMock = $this->createMock(ValidatorInterface::class);
-        $this->persistProcessor = new PersistProcessor($this->persistProcessorMock, $this->uriTemplateParentResourceResolverMock, $this->validatorMock);
+        $this->processor = $this->createMock(ProcessorInterface::class);
+        $this->uriTemplateParentResourceResolver = $this->createMock(UriTemplateParentResourceResolverInterface::class);
+        $this->validator = $this->createMock(ValidatorInterface::class);
+        $this->persistProcessor = new PersistProcessor(
+            $this->processor,
+            $this->uriTemplateParentResourceResolver,
+            $this->validator,
+        );
     }
 
     public function testAProcessorInterface(): void
     {
-        $this->assertInstanceOf(ProcessorInterface::class, $this->persistProcessor);
+        self::assertInstanceOf(ProcessorInterface::class, $this->persistProcessor);
     }
 
     public function testProcessesAPromotionCouponIfOperationIsNotPost(): void
@@ -58,9 +59,9 @@ final class PersistProcessorTest extends TestCase
         $operationMock = $this->createMock(Operation::class);
         /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
         $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        $this->persistProcessorMock->expects(self::once())->method('process')->with($promotionCouponMock, $operationMock, [], []);
-        $this->uriTemplateParentResourceResolverMock->expects(self::never())->method('resolve')->with($this->any());
-        $this->validatorMock->expects(self::never())->method('validate')->with($this->any());
+        $this->processor->expects(self::once())->method('process')->with($promotionCouponMock, $operationMock, [], []);
+        $this->uriTemplateParentResourceResolver->expects(self::never())->method('resolve')->with($this->any());
+        $this->validator->expects(self::never())->method('validate')->with($this->any());
         $this->persistProcessor->process($promotionCouponMock, $operationMock, [], []);
     }
 
@@ -73,10 +74,16 @@ final class PersistProcessorTest extends TestCase
         /** @var ConstraintViolationListInterface|MockObject $constraintViolationListMock */
         $constraintViolationListMock = $this->createMock(ConstraintViolationListInterface::class);
         $operation = new Post(validationContext: ['groups' => ['sylius']]);
-        $this->uriTemplateParentResourceResolverMock->expects(self::once())->method('resolve')->with($promotionCouponMock, $operation, [])->willReturn($promotionMock);
-        $this->validatorMock->expects(self::once())->method('validate')->with($promotionCouponMock, null, ['sylius'])->willReturn($constraintViolationListMock);
+        $this->uriTemplateParentResourceResolver->expects(self::once())
+            ->method('resolve')
+            ->with($promotionCouponMock, $operation, [])
+            ->willReturn($promotionMock);
+        $this->validator->expects(self::once())
+            ->method('validate')
+            ->with($promotionCouponMock, null, ['sylius'])
+            ->willReturn($constraintViolationListMock);
         $constraintViolationListMock->expects(self::once())->method('count')->willReturn(0);
-        $this->persistProcessorMock->expects(self::once())->method('process')->with($promotionCouponMock, $operation, [], []);
+        $this->processor->expects(self::once())->method('process')->with($promotionCouponMock, $operation, [], []);
         $this->persistProcessor->process($promotionCouponMock, $operation, [], []);
     }
 
@@ -89,12 +96,18 @@ final class PersistProcessorTest extends TestCase
         /** @var ConstraintViolationListInterface|MockObject $constraintViolationListMock */
         $constraintViolationListMock = $this->createMock(ConstraintViolationListInterface::class);
         $operation = new Post(validationContext: ['groups' => ['sylius']]);
-        $this->uriTemplateParentResourceResolverMock->expects(self::once())->method('resolve')->with($promotionCouponMock, $operation, [])->willReturn($promotionMock);
-        $this->validatorMock->expects(self::once())->method('validate')->with($promotionCouponMock, null, ['sylius'])->willReturn($constraintViolationListMock);
+        $this->uriTemplateParentResourceResolver->expects(self::once())
+            ->method('resolve')
+            ->with($promotionCouponMock, $operation, [])
+            ->willReturn($promotionMock);
+        $this->validator->expects(self::once())
+            ->method('validate')
+            ->with($promotionCouponMock, null, ['sylius'])
+            ->willReturn($constraintViolationListMock);
         $constraintViolationListMock->expects(self::once())->method('count')->willReturn(1);
         $constraintViolationListMock->expects(self::once())->method('rewind');
         $constraintViolationListMock->expects(self::once())->method('valid')->willReturn(false);
-        $this->persistProcessorMock->expects(self::never())->method('process')->with($promotionCouponMock, $operation, [], []);
+        $this->processor->expects(self::never())->method('process')->with($promotionCouponMock, $operation, [], []);
         $this->expectException(ValidationException::class);
         $this->persistProcessor->process($promotionCouponMock, $operation, [], []);
     }

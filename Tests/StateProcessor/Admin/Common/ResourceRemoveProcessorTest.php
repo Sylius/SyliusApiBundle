@@ -25,15 +25,15 @@ use Sylius\Component\Core\Model\ShippingMethod;
 
 final class ResourceRemoveProcessorTest extends TestCase
 {
-    /** @var ProcessorInterface|MockObject */
-    private MockObject $decoratedRemoveProcessorMock;
+    private MockObject&ProcessorInterface $decoratedRemoveProcessor;
 
     private ResourceRemoveProcessor $resourceRemoveProcessor;
 
     protected function setUp(): void
     {
-        $this->decoratedRemoveProcessorMock = $this->createMock(ProcessorInterface::class);
-        $this->resourceRemoveProcessor = new ResourceRemoveProcessor($this->decoratedRemoveProcessorMock);
+        parent::setUp();
+        $this->decoratedRemoveProcessor = $this->createMock(ProcessorInterface::class);
+        $this->resourceRemoveProcessor = new ResourceRemoveProcessor($this->decoratedRemoveProcessor);
     }
 
     public function testProcessesDataWithoutExceptions(): void
@@ -41,7 +41,7 @@ final class ResourceRemoveProcessorTest extends TestCase
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
         $data = new Promotion();
-        $this->decoratedRemoveProcessorMock->expects(self::once())->method('process')->with($data, $operationMock, [], []);
+        $this->decoratedRemoveProcessor->expects(self::once())->method('process')->with($data, $operationMock, [], []);
         $this->resourceRemoveProcessor->process($data, $operationMock, [], []);
     }
 
@@ -50,7 +50,19 @@ final class ResourceRemoveProcessorTest extends TestCase
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
         $data = new ShippingMethod();
-        $this->decoratedRemoveProcessorMock->expects(self::once())->method('process')->with($data, $operationMock, [], [])->willThrowException(ForeignKeyConstraintViolationException::class);
+
+        $driverException = $this->getMockBuilder(\Doctrine\DBAL\Driver\Exception::class)
+            ->getMock();
+
+        $foreignKeyException = $this->getMockBuilder(ForeignKeyConstraintViolationException::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->decoratedRemoveProcessor->expects(self::once())
+            ->method('process')
+            ->with($data, $operationMock, [], [])
+            ->willThrowException($foreignKeyException);
+
         $this->expectException(ResourceDeleteException::class);
         $this->resourceRemoveProcessor->process($data, $operationMock, [], []);
     }

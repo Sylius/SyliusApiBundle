@@ -25,19 +25,18 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 final class RemoveProcessorTest extends TestCase
 {
-    /** @var ProcessorInterface|MockObject */
-    private MockObject $removeProcessorMock;
+    private MockObject&ProcessorInterface $processor;
 
-    /** @var TokenStorageInterface|MockObject */
-    private MockObject $tokenStorageMock;
+    private MockObject&TokenStorageInterface $tokenStorage;
 
     private RemoveProcessor $removeProcessor;
 
     protected function setUp(): void
     {
-        $this->removeProcessorMock = $this->createMock(ProcessorInterface::class);
-        $this->tokenStorageMock = $this->createMock(TokenStorageInterface::class);
-        $this->removeProcessor = new RemoveProcessor($this->removeProcessorMock, $this->tokenStorageMock);
+        parent::setUp();
+        $this->processor = $this->createMock(ProcessorInterface::class);
+        $this->tokenStorage = $this->createMock(TokenStorageInterface::class);
+        $this->removeProcessor = new RemoveProcessor($this->processor, $this->tokenStorage);
     }
 
     public function testProcessesDeleteOperation(): void
@@ -49,11 +48,11 @@ final class RemoveProcessorTest extends TestCase
         /** @var AdminUserInterface|MockObject $loggedUserMock */
         $loggedUserMock = $this->createMock(AdminUserInterface::class);
         $operation = new Delete();
-        $this->tokenStorageMock->expects(self::once())->method('getToken')->willReturn($tokenMock);
+        $this->tokenStorage->expects(self::once())->method('getToken')->willReturn($tokenMock);
         $tokenMock->expects(self::once())->method('getUser')->willReturn($loggedUserMock);
         $loggedUserMock->expects(self::once())->method('getId')->willReturn(2);
         $adminUserMock->expects(self::once())->method('getId')->willReturn(1);
-        $this->removeProcessorMock->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+        $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
         $this->removeProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -65,7 +64,7 @@ final class RemoveProcessorTest extends TestCase
         $tokenMock = $this->createMock(TokenInterface::class);
         /** @var AdminUserInterface|MockObject $loggedUserMock */
         $loggedUserMock = $this->createMock(AdminUserInterface::class);
-        $this->tokenStorageMock->expects(self::once())->method('getToken')->willReturn($tokenMock);
+        $this->tokenStorage->expects(self::once())->method('getToken')->willReturn($tokenMock);
         $tokenMock->expects(self::once())->method('getUser')->willReturn($loggedUserMock);
         $loggedUserMock->expects(self::once())->method('getId')->willReturn(1);
         $adminUserMock->expects(self::once())->method('getId')->willReturn(1);
@@ -78,8 +77,8 @@ final class RemoveProcessorTest extends TestCase
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         $operation = new Delete();
-        $this->tokenStorageMock->expects(self::once())->method('getToken')->willReturn(null);
-        $this->removeProcessorMock->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+        $this->tokenStorage->expects(self::once())->method('getToken')->willReturn(null);
+        $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
         $this->removeProcessor->process($adminUserMock, $operation, [], []);
     }
 }
