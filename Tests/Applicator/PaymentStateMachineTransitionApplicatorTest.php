@@ -29,14 +29,6 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
 
     private MockObject&PaymentInterface $payment;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->stateMachine = $this->createMock(StateMachineInterface::class);
-        $this->paymentStateMachineTransitionApplicator = new PaymentStateMachineTransitionApplicator($this->stateMachine);
-        $this->payment = $this->createMock(PaymentInterface::class);
-    }
-
     public function testCompletesPayment(): void
     {
         $this->stateMachine->expects(self::once())
@@ -122,5 +114,13 @@ final class PaymentStateMachineTransitionApplicatorTest extends TestCase
         self::expectException(StateMachineTransitionFailedException::class);
 
         $this->paymentStateMachineTransitionApplicator->refund($this->payment);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->paymentStateMachineTransitionApplicator = new PaymentStateMachineTransitionApplicator($this->stateMachine);
+        $this->payment = $this->createMock(PaymentInterface::class);
     }
 }

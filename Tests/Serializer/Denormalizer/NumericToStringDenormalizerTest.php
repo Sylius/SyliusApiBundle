@@ -25,7 +25,8 @@ final class NumericToStringDenormalizerTest extends TestCase
 
     private NumericToStringDenormalizer $numericToStringDenormalizer;
 
-    public const ALREADY_CALLED = 'sylius_numeric_to_string_denormalizer_already_called_for_Sylius\Component\Core\Model\TaxRateInterface';
+    public const ALREADY_CALLED =
+        'sylius_numeric_to_string_denormalizer_already_called_for_Sylius\Component\Core\Model\TaxRateInterface';
 
     protected function setUp(): void
     {

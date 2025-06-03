@@ -29,13 +29,6 @@ final class OrderStateMachineTransitionApplicatorTest extends TestCase
 
     private MockObject&OrderInterface $order;
 
-    protected function setUp(): void
-    {
-        $this->stateMachine = $this->createMock(StateMachineInterface::class);
-        $this->orderStateMachineTransitionApplicator = new OrderStateMachineTransitionApplicator($this->stateMachine);
-        $this->order = $this->createMock(OrderInterface::class);
-    }
-
     public function testCancelsOrder(): void
     {
         $this->stateMachine->expects(self::once())
@@ -78,5 +71,12 @@ final class OrderStateMachineTransitionApplicatorTest extends TestCase
         self::expectException(StateMachineTransitionFailedException::class);
 
         $this->orderStateMachineTransitionApplicator->cancel($this->order);
+    }
+
+    protected function setUp(): void
+    {
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->orderStateMachineTransitionApplicator = new OrderStateMachineTransitionApplicator($this->stateMachine);
+        $this->order = $this->createMock(OrderInterface::class);
     }
 }

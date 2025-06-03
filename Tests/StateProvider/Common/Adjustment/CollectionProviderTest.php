@@ -50,6 +50,7 @@ final class CollectionProviderTest extends TestCase
         self::expectException(\LogicException::class);
 
         $repositoryMock = $this->createMock(RepositoryInterface::class);
+
         $repositoryMock->method('getClassName')->willReturn(\stdClass::class);
 
         new CollectionProvider($repositoryMock, self::IDENTIFIER);
@@ -63,6 +64,7 @@ final class CollectionProviderTest extends TestCase
             ->method('findOneBy');
 
         self::expectException(\InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation, []);
     }
 
@@ -76,6 +78,7 @@ final class CollectionProviderTest extends TestCase
             ->willReturn(null);
 
         self::expectException(\RuntimeException::class);
+
         $this->collectionProvider->provide($operation, [self::IDENTIFIER => 1]);
     }
 
@@ -84,10 +87,13 @@ final class CollectionProviderTest extends TestCase
         $operation = new GetCollection(class: AdjustmentInterface::class);
 
         $request = $this->createMock(Request::class);
+
         $request->query = new InputBag(['type' => 'type']);
 
         $orderItem = $this->createMock(OrderItem::class);
+
         $firstAdjustment = $this->createMock(AdjustmentInterface::class);
+
         $secondAdjustment = $this->createMock(AdjustmentInterface::class);
 
         $adjustments = new ArrayCollection([$firstAdjustment, $secondAdjustment]);

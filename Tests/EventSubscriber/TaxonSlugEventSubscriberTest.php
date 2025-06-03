@@ -47,13 +47,26 @@ final class TaxonSlugEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
-        $taxonMock->expects(self::once())->method('getTranslations')->willReturn(new ArrayCollection([$taxonTranslationMock]));
+
+        $taxonMock->expects(self::once())
+            ->method('getTranslations')
+            ->willReturn(new ArrayCollection([$taxonTranslationMock]));
+
         $taxonTranslationMock->expects(self::once())->method('getSlug')->willReturn(null);
+
         $taxonTranslationMock->expects(self::atLeastOnce())->method('getName')->willReturn('PHP Mug');
+
         $taxonTranslationMock->expects(self::once())->method('getLocale')->willReturn('en_US');
-        $this->taxonSlugGenerator->expects(self::once())->method('generate')->with($taxonMock, 'en_US')->willReturn('php-mug');
+
+        $this->taxonSlugGenerator->expects(self::once())
+            ->method('generate')
+            ->with($taxonMock, 'en_US')
+            ->willReturn('php-mug');
+
         $taxonTranslationMock->expects(self::once())->method('setSlug')->with('php-mug');
+
         $this->taxonSlugEventSubscriber->generateSlug(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -72,12 +85,23 @@ final class TaxonSlugEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
-        $taxonMock->expects(self::once())->method('getTranslations')->willReturn(new ArrayCollection([$taxonTranslationMock]));
-        $taxonTranslationMock->expects(self::atLeastOnce())->method('getSlug')->willReturn('php-mug');
+
+        $taxonMock->expects(self::once())
+            ->method('getTranslations')
+            ->willReturn(new ArrayCollection([$taxonTranslationMock]));
+
+        $taxonTranslationMock->expects(self::atLeastOnce())
+            ->method('getSlug')
+            ->willReturn('php-mug');
+
         $taxonTranslationMock->expects(self::never())->method('getName');
+
         $this->taxonSlugGenerator->expects(self::never())->method('generate');
+
         $taxonTranslationMock->expects(self::never())->method('setSlug');
+
         $this->taxonSlugEventSubscriber->generateSlug(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -96,12 +120,21 @@ final class TaxonSlugEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
-        $taxonMock->expects(self::once())->method('getTranslations')->willReturn(new ArrayCollection([$taxonTranslationMock]));
+
+        $taxonMock->expects(self::once())
+            ->method('getTranslations')
+            ->willReturn(new ArrayCollection([$taxonTranslationMock]));
+
         $taxonTranslationMock->expects(self::once())->method('getSlug')->willReturn(null);
+
         $taxonTranslationMock->expects(self::once())->method('getName')->willReturn(null);
+
         $this->taxonSlugGenerator->expects(self::never())->method('generate');
+
         $taxonTranslationMock->expects(self::never())->method('setSlug');
+
         $this->taxonSlugEventSubscriber->generateSlug(new ViewEvent(
             $kernelMock,
             $requestMock,

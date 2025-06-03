@@ -37,6 +37,7 @@ final class AdminApiUriBasedSectionResolverTest extends TestCase
     public function testReturnsAdminApiSectionIfPathStartsWithApiV2Admin(): void
     {
         $this->assertEquals(new AdminApiSection(), $this->resolver->getSection('/api/v2/admin/something'));
+
         $this->assertEquals(new AdminApiSection(), $this->resolver->getSection('/api/v2/admin'));
     }
 
@@ -46,6 +47,7 @@ final class AdminApiUriBasedSectionResolverTest extends TestCase
     public function testThrowsAnExceptionIfPathDoesNotStartWithApiV2Admin(string $path): void
     {
         self::expectException(SectionCannotBeResolvedException::class);
+
         $this->resolver->getSection($path);
     }
 

@@ -32,16 +32,24 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
     {
-        self::assertFalse($this->translatableLocaleKeyDenormalizer
-            ->supportsDenormalization([], TranslatableInterface::class, context: [
-                'sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
-            ]))
-        ;
+        self::assertFalse(
+            $this->translatableLocaleKeyDenormalizer->supportsDenormalization(
+                [],
+                TranslatableInterface::class,
+                context: [
+                    'sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true,
+                ]
+            )
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        self::assertFalse($this->translatableLocaleKeyDenormalizer->supportsDenormalization('string', TranslatableInterface::class));
+        self::assertFalse(
+            $this->translatableLocaleKeyDenormalizer->supportsDenormalization(
+                'string',
+                TranslatableInterface::class)
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotATranslatable(): void
@@ -52,6 +60,7 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
     public function testDoesNothingIfThereIsNoTranslationKey(): void
     {
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
+
         $this->translatableLocaleKeyDenormalizer->setDenormalizer($denormalizerMock);
 
         $data = [];
@@ -63,7 +72,9 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
                 $data,
                 TranslatableInterface::class,
                 null,
-                ['sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true],
+                [
+                    'sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true
+                ],
             );
 
         $this->translatableLocaleKeyDenormalizer->denormalize($data, TranslatableInterface::class);
@@ -72,6 +83,7 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
     public function testChangesKeysOfTranslationsToLocale(): void
     {
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
+
         $this->translatableLocaleKeyDenormalizer->setDenormalizer($denormalizerMock);
 
         $originalData = [
@@ -95,7 +107,9 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
                 $expectedData,
                 TranslatableInterface::class,
                 null,
-                ['sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true],
+                [
+                    'sylius_translatable_locale_key_denormalizer_already_called_for_Sylius\Resource\Model\TranslatableInterface' => true
+                ],
             );
 
         $this->translatableLocaleKeyDenormalizer->denormalize($originalData, TranslatableInterface::class);
@@ -105,8 +119,14 @@ final class TranslatableLocaleKeyDenormalizerTest extends TestCase
     {
         /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
+
         $this->translatableLocaleKeyDenormalizer->setDenormalizer($denormalizerMock);
+
         self::expectException(TranslationLocaleMismatchException::class);
-        $this->translatableLocaleKeyDenormalizer->denormalize(['translations' => ['de_DE' => ['locale' => 'en_US']]], TranslatableInterface::class);
+
+        $this->translatableLocaleKeyDenormalizer->denormalize(
+            ['translations' => ['de_DE' => ['locale' => 'en_US']]],
+            TranslatableInterface::class
+        );
     }
 }

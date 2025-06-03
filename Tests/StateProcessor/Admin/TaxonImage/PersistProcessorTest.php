@@ -57,20 +57,33 @@ final class PersistProcessorTest extends TestCase
         $filesMock = $this->createMock(FileBag::class);
         /** @var TaxonImageInterface|MockObject $taxonImageMock */
         $taxonImageMock = $this->createMock(TaxonImageInterface::class);
+
         $operation = new Post();
-        $attributesMock->expects(self::once())->method('get')->with('code', '')->willReturn('code');
+
+        $attributesMock->expects(self::once())
+            ->method('get')
+            ->with('code', '')
+            ->willReturn('code');
+
         $requestMock->attributes = $attributesMock;
+
         $file = new \SplFileInfo(__FILE__);
+
         $filesMock->expects(self::once())->method('get')->with('file')->willReturn($file);
+
         $requestMock->files = $filesMock;
+
         $requestMock->request = new InputBag(['type' => 'type']);
+
         $this->taxonImageCreator->expects(self::once())
             ->method('create')
             ->with('code', $file, 'type')
             ->willReturn($taxonImageMock);
+
         $this->processor->expects(self::once())
             ->method('process')
             ->with($taxonImageMock, $operation, [], ['request' => $requestMock]);
+
         $this->persistProcessor->process(null, $operation, [], ['request' => $requestMock]);
     }
 
@@ -79,7 +92,9 @@ final class PersistProcessorTest extends TestCase
         $deleteOperation = new Delete();
         /** @var TaxonImageInterface|MockObject $taxonImageMock */
         $taxonImageMock = $this->createMock(TaxonImageInterface::class);
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->persistProcessor->process($taxonImageMock, $deleteOperation, [], []);
     }
 }

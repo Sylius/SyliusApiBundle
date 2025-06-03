@@ -65,7 +65,8 @@ final class CollectionProviderTest extends TestCase
             ->method('findOneByIdAndOrderTokenValue');
 
         $result = $this->collectionProvider->provide($operation, ['tokenValue' => '42']);
-        $this->assertEquals([], $result);
+
+        self::assertEquals([], $result);
     }
 
     public function testReturnsEmptyArrayWhenUriVariablesHaveNoTokenValue(): void
@@ -82,7 +83,8 @@ final class CollectionProviderTest extends TestCase
             ->method('findOneByIdAndOrderTokenValue');
 
         $result = $this->collectionProvider->provide($operation, ['id' => 42]);
-        $this->assertEquals([], $result);
+
+        self::assertEquals([], $result);
     }
 
     public function testReturnsEmptyArrayWhenNoOrderItemCanBeFound(): void
@@ -101,18 +103,24 @@ final class CollectionProviderTest extends TestCase
             ->willReturn(null);
 
         $result = $this->collectionProvider->provide($operation, ['id' => '42', 'tokenValue' => 'token']);
-        $this->assertEquals([], $result);
+
+        self::assertEquals([], $result);
     }
 
     public function testReturnsAdjustmentsRecursively(): void
     {
         $operation = new GetCollection(class: AdjustmentInterface::class);
+
         $request = $this->createMock(Request::class);
+
         $orderItem = $this->createMock(OrderItem::class);
+
         $firstAdjustment = $this->createMock(AdjustmentInterface::class);
+
         $secondAdjustment = $this->createMock(AdjustmentInterface::class);
 
         $request->query = new InputBag(['type' => 'type']);
+
         $adjustments = new ArrayCollection([$firstAdjustment, $secondAdjustment]);
 
         $this->sectionProvider
@@ -138,7 +146,7 @@ final class CollectionProviderTest extends TestCase
             ['request' => $request],
         );
 
-        $this->assertEquals($adjustments, $result);
+        self::assertEquals($adjustments, $result);
     }
 
     public function testThrowsAnExceptionWhenOperationClassIsNotAdjustment(): void
@@ -151,6 +159,7 @@ final class CollectionProviderTest extends TestCase
             ->willReturn(\stdClass::class);
 
         self::expectException(InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation);
     }
 
@@ -168,6 +177,7 @@ final class CollectionProviderTest extends TestCase
             ->willReturn(new ShopApiSection());
 
         self::expectException(InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operationMock);
     }
 
@@ -181,6 +191,7 @@ final class CollectionProviderTest extends TestCase
             ->willReturn(new AdminApiSection());
 
         self::expectException(InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation);
     }
 }

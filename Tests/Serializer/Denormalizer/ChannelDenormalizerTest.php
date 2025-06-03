@@ -42,12 +42,19 @@ final class ChannelDenormalizerTest extends TestCase
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
     {
-        self::assertFalse($this->channelDenormalizer->supportsDenormalization([], ChannelInterface::class, context: [self::ALREADY_CALLED => true]));
+        self::assertFalse(
+            $this->channelDenormalizer->supportsDenormalization(
+                [],
+                ChannelInterface::class,
+                context: [self::ALREADY_CALLED => true])
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        self::assertFalse($this->channelDenormalizer->supportsDenormalization('string', ChannelInterface::class));
+        self::assertFalse(
+            $this->channelDenormalizer->supportsDenormalization('string', ChannelInterface::class)
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotAChannel(): void
@@ -59,9 +66,16 @@ final class ChannelDenormalizerTest extends TestCase
     {
         /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
+
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with([], 'string', null, [self::ALREADY_CALLED => true])->willReturn(new \stdClass());
+
+        $denormalizerMock->expects(self::once())
+            ->method('denormalize')
+            ->with([], 'string', null, [self::ALREADY_CALLED => true])
+            ->willReturn(new \stdClass());
+
         self::expectException(\InvalidArgumentException::class);
+
         $this->channelDenormalizer->denormalize([], 'string');
     }
 
@@ -75,12 +89,22 @@ final class ChannelDenormalizerTest extends TestCase
         $configMock = $this->createMock(ChannelPriceHistoryConfigInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
+
         $channelMock->expects(self::once())->method('getChannelPriceHistoryConfig')->willReturn($configMock);
+
         $channelMock->expects(self::once())->method('getShopBillingData')->willReturn($shopBillingDataMock);
+
         $channelMock->expects(self::never())->method('setChannelPriceHistoryConfig');
+
         $this->configFactory->expects(self::never())->method('createNew');
-        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
+
+        $denormalizerMock->expects(self::once())
+            ->method('denormalize')
+            ->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])
+            ->willReturn($channelMock);
+
         self::assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
     }
 
@@ -94,12 +118,22 @@ final class ChannelDenormalizerTest extends TestCase
         $configMock = $this->createMock(ChannelPriceHistoryConfigInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
+
         $channelMock->expects(self::once())->method('getChannelPriceHistoryConfig')->willReturn(null);
+
         $channelMock->expects(self::once())->method('getShopBillingData')->willReturn($shopBillingDataMock);
+
         $this->configFactory->expects(self::once())->method('createNew')->willReturn($configMock);
+
         $channelMock->expects(self::once())->method('setChannelPriceHistoryConfig')->with($configMock);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
+
+        $denormalizerMock->expects(self::once())
+            ->method('denormalize')
+            ->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])
+            ->willReturn($channelMock);
+
         self::assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
     }
 
@@ -113,12 +147,22 @@ final class ChannelDenormalizerTest extends TestCase
         $configMock = $this->createMock(ChannelPriceHistoryConfigInterface::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $this->channelDenormalizer->setDenormalizer($denormalizerMock);
+
         $channelMock->expects(self::once())->method('getChannelPriceHistoryConfig')->willReturn($configMock);
+
         $channelMock->expects(self::once())->method('getShopBillingData')->willReturn(null);
+
         $this->shopBillingDataFactory->expects(self::once())->method('createNew')->willReturn($shopBillingDataMock);
+
         $channelMock->expects(self::once())->method('setShopBillingData')->with($shopBillingDataMock);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])->willReturn($channelMock);
+
+        $denormalizerMock->expects(self::once())
+            ->method('denormalize')
+            ->with([], ChannelInterface::class, null, [self::ALREADY_CALLED => true])
+            ->willReturn($channelMock);
+
         self::assertSame($channelMock, $this->channelDenormalizer->denormalize([], ChannelInterface::class));
     }
 }

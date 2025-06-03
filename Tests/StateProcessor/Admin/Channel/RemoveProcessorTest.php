@@ -42,8 +42,11 @@ final class RemoveProcessorTest extends TestCase
     public function testThrowsAnExceptionIfObjectIsNotAChannel(): void
     {
         $this->channelDeletionChecker->expects(self::never())->method('isDeletable');
+
         $this->processor->expects(self::never())->method('process')->with($this->any());
+
         $this->expectException(InvalidArgumentException::class);
+
         $this->removeProcessor->process(new \stdClass(), new Delete(), [], []);
     }
 
@@ -51,14 +54,20 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $uriVariables = [];
+
         $context = [];
+
         $this->channelDeletionChecker->expects(self::once())
             ->method('isDeletable')
             ->with($channelMock)
             ->willReturn(false);
+
         $this->processor->expects(self::never())->method('process')->with($this->any());
+
         $this->expectException(ResourceDeleteException::class);
+
         $this->removeProcessor->process($channelMock, new Delete(), $uriVariables, $context);
     }
 
@@ -66,14 +75,23 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $operation = new Delete();
+
         $uriVariables = [];
+
         $context = [];
-        $this->channelDeletionChecker->expects(self::once())->method('isDeletable')->with($channelMock)->willReturn(true);
+
+        $this->channelDeletionChecker->expects(self::once())
+            ->method('isDeletable')
+            ->with($channelMock)
+            ->willReturn(true);
+
         $this->processor->expects(self::once())
             ->method('process')
             ->with($channelMock, $operation, $uriVariables, $context)
             ->willReturn($channelMock);
+
         $this->removeProcessor->process($channelMock, $operation, $uriVariables, $context);
     }
 }

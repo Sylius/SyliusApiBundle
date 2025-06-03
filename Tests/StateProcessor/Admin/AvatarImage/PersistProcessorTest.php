@@ -58,24 +58,33 @@ final class PersistProcessorTest extends TestCase
         $filesMock = $this->createMock(FileBag::class);
         /** @var AvatarImageInterface|MockObject $avatarImageMock */
         $avatarImageMock = $this->createMock(AvatarImageInterface::class);
+
         $operation = new Post();
+
         $attributesMock->expects(self::once())
             ->method('getString')
             ->with('id')
             ->willReturn('1');
+
         $requestMock->attributes = $attributesMock;
+
         $file = new \SplFileInfo(__FILE__);
+
         $filesMock->expects(self::once())->method('get')->with('file')->willReturn($file);
+
         $requestMock->files = $filesMock;
+
         $this->avatarImageRepository->expects(self::never())->method('remove');
+
         $this->avatarImageCreator->expects(self::once())
             ->method('create')
             ->with('1', $file)
             ->willReturn($avatarImageMock);
+
         $this->processor->expects(self::once())
             ->method('process')
-            ->with($avatarImageMock, $operation, [], ['request' => $requestMock])
-        ;
+            ->with($avatarImageMock, $operation, [], ['request' => $requestMock]);
+
         $this->persistProcessor->process(null, $operation, [], ['request' => $requestMock]);
     }
 
@@ -91,23 +100,33 @@ final class PersistProcessorTest extends TestCase
         $oldAvatarImageMock = $this->createMock(AvatarImageInterface::class);
         /** @var AvatarImageInterface|MockObject $avatarImageMock */
         $avatarImageMock = $this->createMock(AvatarImageInterface::class);
+
         $operation = new Post();
+
         $attributesMock->expects(self::once())
             ->method('getString')
             ->with('id')
             ->willReturn('1');
+
         $requestMock->attributes = $attributesMock;
+
         $file = new \SplFileInfo(__FILE__);
+
         $filesMock->expects(self::once())->method('get')->with('file')->willReturn($file);
+
         $requestMock->files = $filesMock;
+
         $this->avatarImageRepository->expects(self::once())->method('remove')->with($oldAvatarImageMock);
+
         $this->avatarImageCreator->expects(self::once())
             ->method('create')
             ->with('1', $file)
             ->willReturn($avatarImageMock);
+
         $this->processor->expects(self::once())
             ->method('process')
             ->with($avatarImageMock, $operation, [], ['request' => $requestMock]);
+
         $this->persistProcessor->process($oldAvatarImageMock, $operation, [], ['request' => $requestMock]);
     }
 }

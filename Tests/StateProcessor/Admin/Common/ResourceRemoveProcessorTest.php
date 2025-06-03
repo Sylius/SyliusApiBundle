@@ -40,8 +40,13 @@ final class ResourceRemoveProcessorTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
+
         $data = new Promotion();
-        $this->decoratedRemoveProcessor->expects(self::once())->method('process')->with($data, $operationMock, [], []);
+
+        $this->decoratedRemoveProcessor->expects(self::once())
+            ->method('process')
+            ->with($data, $operationMock, [], []);
+
         $this->resourceRemoveProcessor->process($data, $operationMock, [], []);
     }
 
@@ -49,6 +54,7 @@ final class ResourceRemoveProcessorTest extends TestCase
     {
         /** @var Operation|MockObject $operationMock */
         $operationMock = $this->createMock(Operation::class);
+
         $data = new ShippingMethod();
 
         $driverException = $this->getMockBuilder(\Doctrine\DBAL\Driver\Exception::class)
@@ -63,7 +69,8 @@ final class ResourceRemoveProcessorTest extends TestCase
             ->with($data, $operationMock, [], [])
             ->willThrowException($foreignKeyException);
 
-        $this->expectException(ResourceDeleteException::class);
+        self::expectException(ResourceDeleteException::class);
+
         $this->resourceRemoveProcessor->process($data, $operationMock, [], []);
     }
 }

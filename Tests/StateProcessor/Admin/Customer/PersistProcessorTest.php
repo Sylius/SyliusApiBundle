@@ -47,10 +47,15 @@ final class PersistProcessorTest extends TestCase
         $customerMock = $this->createMock(Customer::class);
         /** @var ShopUser|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUser::class);
+
         $operation = new Delete();
+
         $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($shopUserMock);
+
         $this->persist->expects(self::never())->method('process')->with($customerMock, $operation, [], []);
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->persistProcessor->process($customerMock, $operation, [], []);
     }
 
@@ -60,10 +65,15 @@ final class PersistProcessorTest extends TestCase
         $customerMock = $this->createMock(Customer::class);
         /** @var ShopUser|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUser::class);
+
         $operation = new Post();
+
         $customerMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
+
         $this->passwordUpdater->expects(self::once())->method('updatePassword')->with($shopUserMock);
+
         $this->persist->expects(self::once())->method('process')->with($customerMock, $operation, [], []);
+
         $this->persistProcessor->process($customerMock, $operation, [], []);
     }
 
@@ -73,10 +83,15 @@ final class PersistProcessorTest extends TestCase
         $customerMock = $this->createMock(Customer::class);
         /** @var ShopUser|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUser::class);
+
         $operation = new Put();
+
         $customerMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
+
         $this->passwordUpdater->expects(self::once())->method('updatePassword')->with($shopUserMock);
+
         $this->persist->expects(self::once())->method('process')->with($customerMock, $operation, [], []);
+
         $this->persistProcessor->process($customerMock, $operation, [], []);
     }
 
@@ -86,9 +101,13 @@ final class PersistProcessorTest extends TestCase
         $customerMock = $this->createMock(Customer::class);
         /** @var ShopUser|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUser::class);
+
         $operation = new Patch();
+
         $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($shopUserMock);
+
         $this->persist->expects(self::once())->method('process')->with($customerMock, $operation, [], []);
+
         $this->persistProcessor->process($customerMock, $operation, [], []);
     }
 }

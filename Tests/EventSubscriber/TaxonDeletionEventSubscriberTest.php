@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\EventSubscriber;
 
-use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\EventSubscriber\TaxonDeletionEventSubscriber;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Exception\ResourceDeleteException;
@@ -51,9 +49,16 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_DELETE);
+
         $taxonMock->method('getCode')->willReturn('WATCHES');
-        $this->channelRepository->expects(self::once())->method('findOneBy')->with(['menuTaxon' => $taxonMock])->willReturn(null);
+
+        $this->channelRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['menuTaxon' => $taxonMock])
+            ->willReturn(null);
+
         $this->taxonDeletionEventSubscriber->protectFromRemovingMenuTaxon(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -68,12 +73,14 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_DELETE);
+
         $this->taxonDeletionEventSubscriber->protectFromRemovingMenuTaxon(new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
-            new stdClass(),
+            new \stdClass(),
         ));
     }
 
@@ -87,10 +94,18 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_DELETE);
+
         $taxonMock->expects(self::once())->method('getCode')->willReturn('WATCHES');
-        $this->channelRepository->expects(self::once())->method('findOneBy')->with(['menuTaxon' => $taxonMock])->willReturn($channelMock);
-        self::expectException(Exception::class);
+
+        $this->channelRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['menuTaxon' => $taxonMock])
+            ->willReturn($channelMock);
+
+        self::expectException(\Exception::class);
+
         $this->taxonDeletionEventSubscriber->protectFromRemovingMenuTaxon(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -108,13 +123,16 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
+
         $event = new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
             $taxonMock,
         );
+
         $this->taxonInPromotionRuleChecker->expects(self::never())->method('isInUse')->with($taxonMock);
+
         /** should not throw exception */
         $this->taxonDeletionEventSubscriber->protectFromRemovingTaxonInUseByPromotionRule($event);
     }
@@ -156,15 +174,20 @@ final class TaxonDeletionEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_DELETE);
+
         $event = new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
             $taxonMock,
         );
+
         $this->taxonInPromotionRuleChecker->expects(self::once())->method('isInUse')->with($taxonMock)->willReturn(true);
+
         self::expectException(ResourceDeleteException::class);
+
         $this->taxonDeletionEventSubscriber->protectFromRemovingTaxonInUseByPromotionRule($event);
     }
 }

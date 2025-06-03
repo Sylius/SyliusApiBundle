@@ -47,12 +47,19 @@ final class RemoveProcessorTest extends TestCase
         $tokenMock = $this->createMock(TokenInterface::class);
         /** @var AdminUserInterface|MockObject $loggedUserMock */
         $loggedUserMock = $this->createMock(AdminUserInterface::class);
+
         $operation = new Delete();
+
         $this->tokenStorage->expects(self::once())->method('getToken')->willReturn($tokenMock);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($loggedUserMock);
+
         $loggedUserMock->expects(self::once())->method('getId')->willReturn(2);
+
         $adminUserMock->expects(self::once())->method('getId')->willReturn(1);
+
         $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+
         $this->removeProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -64,11 +71,17 @@ final class RemoveProcessorTest extends TestCase
         $tokenMock = $this->createMock(TokenInterface::class);
         /** @var AdminUserInterface|MockObject $loggedUserMock */
         $loggedUserMock = $this->createMock(AdminUserInterface::class);
+
         $this->tokenStorage->expects(self::once())->method('getToken')->willReturn($tokenMock);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($loggedUserMock);
+
         $loggedUserMock->expects(self::once())->method('getId')->willReturn(1);
+
         $adminUserMock->expects(self::once())->method('getId')->willReturn(1);
+
         $this->expectException(ResourceDeleteException::class);
+
         $this->removeProcessor->process($adminUserMock, new Delete(), [], []);
     }
 
@@ -76,9 +89,13 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
+
         $operation = new Delete();
+
         $this->tokenStorage->expects(self::once())->method('getToken')->willReturn(null);
+
         $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+
         $this->removeProcessor->process($adminUserMock, $operation, [], []);
     }
 }

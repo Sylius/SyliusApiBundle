@@ -40,8 +40,13 @@ final class LocaleContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedSerializerContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, []);
+
+        $this->decoratedSerializerContextBuilder->expects(self::once())
+            ->method('createFromRequest')
+            ->with($requestMock, true, []);
+
         $this->localeContext->expects(self::once())->method('getLocaleCode')->willReturn('en_US');
+
         $this->localeContextBuilder->createFromRequest($requestMock, true, []);
     }
 }

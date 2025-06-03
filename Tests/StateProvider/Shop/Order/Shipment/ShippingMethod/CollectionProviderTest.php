@@ -44,7 +44,11 @@ final class CollectionProviderTest extends TestCase
         $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
         $this->shipmentRepository = $this->createMock(ShipmentRepositoryInterface::class);
         $this->shippingMethodsResolver = $this->createMock(ShippingMethodsResolverInterface::class);
-        $this->collectionProvider = new CollectionProvider($this->sectionProvider, $this->shipmentRepository, $this->shippingMethodsResolver);
+        $this->collectionProvider = new CollectionProvider(
+            $this->sectionProvider,
+            $this->shipmentRepository,
+            $this->shippingMethodsResolver
+        );
     }
 
     public function testProvidesShippingMethods(): void
@@ -55,10 +59,21 @@ final class CollectionProviderTest extends TestCase
         $shipmentMock = $this->createMock(ShipmentInterface::class);
         /** @var ShippingMethodInterface|MockObject $methodMock */
         $methodMock = $this->createMock(ShippingMethodInterface::class);
+
         $operation = new GetCollection(class: ShippingMethod::class);
+
         $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->shipmentRepository->expects(self::once())->method('findOneByOrderTokenAndChannel')->with(1, 'TOKEN', $channelMock)->willReturn($shipmentMock);
-        $this->shippingMethodsResolver->expects(self::once())->method('getSupportedMethods')->with($shipmentMock)->willReturn([$methodMock]);
+
+        $this->shipmentRepository->expects(self::once())
+            ->method('findOneByOrderTokenAndChannel')
+            ->with(1, 'TOKEN', $channelMock)
+            ->willReturn($shipmentMock);
+
+        $this->shippingMethodsResolver->expects(self::once())
+            ->method('getSupportedMethods')
+            ->with($shipmentMock)
+            ->willReturn([$methodMock]);
+
         self::assertSame([$methodMock], $this->collectionProvider
             ->provide($operation, ['tokenValue' => 'TOKEN', 'shipmentId' => 1], ['sylius_api_channel' => $channelMock]))
         ;
@@ -67,30 +82,40 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenResourceIsNotAShippingMethodInterface(): void
     {
         $operation = new GetCollection(class: \stdClass::class);
+
         self::expectException(\InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation);
     }
 
     public function testThrowsAnExceptionWhenOperationIsNotGetCollection(): void
     {
         $operation = new Get(class: ShippingMethod::class);
+
         self::expectException(\InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation);
     }
 
     public function testThrowsAnExceptionWhenOperationIsNotInShopApiSection(): void
     {
         $operation = new GetCollection(class: ShippingMethod::class);
+
         $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
+
         self::expectException(\InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation);
     }
 
     public function testThrowsAnExceptionWhenUriVariablesDoNotExist(): void
     {
         $operation = new GetCollection(class: ShippingMethod::class);
+
         $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+
         self::expectException(\InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation);
     }
 }

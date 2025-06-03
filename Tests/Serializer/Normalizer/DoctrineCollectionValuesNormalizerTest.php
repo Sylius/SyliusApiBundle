@@ -37,22 +37,52 @@ final class DoctrineCollectionValuesNormalizerTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         /** @var Collection|MockObject $collectionMock */
         $collectionMock = $this->createMock(Collection::class);
+
         self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization($orderMock));
-        self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization($orderMock, null, ['collection_values' => false]));
-        self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization($orderMock, null, ['collection_values' => true]));
+
+        self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization(
+            $orderMock,
+            null,
+            ['collection_values' => false])
+        );
+
+        self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization(
+            $orderMock,
+            null,
+            ['collection_values' => true])
+        );
+
         self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization($collectionMock));
-        self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization($collectionMock, null, ['collection_values' => false]));
-        self::assertTrue($this->doctrineCollectionValuesNormalizer->supportsNormalization($collectionMock, null, ['collection_values' => true]));
+
+        self::assertFalse($this->doctrineCollectionValuesNormalizer->supportsNormalization(
+            $collectionMock,
+            null,
+            ['collection_values' => false])
+        );
+
+        self::assertTrue($this->doctrineCollectionValuesNormalizer->supportsNormalization(
+            $collectionMock,
+            null,
+            ['collection_values' => true])
+        );
     }
 
     public function testNormalizesCollectionValues(): void
     {
         /** @var NormalizerInterface|MockObject $normalizerMock */
         $normalizerMock = $this->createMock(NormalizerInterface::class);
+
         $this->doctrineCollectionValuesNormalizer->setNormalizer($normalizerMock);
-        $normalizerMock->expects(self::once())->method('normalize')->with([['id' => 1], ['id' => 2]], null, ['collection_values' => true])
-            ->willReturn([])
-        ;
-        $this->doctrineCollectionValuesNormalizer->normalize(new ArrayCollection(['1' => ['id' => 1], '2' => ['id' => 2]]), null, ['collection_values' => true]);
+
+        $normalizerMock->expects(self::once())
+            ->method('normalize')
+            ->with([['id' => 1], ['id' => 2]], null, ['collection_values' => true])
+            ->willReturn([]);
+
+        $this->doctrineCollectionValuesNormalizer->normalize(
+            new ArrayCollection(['1' => ['id' => 1], '2' => ['id' => 2]]),
+            null,
+            ['collection_values' => true]
+        );
     }
 }

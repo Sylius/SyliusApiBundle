@@ -42,15 +42,21 @@ final class UriTemplateParentResourceResolverTest extends TestCase
 
     public function testImpliesUriTemplateParentResourceResolverInterface(): void
     {
-        self::assertInstanceOf(UriTemplateParentResourceResolverInterface::class, $this->uriTemplateParentResourceResolver);
+        self::assertInstanceOf(
+            UriTemplateParentResourceResolverInterface::class,
+            $this->uriTemplateParentResourceResolver,
+        );
     }
 
     public function testThrowsAnExceptionIfNoUriVariablesArePassed(): void
     {
         /** @var ResourceInterface|MockObject $itemMock */
         $itemMock = $this->createMock(ResourceInterface::class);
+
         $this->entityManager->expects(self::never())->method('getRepository');
+
         self::expectException(\RuntimeException::class);
+
         $this->uriTemplateParentResourceResolver->resolve($itemMock, new Post(), [], []);
     }
 
@@ -60,24 +66,42 @@ final class UriTemplateParentResourceResolverTest extends TestCase
         $itemMock = $this->createMock(ResourceInterface::class);
         /** @var ResourceInterface|MockObject $parentItemMock */
         $parentItemMock = $this->createMock(ResourceInterface::class);
+
         $this->entityManager->expects(self::never())->method('getRepository');
+
         $operation = new Post(uriVariables: [
             'variable' => new Link(fromClass: $parentItemMock::class),
         ]);
+
         self::expectException(\RuntimeException::class);
-        $this->uriTemplateParentResourceResolver->resolve($itemMock, $operation, ['uri_variables' => ['variable' => 'value']], []);
+
+        $this->uriTemplateParentResourceResolver->resolve(
+            $itemMock,
+            $operation,
+            ['uri_variables' => ['variable' => 'value']],
+            [],
+        );
     }
 
     public function testThrowsAnExceptionIfUriVariableClassIsNotDefined(): void
     {
         /** @var ResourceInterface|MockObject $itemMock */
         $itemMock = $this->createMock(ResourceInterface::class);
+
         $this->entityManager->expects(self::never())->method('getRepository');
+
         $operation = new Post(uriVariables: [
             'variable' => new Link(),
         ]);
+
         self::expectException(\RuntimeException::class);
-        $this->uriTemplateParentResourceResolver->resolve($itemMock, $operation, ['uri_variables' => ['variable' => 'value']], []);
+
+        $this->uriTemplateParentResourceResolver->resolve(
+            $itemMock,
+            $operation,
+            ['uri_variables' => ['variable' => 'value']],
+            []
+        );
     }
 
     public function testThrowsAnExceptionIfParentResourceIsNotFound(): void
@@ -88,22 +112,45 @@ final class UriTemplateParentResourceResolverTest extends TestCase
         $unitOfWorkMock = $this->createMock(UnitOfWork::class);
         /** @var EntityPersister|MockObject $entityPersisterMock */
         $entityPersisterMock = $this->createMock(EntityPersister::class);
+
         $parentItem = new class() implements ResourceInterface {
             public function getId(): ?int
             {
                 return null;
             }
         };
+
         $operation = new Post(uriVariables: [
             'variable' => new Link(parameterName: 'variable', fromClass: $parentItem::class),
         ]);
+
         $repository = new EntityRepository($this->entityManager, new ClassMetadata($parentItem::class));
+
         $this->entityManager->expects(self::once())->method('getUnitOfWork')->willReturn($unitOfWorkMock);
-        $this->entityManager->expects(self::once())->method('getRepository')->with($parentItem::class)->willReturn($repository);
-        $unitOfWorkMock->expects(self::once())->method('getEntityPersister')->with($parentItem::class)->willReturn($entityPersisterMock);
-        $entityPersisterMock->expects(self::once())->method('load')->with(['code' => 'value'], null, null, [], null, 1, null)->willReturn(null);
+
+        $this->entityManager->expects(self::once())
+            ->method('getRepository')
+            ->with($parentItem::class)
+            ->willReturn($repository);
+
+        $unitOfWorkMock->expects(self::once())
+            ->method('getEntityPersister')
+            ->with($parentItem::class)
+            ->willReturn($entityPersisterMock);
+
+        $entityPersisterMock->expects(self::once())
+            ->method('load')
+            ->with(['code' => 'value'], null, null, [], null, 1, null)
+            ->willReturn(null);
+
         self::expectException(NotFoundHttpException::class);
-        $this->uriTemplateParentResourceResolver->resolve($itemMock, $operation, ['uri_variables' => ['variable' => 'value']], []);
+
+        $this->uriTemplateParentResourceResolver->resolve(
+            $itemMock,
+            $operation,
+            ['uri_variables' => ['variable' => 'value']],
+            [],
+        );
     }
 
     public function testResolvesParentResource(): void

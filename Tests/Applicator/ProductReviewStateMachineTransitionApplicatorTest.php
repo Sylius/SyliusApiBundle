@@ -29,16 +29,6 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
 
     private MockObject&ReviewInterface $review;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->stateMachine = $this->createMock(StateMachineInterface::class);
-        $this->productReviewStateMachineTransitionApplicator = new ProductReviewStateMachineTransitionApplicator(
-            $this->stateMachine,
-        );
-        $this->review = $this->createMock(ReviewInterface::class);
-    }
-
     public function testAcceptsProductReview(): void
     {
         $this->stateMachine->expects(self::once())
@@ -125,5 +115,15 @@ final class ProductReviewStateMachineTransitionApplicatorTest extends TestCase
         self::expectException(StateMachineTransitionFailedException::class);
 
         $this->productReviewStateMachineTransitionApplicator->reject($this->review);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->productReviewStateMachineTransitionApplicator = new ProductReviewStateMachineTransitionApplicator(
+            $this->stateMachine,
+        );
+        $this->review = $this->createMock(ReviewInterface::class);
     }
 }

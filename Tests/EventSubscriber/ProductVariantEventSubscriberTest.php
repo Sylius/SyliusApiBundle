@@ -15,7 +15,6 @@ namespace Tests\Sylius\Bundle\ApiBundle\EventSubscriber;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\EventSubscriber\ProductVariantEventSubscriber;
 use Sylius\Component\Core\Event\ProductVariantCreated;
 use Sylius\Component\Core\Event\ProductVariantUpdated;
@@ -47,10 +46,18 @@ final class ProductVariantEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
+
         $variantMock->expects(self::once())->method('getCode')->willReturn('MUG');
+
         $message = new ProductVariantCreated('MUG');
-        $this->eventBus->expects(self::once())->method('dispatch')->with($message)->willReturn(new Envelope($message));
+
+        $this->eventBus->expects(self::once())
+            ->method('dispatch')
+            ->with($message)
+            ->willReturn(new Envelope($message));
+
         $this->productVariantEventSubscriber->postWrite(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -67,10 +74,18 @@ final class ProductVariantEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_PUT);
+
         $variantMock->expects(self::once())->method('getCode')->willReturn('MUG');
+
         $message = new ProductVariantUpdated('MUG');
-        $this->eventBus->expects(self::once())->method('dispatch')->with($message)->willReturn(new Envelope($message));
+
+        $this->eventBus->expects(self::once())
+            ->method('dispatch')
+            ->with($message)
+            ->willReturn(new Envelope($message));
+
         $this->productVariantEventSubscriber->postWrite(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -85,13 +100,16 @@ final class ProductVariantEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_PUT);
+
         $this->eventBus->expects(self::never())->method('dispatch');
+
         $this->productVariantEventSubscriber->postWrite(new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
-            new stdClass(),
+            new \stdClass(),
         ));
     }
 }

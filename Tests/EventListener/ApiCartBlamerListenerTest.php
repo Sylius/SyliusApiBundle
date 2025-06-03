@@ -88,10 +88,17 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+
+        $this->sectionResolver->expects(self::once())
+            ->method('getSection')
+            ->willReturn($shopApiOrdersSubSectionSectionMock);
+
         $this->cartContext->expects(self::once())->method('getCart')->willReturn($orderMock);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($userMock);
+
         self::expectException(UnexpectedTypeException::class);
+
         $this->apiCartBlamerListener->onLoginSuccess(new LoginSuccessEvent(
             $authenticatorMock,
             $passportMock,
@@ -120,17 +127,30 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+
+        $this->sectionResolver->expects(self::once())
+            ->method('getSection')
+            ->willReturn($shopApiOrdersSubSectionSectionMock);
+
         $this->cartContext->expects(self::once())->method('getCart')->willReturn($cartMock);
+
         $cartMock->expects(self::once())->method('isCreatedByGuest')->willReturn(true);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($userMock);
+
         $userMock->method('getCustomer')->willReturn($customerMock);
+
         $userMock->expects(self::once())->method('getEmail')->willReturn('email@sylius.com');
+
         $cartMock->expects(self::once())->method('getTokenValue')->willReturn('TOKEN');
+
         $blameCart = new BlameCart('email@sylius.com', 'TOKEN');
-        $this->commandBus->expects(self::once())->method('dispatch')->with($blameCart)
-            ->willReturn(new Envelope($blameCart))
-        ;
+
+        $this->commandBus->expects(self::once())
+            ->method('dispatch')
+            ->with($blameCart)
+            ->willReturn(new Envelope($blameCart));
+
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
                 $authenticatorMock,
@@ -159,10 +179,17 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+
+        $this->sectionResolver->expects(self::once())
+            ->method('getSection')
+            ->willReturn($shopApiOrdersSubSectionSectionMock);
+
         $this->cartContext->method('getCart')->willReturn($cartMock);
+
         $cartMock->method('isCreatedByGuest')->willReturn(false);
+
         $cartMock->expects(self::never())->method('setCustomer');
+
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
                 $authenticatorMock,
@@ -189,10 +216,17 @@ final class ApiCartBlamerListenerTest extends TestCase
         $authenticatorMock = $this->createMock(AuthenticatorInterface::class);
         /** @var Passport|MockObject $passportMock */
         $passportMock = $this->createMock(Passport::class);
-        $this->sectionResolver->expects(self::once())->method('getSection')->willReturn($shopApiOrdersSubSectionSectionMock);
+
+        $this->sectionResolver->expects(self::once())
+            ->method('getSection')
+            ->willReturn($shopApiOrdersSubSectionSectionMock);
+
         $this->cartContext->method('getCart')->willReturn($cartMock);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn(null);
+
         $cartMock->expects(self::never())->method('setCustomer');
+
         $this->apiCartBlamerListener->onLoginSuccess(
             new LoginSuccessEvent(
                 $authenticatorMock,

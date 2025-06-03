@@ -35,7 +35,10 @@ final class CommandArgumentsDenormalizerTest extends TestCase
         parent::setUp();
         $this->commandDenormalizer = $this->createMock(DenormalizerInterface::class);
         $this->iriToIdentifierConverter = $this->createMock(IriToIdentifierConverterInterface::class);
-        $this->commandArgumentsDenormalizer = new CommandArgumentsDenormalizer($this->commandDenormalizer, $this->iriToIdentifierConverter);
+        $this->commandArgumentsDenormalizer = new CommandArgumentsDenormalizer(
+            $this->commandDenormalizer,
+            $this->iriToIdentifierConverter
+        );
     }
 
     public function testSupportsDenormalizationAddProductReview(): void
@@ -48,8 +51,7 @@ final class CommandArgumentsDenormalizerTest extends TestCase
                 AddProductReview::class,
                 null,
                 $context,
-            ))
-        ;
+            ));
     }
 
     public function testDoesNotSupportDenormalizationForNotSupportedClass(): void
@@ -62,8 +64,7 @@ final class CommandArgumentsDenormalizerTest extends TestCase
                 AddProductReview::class,
                 null,
                 $context,
-            ))
-        ;
+            ));
     }
 
     public function testDenormalizesAddProductReviewAndConvertsProductFieldFromIriToCode(): void

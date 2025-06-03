@@ -40,6 +40,7 @@ final class CollectionProviderTest extends TestCase
     public function testProvidesChannel(): void
     {
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $operation = new GetCollection(class: Channel::class);
 
         $this->sectionProvider
@@ -59,12 +60,14 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenOperationClassIsNotChannel(): void
     {
         $operationMock = $this->createMock(Operation::class);
+
         $operationMock
             ->expects(self::once())
             ->method('getClass')
             ->willReturn(\stdClass::class);
 
         self::expectException(\InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operationMock);
     }
 
@@ -85,6 +88,7 @@ final class CollectionProviderTest extends TestCase
     public function testThrowsAnExceptionWhenOperationIsNotInShopApiSection(): void
     {
         $channelMock = $this->createMock(ChannelInterface::class);
+
         $operation = new GetCollection(class: Channel::class);
 
         $this->sectionProvider
@@ -110,6 +114,7 @@ final class CollectionProviderTest extends TestCase
             ->willReturn(new ShopApiSection());
 
         self::expectException(\InvalidArgumentException::class);
+
         $this->collectionProvider->provide($operation, [], []);
     }
 }

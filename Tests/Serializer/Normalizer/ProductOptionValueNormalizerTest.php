@@ -51,7 +51,9 @@ final class ProductOptionValueNormalizerTest extends TestCase
         $productOptionValueMock = $this->createMock(ProductOptionValueInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
+
         self::assertTrue($this->productOptionValueNormalizer->supportsNormalization($productOptionValueMock));
+
         self::assertFalse($this->productOptionValueNormalizer->supportsNormalization($orderMock));
     }
 
@@ -59,28 +61,44 @@ final class ProductOptionValueNormalizerTest extends TestCase
     {
         /** @var ProductOptionValueInterface|MockObject $productOptionValueMock */
         $productOptionValueMock = $this->createMock(ProductOptionValueInterface::class);
+
         self::assertTrue($this->productOptionValueNormalizer
-            ->supportsNormalization($productOptionValueMock, null, []))
-        ;
-        self::assertFalse($this->productOptionValueNormalizer
-            ->supportsNormalization($productOptionValueMock, null, ['sylius_product_option_value_normalizer_already_called' => true]))
-        ;
+            ->supportsNormalization($productOptionValueMock, null, []));
+
+        self::assertFalse(
+            $this->productOptionValueNormalizer->supportsNormalization(
+            $productOptionValueMock,
+            null,
+                ['sylius_product_option_value_normalizer_already_called' => true]
+            )
+        );
     }
 
     public function testAssignsLocaleToTranslatableEntity(): void
     {
         /** @var ProductOptionValueInterface|MockObject $productOptionValueMock */
         $productOptionValueMock = $this->createMock(ProductOptionValueInterface::class);
-        $this->normalizer->expects(self::once())->method('normalize')->with($productOptionValueMock, null, ['sylius_product_option_value_normalizer_already_called' => true])
-            ->willReturn([])
-        ;
-        $this->translatableEntityLocaleAssigner->expects(self::once())->method('assignLocale')->with($productOptionValueMock);
+
+        $this->normalizer->expects(self::once())
+            ->method('normalize')
+            ->with(
+                $productOptionValueMock,
+                null,
+                ['sylius_product_option_value_normalizer_already_called' => true]
+            )
+            ->willReturn([]);
+
+        $this->translatableEntityLocaleAssigner->expects(self::once())
+            ->method('assignLocale')
+            ->with($productOptionValueMock);
+
         self::assertSame([], $this->productOptionValueNormalizer->normalize($productOptionValueMock, null, []));
     }
 
     public function testThrowsAnExceptionIfTheGivenObjectIsNotAProductOptionValueInterface(): void
     {
         self::expectException(InvalidArgumentException::class);
+
         $this->productOptionValueNormalizer->normalize(new \stdClass());
     }
 
@@ -88,7 +106,13 @@ final class ProductOptionValueNormalizerTest extends TestCase
     {
         /** @var ProductOptionValueInterface|MockObject $productOptionValueMock */
         $productOptionValueMock = $this->createMock(ProductOptionValueInterface::class);
+
         self::expectException(InvalidArgumentException::class);
-        $this->productOptionValueNormalizer->normalize($productOptionValueMock, null, ['sylius_product_option_value_normalizer_already_called' => true]);
+
+        $this->productOptionValueNormalizer->normalize(
+            $productOptionValueMock,
+            null,
+            ['sylius_product_option_value_normalizer_already_called' => true]
+        );
     }
 }

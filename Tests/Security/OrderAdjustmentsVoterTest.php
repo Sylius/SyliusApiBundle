@@ -39,20 +39,39 @@ final class OrderAdjustmentsVoterTest extends TestCase
 
     public function testOnlySupportsSyliusOrderAdjustmentAttribute(): void
     {
-        self::assertTrue($this->orderAdjustmentsVoter->supportsAttribute(OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT));
+        self::assertTrue(
+            $this->orderAdjustmentsVoter->supportsAttribute(OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT)
+        );
+
         self::assertFalse($this->orderAdjustmentsVoter->supportsAttribute('OTHER_ATTRIBUTE'));
     }
 
     public function testVotesGrantedWhenCollectionIsEmpty(): void
     {
         $tokenMock = $this->createMock(TokenInterface::class);
-        self::assertSame(VoterInterface::ACCESS_GRANTED, $this->orderAdjustmentsVoter->vote($tokenMock, new ArrayCollection(), [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_GRANTED,
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                new ArrayCollection(),
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            )
+        );
     }
 
     public function testVotesGrantedWhenCollectionIsAnEmptyArray(): void
     {
         $tokenMock = $this->createMock(TokenInterface::class);
-        self::assertSame(VoterInterface::ACCESS_GRANTED, $this->orderAdjustmentsVoter->vote($tokenMock, [], [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_GRANTED,
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                [],
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            )
+        );
     }
 
     public function testVotesGrantedWhenOrderUserMatchesTokenUser(): void
@@ -68,12 +87,18 @@ final class OrderAdjustmentsVoterTest extends TestCase
             ->willReturn($orderMock);
 
         $tokenMock->method('getUser')->willReturn($user);
+
         $orderMock->method('getUser')->willReturn($user);
+
         $orderMock->method('isCreatedByGuest')->willReturn(false);
 
         self::assertSame(
             VoterInterface::ACCESS_GRANTED,
-            $this->orderAdjustmentsVoter->vote($tokenMock, $collection, [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]),
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                $collection,
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            ),
         );
     }
 
@@ -91,12 +116,18 @@ final class OrderAdjustmentsVoterTest extends TestCase
             ->willReturn($orderMock);
 
         $tokenMock->method('getUser')->willReturn($tokenUser);
+
         $orderMock->method('getUser')->willReturn($orderUser);
+
         $orderMock->method('isCreatedByGuest')->willReturn(false);
 
         self::assertSame(
             VoterInterface::ACCESS_DENIED,
-            $this->orderAdjustmentsVoter->vote($tokenMock, $collection, [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]),
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                $collection,
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            ),
         );
     }
 
@@ -112,12 +143,18 @@ final class OrderAdjustmentsVoterTest extends TestCase
             ->willReturn($orderMock);
 
         $tokenMock->method('getUser')->willReturn(null);
+
         $orderMock->method('getUser')->willReturn(null);
+
         $orderMock->method('isCreatedByGuest')->willReturn(true);
 
         self::assertSame(
             VoterInterface::ACCESS_GRANTED,
-            $this->orderAdjustmentsVoter->vote($tokenMock, $collection, [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]),
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                $collection,
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            ),
         );
     }
 
@@ -128,9 +165,22 @@ final class OrderAdjustmentsVoterTest extends TestCase
         /** @var AdjustmentInterface|MockObject $adjustmentMock */
         $adjustmentMock = $this->createMock(AdjustmentInterface::class);
         $collection = new ArrayCollection([$adjustmentMock]);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn(null);
-        $this->adjustmentOrderProvider->expects(self::once())->method('provide')->with($adjustmentMock)->willReturn(null);
-        self::assertSame(VoterInterface::ACCESS_GRANTED, $this->orderAdjustmentsVoter->vote($tokenMock, $collection, [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]));
+
+        $this->adjustmentOrderProvider->expects(self::once())
+            ->method('provide')
+            ->with($adjustmentMock)
+            ->willReturn(null);
+
+        self::assertSame(
+            VoterInterface::ACCESS_GRANTED,
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                $collection,
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            )
+        );
     }
 
     public function testVotesGrantedWhenAdjustmentHasOrderCreatedByGuestAndTokenHasUser(): void
@@ -143,11 +193,26 @@ final class OrderAdjustmentsVoterTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         $collection = new ArrayCollection([$adjustmentMock]);
         $user = new ShopUser();
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($user);
-        $this->adjustmentOrderProvider->expects(self::atLeastOnce())->method('provide')->with($adjustmentMock)->willReturn($orderMock);
+
+        $this->adjustmentOrderProvider->expects(self::atLeastOnce())
+            ->method('provide')
+            ->with($adjustmentMock)
+            ->willReturn($orderMock);
+
         $orderMock->expects(self::once())->method('getUser')->willReturn(null);
+
         $orderMock->expects(self::once())->method('isCreatedByGuest')->willReturn(true);
-        self::assertSame(VoterInterface::ACCESS_GRANTED, $this->orderAdjustmentsVoter->vote($tokenMock, $collection, [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_GRANTED,
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                $collection,
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            )
+        );
     }
 
     public function testVotesDeniedWhenOrderHasUserAndTokenHasNoUser(): void
@@ -160,10 +225,27 @@ final class OrderAdjustmentsVoterTest extends TestCase
         $orderMock = $this->createMock(OrderInterface::class);
         $collection = new ArrayCollection([$adjustmentMock]);
         $user = new ShopUser();
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn(null);
-        $this->adjustmentOrderProvider->expects(self::atLeastOnce())->method('provide')->with($adjustmentMock)->willReturn($orderMock);
-        $orderMock->expects(self::atLeastOnce())->method('getUser')->willReturn($user);
+
+        $this->adjustmentOrderProvider->expects(self::atLeastOnce())
+            ->method('provide')
+            ->with($adjustmentMock)
+            ->willReturn($orderMock);
+
+        $orderMock->expects(self::atLeastOnce())
+            ->method('getUser')
+            ->willReturn($user);
+
         $orderMock->expects(self::once())->method('isCreatedByGuest')->willReturn(true);
-        self::assertSame(VoterInterface::ACCESS_DENIED, $this->orderAdjustmentsVoter->vote($tokenMock, $collection, [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_DENIED,
+            $this->orderAdjustmentsVoter->vote(
+                $tokenMock,
+                $collection,
+                [OrderAdjustmentsVoter::SYLIUS_ORDER_ADJUSTMENT]
+            )
+        );
     }
 }

@@ -58,8 +58,9 @@ final class MessengerPersistProcessorTest extends TestCase
             ->with($envelope, $operation, [], [])
             ->willThrowException($exception);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Delayed message exception');
+        self::expectException(\RuntimeException::class);
+
+        self::expectExceptionMessage('Delayed message exception');
 
         $this->messengerPersistProcessor->process($envelope, $operation, [], []);
     }
@@ -81,8 +82,9 @@ final class MessengerPersistProcessorTest extends TestCase
             ->with($envelope, $operation, [], [])
             ->willThrowException($exception);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Delayed message exception');
+        self::expectException(\RuntimeException::class);
+
+        self::expectExceptionMessage('Delayed message exception');
 
         $this->messengerPersistProcessor->process($envelope, $operation, [], []);
     }

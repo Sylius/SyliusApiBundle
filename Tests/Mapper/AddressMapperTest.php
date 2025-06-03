@@ -34,6 +34,7 @@ final class AddressMapperTest extends TestCase
         $currentAddressMock = $this->createMock(AddressInterface::class);
         /** @var AddressInterface|MockObject $targetAddressMock */
         $targetAddressMock = $this->createMock(AddressInterface::class);
+
         $targetAddressMock->expects(self::once())->method('getFirstName')->willReturn('John');
         $targetAddressMock->expects(self::once())->method('getLastName')->willReturn('Doe');
         $targetAddressMock->expects(self::once())->method('getCompany')->willReturn('CocaCola');
@@ -54,6 +55,7 @@ final class AddressMapperTest extends TestCase
         $currentAddressMock->expects(self::once())->method('setPhoneNumber')->with('123456789');
         $currentAddressMock->expects(self::once())->method('setProvinceCode')->with('999');
         $currentAddressMock->expects(self::once())->method('setProvinceName')->with('east');
+
         self::assertSame($currentAddressMock, $this->addressMapper->mapExisting($currentAddressMock, $targetAddressMock));
     }
 
@@ -63,6 +65,7 @@ final class AddressMapperTest extends TestCase
         $currentAddressMock = $this->createMock(AddressInterface::class);
         /** @var AddressInterface|MockObject $targetAddressMock */
         $targetAddressMock = $this->createMock(AddressInterface::class);
+
         $targetAddressMock->expects(self::once())->method('getFirstName')->willReturn('John');
         $targetAddressMock->expects(self::once())->method('getLastName')->willReturn('Doe');
         $targetAddressMock->expects(self::once())->method('getCompany')->willReturn('CocaCola');
@@ -83,6 +86,7 @@ final class AddressMapperTest extends TestCase
         $currentAddressMock->expects(self::once())->method('setPhoneNumber')->with('123456789');
         $currentAddressMock->expects(self::never())->method('setProvinceCode')->with('999');
         $currentAddressMock->expects(self::never())->method('setProvinceName')->with('east');
+
         self::assertSame($currentAddressMock, $this->addressMapper->mapExisting($currentAddressMock, $targetAddressMock));
     }
 }

@@ -45,20 +45,27 @@ final class ImageNormalizerTest extends TestCase
         $this->requestStack = $this->createMock(RequestStack::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
 
-        $this->imageNormalizer = new ImageNormalizer($this->cacheManager, $this->requestStack, self::DEFAULT_FILTER);
+        $this->imageNormalizer = new ImageNormalizer(
+            $this->cacheManager,
+            $this->requestStack,
+            self::DEFAULT_FILTER
+        );
         $this->imageNormalizer->setNormalizer($this->normalizer);
     }
 
     public function testItImplementsNormalizerInterfaces(): void
     {
         self::assertInstanceOf(NormalizerInterface::class, $this->imageNormalizer);
+
         self::assertInstanceOf(NormalizerAwareInterface::class, $this->imageNormalizer);
     }
 
     public function testSupportsOnlyImages(): void
     {
         $imageMock = $this->createMock(ImageInterface::class);
+
         self::assertFalse($this->imageNormalizer->supportsNormalization(new \stdClass()));
+
         self::assertTrue($this->imageNormalizer->supportsNormalization($imageMock));
     }
 

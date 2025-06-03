@@ -38,6 +38,7 @@ final class ShopApiUriBasedSectionResolverTest extends TestCase
     public function testReturnsShopApiSectionIfPathStartsWithApiV2Shop(): void
     {
         $this->assertEquals(new ShopApiSection(), $this->resolver->getSection('/api/v2/shop/something'));
+
         $this->assertEquals(new ShopApiSection(), $this->resolver->getSection('/api/v2/shop'));
     }
 
@@ -52,6 +53,7 @@ final class ShopApiUriBasedSectionResolverTest extends TestCase
     public function testThrowsAnExceptionIfPathDoesNotStartWithApiV2Shop(string $path): void
     {
         self::expectException(SectionCannotBeResolvedException::class);
+
         $this->resolver->getSection($path);
     }
 

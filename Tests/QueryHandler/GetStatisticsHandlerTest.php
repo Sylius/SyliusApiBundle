@@ -13,9 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\QueryHandler;
 
-use DateInterval;
-use DatePeriod;
-use DateTime;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Exception\ChannelNotFoundException;
@@ -49,26 +46,50 @@ final class GetStatisticsHandlerTest extends TestCase
         /** @var GetStatistics|MockObject $queryMock */
         $queryMock = $this->createMock(GetStatistics::class);
         /** @var DatePeriod|MockObject $datePeriodMock */
-        $datePeriodMock = $this->createMock(DatePeriod::class);
+        $datePeriodMock = $this->createMock(\DatePeriod::class);
         /** @var Statistics|MockObject $statisticsMock */
         $statisticsMock = $this->createMock(Statistics::class);
+
         $queryMock->expects(self::once())->method('getChannelCode')->willReturn('CHANNEL_CODE');
+
         $queryMock->expects(self::once())->method('getDatePeriod')->willReturn($datePeriodMock);
+
         $queryMock->expects(self::once())->method('getIntervalType')->willReturn('day');
-        $this->channelRepository->expects(self::once())->method('findOneByCode')->with('CHANNEL_CODE')->willReturn($channelMock);
-        $this->statisticsProvider->expects(self::once())->method('provide')->with('day', $datePeriodMock, $channelMock)->willReturn($statisticsMock);
+
+        $this->channelRepository->expects(self::once())
+            ->method('findOneByCode')
+            ->with('CHANNEL_CODE')
+            ->willReturn($channelMock);
+
+        $this->statisticsProvider->expects(self::once())
+            ->method('provide')
+            ->with('day', $datePeriodMock, $channelMock)
+            ->willReturn($statisticsMock);
+
         self::assertSame($statisticsMock, $this->getStatisticsHandler->__invoke($queryMock));
     }
 
     public function testThrowsChannelNotFoundExceptionWhenChannelIsNull(): void
     {
-        $datePeriod = new DatePeriod(
-            new DateTime('2022-01-01'),
-            new DateInterval('P1D'),
-            new DateTime('2022-12-31'),
+        $datePeriod = new \DatePeriod(
+            new \DateTime('2022-01-01'),
+            new \DateInterval('P1D'),
+            new \DateTime('2022-12-31'),
         );
-        $this->channelRepository->expects(self::once())->method('findOneByCode')->with('NON_EXISTING_CHANNEL_CODE')->willReturn(null);
+
+        $this->channelRepository->expects(self::once())
+            ->method('findOneByCode')
+            ->with('NON_EXISTING_CHANNEL_CODE')
+            ->willReturn(null);
+
         self::expectException(ChannelNotFoundException::class);
-        $this->getStatisticsHandler->__invoke(new GetStatistics('day', $datePeriod, 'NON_EXISTING_CHANNEL_CODE'));
+
+        $this->getStatisticsHandler->__invoke(
+            new GetStatistics(
+                'day',
+                $datePeriod,
+                'NON_EXISTING_CHANNEL_CODE',
+            ),
+        );
     }
 }

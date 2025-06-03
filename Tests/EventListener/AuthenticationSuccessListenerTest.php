@@ -42,9 +42,13 @@ final class AuthenticationSuccessListenerTest extends TestCase
         $shopUserMock = $this->createMock(ShopUserInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
+
         $event = new AuthenticationSuccessEvent([], $shopUserMock, new Response());
+
         $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+
         $this->iriConverter->expects(self::once())->method('getIriFromResource')->with($customerMock);
+
         $this->authenticationSuccessListener->onAuthenticationSuccessResponse($event);
     }
 
@@ -54,8 +58,11 @@ final class AuthenticationSuccessListenerTest extends TestCase
         $adminUserMock = $this->createMock(AdminUserInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
+
         $event = new AuthenticationSuccessEvent([], $adminUserMock, new Response());
+
         $this->iriConverter->expects(self::never())->method('getIriFromResource')->with($customerMock);
+
         $this->authenticationSuccessListener->onAuthenticationSuccessResponse($event);
     }
 }

@@ -44,14 +44,18 @@ final class ProductDeletionEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
+
         $event = new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
             $productMock,
         );
+
         $this->productInPromotionRuleChecker->expects(self::never())->method('isInUse')->with($productMock);
+
         /** should not throw exception */
         $this->productDeletionEventSubscriber->protectFromRemovingProductInUseByPromotionRule($event);
     }
@@ -94,15 +98,23 @@ final class ProductDeletionEventSubscriberTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var HttpKernelInterface|MockObject $kernelMock */
         $kernelMock = $this->createMock(HttpKernelInterface::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_DELETE);
+
         $event = new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
             $productMock,
         );
-        $this->productInPromotionRuleChecker->expects(self::once())->method('isInUse')->with($productMock)->willReturn(true);
+
+        $this->productInPromotionRuleChecker->expects(self::once())
+            ->method('isInUse')
+            ->with($productMock)
+            ->willReturn(true);
+
         self::expectException(ResourceDeleteException::class);
+
         $this->productDeletionEventSubscriber->protectFromRemovingProductInUseByPromotionRule($event);
     }
 }

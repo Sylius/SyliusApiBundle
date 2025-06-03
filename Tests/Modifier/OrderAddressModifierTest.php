@@ -46,13 +46,17 @@ final class OrderAddressModifierTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
 
         $orderMock->expects(self::once())->method('getTokenValue')->willReturn('ORDERTOKEN');
+
         $orderMock->expects(self::once())->method('getShippingAddress')->willReturn(null);
+
         $orderMock->expects(self::once())->method('getBillingAddress')->willReturn(null);
+
         $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
 
         $channelMock->expects(self::once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
 
         $orderMock->expects(self::once())->method('setBillingAddress')->with($billingAddressMock);
+
         $orderMock->expects(self::once())->method('setShippingAddress')->with($this->isInstanceOf(AddressInterface::class));
 
         $this->stateMachine->expects(self::once())
@@ -74,14 +78,20 @@ final class OrderAddressModifierTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
 
         $orderMock->expects(self::once())->method('getTokenValue')->willReturn('ORDERTOKEN');
+
         $orderMock->expects(self::once())->method('getShippingAddress')->willReturn(null);
+
         $orderMock->expects(self::once())->method('getBillingAddress')->willReturn(null);
+
         $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
 
         $channelMock->expects(self::once())->method('isShippingAddressInCheckoutRequired')->willReturn(true);
 
         $orderMock->expects(self::once())->method('setShippingAddress')->with($shippingAddressMock);
-        $orderMock->expects(self::once())->method('setBillingAddress')->with($this->isInstanceOf(AddressInterface::class));
+
+        $orderMock->expects(self::once())
+            ->method('setBillingAddress')
+            ->with($this->isInstanceOf(AddressInterface::class));
 
         $this->stateMachine->expects(self::once())
             ->method('can')
@@ -105,8 +115,11 @@ final class OrderAddressModifierTest extends TestCase
         $channelMock = $this->createMock(ChannelInterface::class);
 
         $orderMock->expects(self::once())->method('getTokenValue')->willReturn('ORDERTOKEN');
+
         $orderMock->expects(self::once())->method('getBillingAddress')->willReturn($oldBillingAddressMock);
+
         $orderMock->expects(self::once())->method('getShippingAddress')->willReturn($oldShippingAddressMock);
+
         $orderMock->expects(self::once())->method('getChannel')->willReturn($channelMock);
 
         $channelMock->expects(self::once())->method('isShippingAddressInCheckoutRequired')->willReturn(false);
@@ -125,6 +138,7 @@ final class OrderAddressModifierTest extends TestCase
             });
 
         $orderMock->expects(self::once())->method('setBillingAddress')->with($oldBillingAddressMock);
+
         $orderMock->expects(self::once())->method('setShippingAddress')->with($oldShippingAddressMock);
 
         $this->stateMachine->expects(self::once())

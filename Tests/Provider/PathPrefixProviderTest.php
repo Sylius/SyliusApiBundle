@@ -25,7 +25,10 @@ final class PathPrefixProviderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->pathPrefixProvider = new PathPrefixProvider('/api/v2', [PathPrefixes::ADMIN_PREFIX, PathPrefixes::SHOP_PREFIX]);
+        $this->pathPrefixProvider = new PathPrefixProvider(
+            '/api/v2',
+            [PathPrefixes::ADMIN_PREFIX, PathPrefixes::SHOP_PREFIX],
+        );
     }
 
     public function testImplementsThePathPrefixProviderInterface(): void
@@ -57,6 +60,9 @@ final class PathPrefixProviderTest extends TestCase
     {
         $this->pathPrefixProvider = new PathPrefixProvider('/api/long/route/name', [PathPrefixes::ADMIN_PREFIX]);
 
-        self::assertSame('admin', $this->pathPrefixProvider->getPathPrefix('/api/long/route/name/admin/certain-route'));
+        self::assertSame(
+            'admin',
+            $this->pathPrefixProvider->getPathPrefix('/api/long/route/name/admin/certain-route'),
+        );
     }
 }

@@ -41,9 +41,13 @@ final class RemoveProcessorTest extends TestCase
     public function testThrowsAnExceptionIfObjectIsNotAZone(): void
     {
         $deleteOperation = new Delete();
+
         $this->zoneDeletionChecker->expects(self::never())->method('isDeletable');
+
         $this->processor->expects(self::never())->method('process')->with($this->any());
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->removeProcessor->process(new \stdClass(), $deleteOperation, [], []);
     }
 
@@ -52,12 +56,16 @@ final class RemoveProcessorTest extends TestCase
         $deleteOperation = new Delete();
         /** @var ZoneInterface|MockObject $zoneMock */
         $zoneMock = $this->createMock(ZoneInterface::class);
+
         $this->zoneDeletionChecker->expects(self::once())
             ->method('isDeletable')
             ->with($zoneMock)
             ->willReturn(false);
+
         $this->processor->expects(self::never())->method('process')->with($this->any());
-        $this->expectException(ResourceDeleteException::class);
+
+        self::expectException(ResourceDeleteException::class);
+
         $this->removeProcessor->process($zoneMock, $deleteOperation, [], []);
     }
 
@@ -66,11 +74,14 @@ final class RemoveProcessorTest extends TestCase
         $deleteOperation = new Delete();
         /** @var ZoneInterface|MockObject $zoneMock */
         $zoneMock = $this->createMock(ZoneInterface::class);
+
         $this->zoneDeletionChecker->expects(self::once())->method('isDeletable')->with($zoneMock)->willReturn(true);
+
         $this->processor->expects(self::once())
             ->method('process')
             ->with($zoneMock, $deleteOperation, [], [])
             ->willReturn($zoneMock);
+
         $this->removeProcessor->process($zoneMock, $deleteOperation);
     }
 }

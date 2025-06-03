@@ -36,7 +36,10 @@ final class GetCustomerStatisticsHandlerTest extends TestCase
         parent::setUp();
         $this->customerRepository = $this->createMock(CustomerRepositoryInterface::class);
         $this->customerStatisticsProvider = $this->createMock(CustomerStatisticsProviderInterface::class);
-        $this->getCustomerStatisticsHandler = new GetCustomerStatisticsHandler($this->customerRepository, $this->customerStatisticsProvider);
+        $this->getCustomerStatisticsHandler = new GetCustomerStatisticsHandler(
+            $this->customerRepository,
+            $this->customerStatisticsProvider,
+        );
     }
 
     public function testReturnsStatisticsForAGivenCustomer(): void
@@ -60,14 +63,18 @@ final class GetCustomerStatisticsHandlerTest extends TestCase
         $query = new GetCustomerStatistics(1);
 
         $result = $this->getCustomerStatisticsHandler->__invoke($query);
+
         self::assertSame($customerStatistics, $result);
     }
 
     public function testThrowsAnExceptionWhenCustomerWithAGivenIdDoesntExist(): void
     {
         $this->customerRepository->expects(self::once())->method('find')->with(1)->willReturn(null);
+
         $query = new GetCustomerStatistics(1);
+
         self::expectException(CustomerNotFoundException::class);
+
         $this->getCustomerStatisticsHandler->__invoke($query);
     }
 }

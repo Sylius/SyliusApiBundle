@@ -43,8 +43,13 @@ final class ChannelContextBuilderTest extends TestCase
         $requestMock = $this->createMock(Request::class);
         /** @var ChannelInterface|MockObject $channelMock */
         $channelMock = $this->createMock(ChannelInterface::class);
-        $this->decoratedContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, []);
+
+        $this->decoratedContextBuilder->expects(self::once())
+            ->method('createFromRequest')
+            ->with($requestMock, true, []);
+
         $this->channelContext->expects(self::once())->method('getChannel')->willReturn($channelMock);
+
         $this->channelContextBuilder->createFromRequest($requestMock, true, []);
     }
 }

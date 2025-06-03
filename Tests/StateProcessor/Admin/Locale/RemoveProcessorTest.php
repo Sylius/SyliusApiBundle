@@ -42,8 +42,11 @@ final class RemoveProcessorTest extends TestCase
     public function testThrowsAnExceptionIfObjectIsNotALocale(): void
     {
         $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
+
         $this->localeUsageCheckerMock->expects(self::never())->method('isUsed');
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->removeProcessor->process(new \stdClass(), new Delete());
     }
 
@@ -51,9 +54,13 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
+
         $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
+
         $this->localeUsageCheckerMock->expects(self::never())->method('isUsed');
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->removeProcessor->process($localeMock, new Post());
     }
 
@@ -61,10 +68,15 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
+
         $localeMock->expects(self::atLeastOnce())->method('getCode')->willReturn('pl_PL');
+
         $this->localeUsageCheckerMock->expects(self::once())->method('isUsed')->with('pl_PL')->willReturn(true);
+
         $this->removeProcessorMock->expects(self::never())->method('process')->with($this->any());
-        $this->expectException(LocaleIsUsedException::class);
+
+        self::expectException(LocaleIsUsedException::class);
+
         $this->removeProcessor->process($localeMock, new Delete());
     }
 
@@ -72,10 +84,15 @@ final class RemoveProcessorTest extends TestCase
     {
         /** @var LocaleInterface|MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
+
         $operation = new Delete();
+
         $localeMock->expects(self::once())->method('getCode')->willReturn('pl_PL');
+
         $this->localeUsageCheckerMock->expects(self::once())->method('isUsed')->with('pl_PL')->willReturn(false);
+
         $this->removeProcessorMock->expects(self::once())->method('process')->with($localeMock, $operation, [], []);
+
         $this->removeProcessor->process($localeMock, $operation);
     }
 }

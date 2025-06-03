@@ -15,7 +15,6 @@ namespace Tests\Sylius\Bundle\ApiBundle\EventSubscriber;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\EventSubscriber\CatalogPromotionEventSubscriber;
 use Sylius\Bundle\CoreBundle\CatalogPromotion\Announcer\CatalogPromotionAnnouncerInterface;
 use Sylius\Component\Core\Model\CatalogPromotionInterface;
@@ -44,8 +43,13 @@ final class CatalogPromotionEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
-        $this->catalogPromotionAnnouncerMock->expects(self::once())->method('dispatchCatalogPromotionCreatedEvent')->with($catalogPromotionMock);
+
+        $this->catalogPromotionAnnouncerMock->expects(self::once())
+            ->method('dispatchCatalogPromotionCreatedEvent')
+            ->with($catalogPromotionMock);
+
         $this->catalogPromotionEventSubscriber->postWrite(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -62,8 +66,13 @@ final class CatalogPromotionEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_PUT);
-        $this->catalogPromotionAnnouncerMock->expects(self::once())->method('dispatchCatalogPromotionUpdatedEvent')->with($catalogPromotionMock);
+
+        $this->catalogPromotionAnnouncerMock->expects(self::once())
+            ->method('dispatchCatalogPromotionUpdatedEvent')
+            ->with($catalogPromotionMock);
+
         $this->catalogPromotionEventSubscriber->postWrite(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -78,12 +87,14 @@ final class CatalogPromotionEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $this->catalogPromotionAnnouncerMock->expects(self::never())->method('dispatchCatalogPromotionCreatedEvent');
+
         $this->catalogPromotionEventSubscriber->postWrite(new ViewEvent(
             $kernelMock,
             $requestMock,
             HttpKernelInterface::MAIN_REQUEST,
-            new stdClass(),
+            new \stdClass(),
         ));
     }
 
@@ -95,8 +106,13 @@ final class CatalogPromotionEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_GET);
-        $this->catalogPromotionAnnouncerMock->expects(self::never())->method('dispatchCatalogPromotionCreatedEvent')->with($catalogPromotionMock);
+
+        $this->catalogPromotionAnnouncerMock->expects(self::never())
+            ->method('dispatchCatalogPromotionCreatedEvent')
+            ->with($catalogPromotionMock);
+
         $this->catalogPromotionEventSubscriber->postWrite(new ViewEvent(
             $kernelMock,
             $requestMock,

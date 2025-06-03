@@ -26,7 +26,8 @@ final class ProductVariantChannelPricingsChannelCodeKeyDenormalizerTest extends 
 
     protected function setUp(): void
     {
-        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer = new ProductVariantChannelPricingsChannelCodeKeyDenormalizer();
+        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer =
+            new ProductVariantChannelPricingsChannelCodeKeyDenormalizer();
     }
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
@@ -40,17 +41,26 @@ final class ProductVariantChannelPricingsChannelCodeKeyDenormalizerTest extends 
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        self::assertFalse($this->productVariantChannelPricingsChannelCodeKeyDenormalizer->supportsDenormalization('string', ProductVariantInterface::class));
+        self::assertFalse(
+            $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->supportsDenormalization(
+                'string',
+                ProductVariantInterface::class)
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotAProductVariant(): void
     {
-        self::assertFalse($this->productVariantChannelPricingsChannelCodeKeyDenormalizer->supportsDenormalization([], 'string'));
+        self::assertFalse(
+            $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->supportsDenormalization(
+                [],
+                'string')
+        );
     }
 
     public function testDoesNothingIfThereIsNoChannelPricingsKey(): void
     {
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
+
         $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->setDenormalizer($denormalizerMock);
 
         $originalData = ['someOtherKey' => []];
@@ -74,6 +84,7 @@ final class ProductVariantChannelPricingsChannelCodeKeyDenormalizerTest extends 
     public function testChangesKeysOfChannelPricingsToChannelCode(): void
     {
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
+
         $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->setDenormalizer($denormalizerMock);
 
         $originalData = [
@@ -110,8 +121,14 @@ final class ProductVariantChannelPricingsChannelCodeKeyDenormalizerTest extends 
     {
         /** @var DenormalizerInterface|MockObject $denormalizerMock */
         $denormalizerMock = $this->createMock(DenormalizerInterface::class);
+
         $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->setDenormalizer($denormalizerMock);
+
         self::expectException(ChannelPricingChannelCodeMismatchException::class);
-        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->denormalize(['channelPricings' => ['WEB' => ['channelCode' => 'MOBILE']]], ProductVariantInterface::class);
+
+        $this->productVariantChannelPricingsChannelCodeKeyDenormalizer->denormalize(
+            ['channelPricings' => ['WEB' => ['channelCode' => 'MOBILE']]],
+            ProductVariantInterface::class
+        );
     }
 }

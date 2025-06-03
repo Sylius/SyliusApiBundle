@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Tests\Sylius\Bundle\ApiBundle\PropertyInfo\Extractor;
 
 use PHPUnit\Framework\TestCase;
-use Serializable;
 use Sylius\Bundle\ApiBundle\Command\Cart\PickupCart;
 use Sylius\Bundle\ApiBundle\PropertyInfo\Extractor\EmptyPropertyListExtractor;
 use Symfony\Component\PropertyInfo\PropertyListExtractorInterface;
@@ -41,6 +40,6 @@ final class EmptyPropertyListExtractorTest extends TestCase
 
     public function testProvidesNullIfRequestedClassDoesNotExist(): void
     {
-        $this->assertNull($this->emptyPropertyListExtractor->getProperties(Serializable::class, []));
+        self::assertNull($this->emptyPropertyListExtractor->getProperties(\Serializable::class, []));
     }
 }

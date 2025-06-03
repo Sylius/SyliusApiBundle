@@ -39,10 +39,22 @@ final class CompositePaymentConfigurationProviderTest extends TestCase
         $paymentMock = $this->createMock(PaymentInterface::class);
         /** @var PaymentMethodInterface|MockObject $paymentMethodMock */
         $paymentMethodMock = $this->createMock(PaymentMethodInterface::class);
+
         $paymentMock->expects(self::once())->method('getMethod')->willReturn($paymentMethodMock);
-        $this->apiPaymentMethod->expects(self::once())->method('supports')->with($paymentMethodMock)->willReturn(true);
-        $this->apiPaymentMethod->expects(self::once())->method('provideConfiguration')->with($paymentMock)->willReturn(['payment_data' => 'PAYMENT_DATA']);
-        self::assertSame(['payment_data' => 'PAYMENT_DATA'], $this->compositePaymentConfigurationProvider->provide($paymentMock));
+
+        $this->apiPaymentMethod->expects(self::once())
+            ->method('supports')
+            ->with($paymentMethodMock)
+            ->willReturn(true);
+
+        $this->apiPaymentMethod->expects(self::once())
+            ->method('provideConfiguration')
+            ->with($paymentMock)->willReturn(['payment_data' => 'PAYMENT_DATA']);
+
+        self::assertSame(
+            ['payment_data' => 'PAYMENT_DATA'],
+            $this->compositePaymentConfigurationProvider->provide($paymentMock),
+        );
     }
 
     public function testReturnsEmptyArrayIfPaymentIsNotSupported(): void
@@ -51,9 +63,16 @@ final class CompositePaymentConfigurationProviderTest extends TestCase
         $paymentMock = $this->createMock(PaymentInterface::class);
         /** @var PaymentMethodInterface|MockObject $paymentMethodMock */
         $paymentMethodMock = $this->createMock(PaymentMethodInterface::class);
+
         $paymentMock->expects(self::once())->method('getMethod')->willReturn($paymentMethodMock);
-        $this->apiPaymentMethod->expects(self::once())->method('supports')->with($paymentMethodMock)->willReturn(false);
+
+        $this->apiPaymentMethod->expects(self::once())
+            ->method('supports')
+            ->with($paymentMethodMock)
+            ->willReturn(false);
+
         $this->apiPaymentMethod->expects(self::never())->method('provideConfiguration')->with($paymentMock);
+
         self::assertSame([], $this->compositePaymentConfigurationProvider->provide($paymentMock));
     }
 
@@ -67,12 +86,35 @@ final class CompositePaymentConfigurationProviderTest extends TestCase
         $apiPaymentMethodOneMock = $this->createMock(PaymentConfigurationProviderInterface::class);
         /** @var PaymentConfigurationProviderInterface|MockObject $apiPaymentMethodTwoMock */
         $apiPaymentMethodTwoMock = $this->createMock(PaymentConfigurationProviderInterface::class);
-        $this->compositePaymentConfigurationProvider = new CompositePaymentConfigurationProvider([$apiPaymentMethodOneMock, $apiPaymentMethodTwoMock]);
+
+        $this->compositePaymentConfigurationProvider = new CompositePaymentConfigurationProvider(
+            [$apiPaymentMethodOneMock,
+                $apiPaymentMethodTwoMock,
+            ],
+        );
+
         $paymentMock->expects(self::once())->method('getMethod')->willReturn($paymentMethodMock);
-        $apiPaymentMethodOneMock->expects(self::once())->method('supports')->with($paymentMethodMock)->willReturn(false);
-        $apiPaymentMethodTwoMock->expects(self::once())->method('supports')->with($paymentMethodMock)->willReturn(true);
+
+        $apiPaymentMethodOneMock->expects(self::once())
+            ->method('supports')
+            ->with($paymentMethodMock)
+            ->willReturn(false);
+
+        $apiPaymentMethodTwoMock->expects(self::once())
+            ->method('supports')
+            ->with($paymentMethodMock)
+            ->willReturn(true);
+
         $apiPaymentMethodOneMock->expects(self::never())->method('provideConfiguration')->with($paymentMock);
-        $apiPaymentMethodTwoMock->expects(self::once())->method('provideConfiguration')->with($paymentMock)->willReturn(['payment_data_two' => 'PAYMENT_DATA_TWO']);
-        self::assertSame(['payment_data_two' => 'PAYMENT_DATA_TWO'], $this->compositePaymentConfigurationProvider->provide($paymentMock));
+
+        $apiPaymentMethodTwoMock->expects(self::once())
+            ->method('provideConfiguration')
+            ->with($paymentMock)
+            ->willReturn(['payment_data_two' => 'PAYMENT_DATA_TWO']);
+
+        self::assertSame(
+            ['payment_data_two' => 'PAYMENT_DATA_TWO'],
+            $this->compositePaymentConfigurationProvider->provide($paymentMock),
+        );
     }
 }

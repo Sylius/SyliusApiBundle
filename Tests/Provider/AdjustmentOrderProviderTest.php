@@ -37,8 +37,11 @@ final class AdjustmentOrderProviderTest extends TestCase
         $adjustmentMock = $this->createMock(AdjustmentInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
+
         $adjustmentMock->expects(self::once())->method('getAdjustable')->willReturn($orderMock);
+
         $adjustmentMock->expects(self::once())->method('getOrder')->willReturn($orderMock);
+
         self::assertSame($orderMock, $this->adjustmentOrderProvider->provide($adjustmentMock));
     }
 
@@ -50,9 +53,13 @@ final class AdjustmentOrderProviderTest extends TestCase
         $orderItemMock = $this->createMock(OrderItemInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
+
         $adjustmentMock->expects(self::atLeastOnce())->method('getAdjustable')->willReturn($orderItemMock);
+
         $adjustmentMock->expects(self::once())->method('getOrderItem')->willReturn($orderItemMock);
+
         $orderItemMock->expects(self::once())->method('getOrder')->willReturn($orderMock);
+
         self::assertSame($orderMock, $this->adjustmentOrderProvider->provide($adjustmentMock));
     }
 
@@ -66,10 +73,15 @@ final class AdjustmentOrderProviderTest extends TestCase
         $orderItemMock = $this->createMock(OrderItemInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
+
         $adjustmentMock->expects(self::atLeastOnce())->method('getAdjustable')->willReturn($orderItemUnitMock);
+
         $adjustmentMock->expects(self::once())->method('getOrderItemUnit')->willReturn($orderItemUnitMock);
+
         $orderItemUnitMock->expects(self::once())->method('getOrderItem')->willReturn($orderItemMock);
+
         $orderItemMock->expects(self::once())->method('getOrder')->willReturn($orderMock);
+
         self::assertSame($orderMock, $this->adjustmentOrderProvider->provide($adjustmentMock));
     }
 
@@ -77,7 +89,9 @@ final class AdjustmentOrderProviderTest extends TestCase
     {
         /** @var AdjustmentInterface|MockObject $adjustmentMock */
         $adjustmentMock = $this->createMock(AdjustmentInterface::class);
+
         $adjustmentMock->expects(self::atLeastOnce())->method('getAdjustable')->willReturn(null);
-        $this->assertNull($this->adjustmentOrderProvider->provide($adjustmentMock));
+
+        self::assertNull($this->adjustmentOrderProvider->provide($adjustmentMock));
     }
 }

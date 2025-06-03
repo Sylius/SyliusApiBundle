@@ -47,12 +47,24 @@ final class ProductSlugEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
-        $productMock->expects(self::once())->method('getTranslations')->willReturn(new ArrayCollection([$productTranslationMock]));
+
+        $productMock->expects(self::once())
+            ->method('getTranslations')
+            ->willReturn(new ArrayCollection([$productTranslationMock]));
+
         $productTranslationMock->expects(self::once())->method('getSlug')->willReturn(null);
+
         $productTranslationMock->expects(self::atLeastOnce())->method('getName')->willReturn('Audi RS7');
-        $this->slugGenerator->expects(self::once())->method('generate')->with('Audi RS7')->willReturn('audi-rs7');
+
+        $this->slugGenerator->expects(self::once())
+            ->method('generate')
+            ->with('Audi RS7')
+            ->willReturn('audi-rs7');
+
         $productTranslationMock->expects(self::once())->method('setSlug')->with('audi-rs7');
+
         $this->productSlugEventSubscriber->generateSlug(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -71,12 +83,21 @@ final class ProductSlugEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
-        $productMock->expects(self::once())->method('getTranslations')->willReturn(new ArrayCollection([$productTranslationMock]));
+
+        $productMock->expects(self::once())
+            ->method('getTranslations')
+            ->willReturn(new ArrayCollection([$productTranslationMock]));
+
         $productTranslationMock->expects(self::atLeastOnce())->method('getSlug')->willReturn('audi-rs7');
+
         $productTranslationMock->expects(self::never())->method('getName');
+
         $this->slugGenerator->expects(self::never())->method('generate');
+
         $productTranslationMock->expects(self::never())->method('setSlug');
+
         $this->productSlugEventSubscriber->generateSlug(new ViewEvent(
             $kernelMock,
             $requestMock,
@@ -95,12 +116,21 @@ final class ProductSlugEventSubscriberTest extends TestCase
         $kernelMock = $this->createMock(HttpKernelInterface::class);
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
+
         $requestMock->expects(self::once())->method('getMethod')->willReturn(Request::METHOD_POST);
-        $productMock->expects(self::once())->method('getTranslations')->willReturn(new ArrayCollection([$productTranslationMock]));
+
+        $productMock->expects(self::once())
+            ->method('getTranslations')
+            ->willReturn(new ArrayCollection([$productTranslationMock]));
+
         $productTranslationMock->expects(self::once())->method('getSlug')->willReturn(null);
+
         $productTranslationMock->expects(self::once())->method('getName')->willReturn(null);
+
         $this->slugGenerator->expects(self::never())->method('generate');
+
         $productTranslationMock->expects(self::never())->method('setSlug');
+
         $this->productSlugEventSubscriber->generateSlug(new ViewEvent(
             $kernelMock,
             $requestMock,

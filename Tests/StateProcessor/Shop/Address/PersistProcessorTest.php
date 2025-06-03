@@ -42,16 +42,22 @@ final class PersistProcessorTest extends TestCase
     public function testThrowsAnExceptionIfObjectIsNotAnAddress(): void
     {
         $this->processor->expects(self::never())->method('process')->with($this->any());
+
         $this->userContext->expects(self::never())->method('getUser');
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->persistProcessor->process(new \stdClass(), new Post());
     }
 
     public function testThrowsAnExceptionIfOperationIsNotPost(): void
     {
         $this->processor->expects(self::never())->method('process')->with($this->any());
+
         $this->userContext->expects(self::never())->method('getUser');
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->persistProcessor->process(new \stdClass(), new Delete());
     }
 
@@ -63,13 +69,19 @@ final class PersistProcessorTest extends TestCase
         $userMock = $this->createMock(ShopUserInterface::class);
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
+
         $operation = new Post();
 
         $this->userContext->expects(self::once())->method('getUser')->willReturn($userMock);
+
         $userMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+
         $customerMock->expects(self::once())->method('getDefaultAddress')->willReturn(null);
+
         $addressMock->expects(self::once())->method('setCustomer')->with($customerMock);
+
         $customerMock->expects(self::once())->method('setDefaultAddress')->with($addressMock);
+
         $this->processor->expects(self::once())->method('process')->with($addressMock, $operation, [], []);
 
         $this->persistProcessor->process($addressMock, $operation);
@@ -85,13 +97,19 @@ final class PersistProcessorTest extends TestCase
         $customerMock = $this->createMock(CustomerInterface::class);
         /** @var AddressInterface|MockObject $defaultAddressMock */
         $defaultAddressMock = $this->createMock(AddressInterface::class);
+
         $operation = new Post();
 
         $this->userContext->expects(self::once())->method('getUser')->willReturn($userMock);
+
         $userMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+
         $customerMock->expects(self::once())->method('getDefaultAddress')->willReturn($defaultAddressMock);
+
         $addressMock->expects(self::once())->method('setCustomer')->with($customerMock);
+
         $customerMock->expects(self::never())->method('setDefaultAddress');
+
         $this->processor->expects(self::once())->method('process')->with($addressMock, $operation, [], []);
 
         $this->persistProcessor->process($addressMock, $operation);
@@ -104,7 +122,9 @@ final class PersistProcessorTest extends TestCase
         $operation = new Post();
 
         $this->userContext->expects(self::once())->method('getUser')->willReturn(null);
+
         $addressMock->expects(self::never())->method('setCustomer');
+        
         $this->processor->expects(self::once())->method('process')->with($addressMock, $operation, [], []);
 
         $this->persistProcessor->process($addressMock, $operation);

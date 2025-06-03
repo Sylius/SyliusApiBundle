@@ -35,15 +35,31 @@ final class ShopUserVoterTest extends TestCase
     {
         /** @var TokenInterface|MockObject $tokenMock */
         $tokenMock = $this->createMock(TokenInterface::class);
-        self::assertSame(VoterInterface::ACCESS_ABSTAIN, $this->shopUserVoter->vote($tokenMock, null, ['WRONG_ATTRIBUTE']));
+
+        self::assertSame(
+            VoterInterface::ACCESS_ABSTAIN,
+            $this->shopUserVoter->vote(
+                $tokenMock,
+                null,
+                ['WRONG_ATTRIBUTE'])
+        );
     }
 
     public function testDeniesAccessWhenUserIsNull(): void
     {
         /** @var TokenInterface|MockObject $tokenMock */
         $tokenMock = $this->createMock(TokenInterface::class);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn(null);
-        self::assertSame(VoterInterface::ACCESS_DENIED, $this->shopUserVoter->vote($tokenMock, null, [ShopUserVoter::SYLIUS_SHOP_USER]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_DENIED,
+            $this->shopUserVoter->vote(
+                $tokenMock,
+                null,
+                [ShopUserVoter::SYLIUS_SHOP_USER]
+            )
+        );
     }
 
     public function testDeniesAccessWhenUserIsNotShopUser(): void
@@ -52,8 +68,17 @@ final class ShopUserVoterTest extends TestCase
         $tokenMock = $this->createMock(TokenInterface::class);
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($adminUserMock);
-        self::assertSame(VoterInterface::ACCESS_DENIED, $this->shopUserVoter->vote($tokenMock, null, [ShopUserVoter::SYLIUS_SHOP_USER]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_DENIED,
+            $this->shopUserVoter->vote(
+                $tokenMock,
+                null,
+                [ShopUserVoter::SYLIUS_SHOP_USER]
+            )
+        );
     }
 
     public function testDeniesAccessWhenUserDoesNotHaveRoleUser(): void
@@ -62,9 +87,19 @@ final class ShopUserVoterTest extends TestCase
         $tokenMock = $this->createMock(TokenInterface::class);
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
+
         $shopUserMock->expects(self::once())->method('getRoles')->willReturn(['ROLE_TEST']);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
-        self::assertSame(VoterInterface::ACCESS_DENIED, $this->shopUserVoter->vote($tokenMock, null, [ShopUserVoter::SYLIUS_SHOP_USER]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_DENIED,
+            $this->shopUserVoter->vote(
+                $tokenMock,
+                null,
+                [ShopUserVoter::SYLIUS_SHOP_USER]
+            )
+        );
     }
 
     public function testGrantsAccessWhenUserHasRoleUser(): void
@@ -73,9 +108,20 @@ final class ShopUserVoterTest extends TestCase
         $tokenMock = $this->createMock(TokenInterface::class);
         /** @var ShopUserInterface|MockObject $shopUserMock */
         $shopUserMock = $this->createMock(ShopUserInterface::class);
+
         $shopUserMock->expects(self::once())->method('getRoles')->willReturn(['ROLE_USER']);
+
         $shopUserMock->method('getCustomer')->willReturn(null);
+
         $tokenMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
-        self::assertSame(VoterInterface::ACCESS_GRANTED, $this->shopUserVoter->vote($tokenMock, null, [ShopUserVoter::SYLIUS_SHOP_USER]));
+
+        self::assertSame(
+            VoterInterface::ACCESS_GRANTED,
+            $this->shopUserVoter->vote(
+                $tokenMock,
+                null,
+                [ShopUserVoter::SYLIUS_SHOP_USER]
+            )
+        );
     }
 }

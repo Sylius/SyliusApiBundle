@@ -47,7 +47,13 @@ final class CommandDenormalizerTest extends TestCase
 
     public function testSupportsDenormalizationForSpecifiedInputClass(): void
     {
-        self::assertTrue($this->commandDenormalizer->supportsDenormalization(null, '', context: ['input' => ['class' => 'Class']]));
+        self::assertTrue(
+            $this->commandDenormalizer->supportsDenormalization(
+                null,
+                '',
+                context: ['input' => ['class' => 'Class']]
+            )
+        );
     }
 
     public function testDoesNotSupportDenormalizationForNotSpecifiedInputClass(): void
@@ -57,8 +63,15 @@ final class CommandDenormalizerTest extends TestCase
 
     public function testThrowsExceptionIfNotAllRequiredParametersArePresentInTheContext(): void
     {
-        $exception = new MissingConstructorArgumentsException('', 400, null, ['firstName', 'lastName']);
+        $exception = new MissingConstructorArgumentsException(
+            '',
+            400,
+            null,
+            ['firstName', 'lastName']
+        );
+
         $context = ['input' => ['class' => RegisterShopUser::class]];
+
         $data = ['email' => 'test@example.com', 'password' => 'pa$$word'];
 
         $this->nameConverter
@@ -83,9 +96,17 @@ final class CommandDenormalizerTest extends TestCase
 
     public function testThrowsExceptionForMismatchedArgumentType(): void
     {
-        $previousException = NotNormalizableValueException::createForUnexpectedDataType('', 1, ['string'], 'firstName');
+        $previousException = NotNormalizableValueException::createForUnexpectedDataType(
+            '',
+            1,
+            ['string'],
+            'firstName'
+        );
+
         $exception = new UnexpectedValueException('', 400, $previousException);
+
         $context = ['input' => ['class' => RegisterShopUser::class]];
+
         $data = ['firstName' => 1];
 
         $this->nameConverter
@@ -101,6 +122,7 @@ final class CommandDenormalizerTest extends TestCase
             ->willThrowException($exception);
 
         self::expectException(InvalidRequestArgumentException::class);
+
         self::expectExceptionMessage('Request field "first_name" should be of type "string".');
 
         $this->commandDenormalizer->denormalize($data, '', null, $context);
@@ -109,7 +131,9 @@ final class CommandDenormalizerTest extends TestCase
     public function testThrowsTheSameExceptionIfPreviousExceptionIsNotNormalizableValueException(): void
     {
         $exception = new UnexpectedValueException('Unexpected value');
+
         $context = ['input' => ['class' => RegisterShopUser::class]];
+
         $data = ['firstName' => '1'];
 
         $this->baseNormalizer
@@ -119,6 +143,7 @@ final class CommandDenormalizerTest extends TestCase
             ->willThrowException($exception);
 
         self::expectException(UnexpectedValueException::class);
+
         self::expectExceptionMessage('Unexpected value');
 
         $this->commandDenormalizer->denormalize($data, '', null, $context);

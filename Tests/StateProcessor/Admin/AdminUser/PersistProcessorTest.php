@@ -44,10 +44,15 @@ final class PersistProcessorTest extends TestCase
     {
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
+
         $operation = new Delete();
+
         $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($adminUserMock);
+
         $this->processor->expects(self::never())->method('process')->with($adminUserMock, $operation, [], []);
+
         $this->expectException(\InvalidArgumentException::class);
+
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -55,9 +60,13 @@ final class PersistProcessorTest extends TestCase
     {
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
+
         $operation = new Post();
+
         $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($adminUserMock);
+
         $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -65,9 +74,13 @@ final class PersistProcessorTest extends TestCase
     {
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
+
         $operation = new Patch();
+
         $this->passwordUpdater->expects(self::never())->method('updatePassword')->with($adminUserMock);
+
         $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 
@@ -75,9 +88,13 @@ final class PersistProcessorTest extends TestCase
     {
         /** @var AdminUserInterface|MockObject $adminUserMock */
         $adminUserMock = $this->createMock(AdminUserInterface::class);
+
         $operation = new Put();
+
         $this->passwordUpdater->expects(self::once())->method('updatePassword')->with($adminUserMock);
+
         $this->processor->expects(self::once())->method('process')->with($adminUserMock, $operation, [], []);
+
         $this->persistProcessor->process($adminUserMock, $operation, [], []);
     }
 }

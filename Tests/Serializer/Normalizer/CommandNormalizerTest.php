@@ -99,9 +99,12 @@ final class CommandNormalizerTest extends TestCase
     {
         /** @var stdClass|MockObject $objectMock */
         $objectMock = $this->createMock(\stdClass::class);
-        $this->baseNormalizer->expects(self::once())->method('normalize')->with($objectMock, null, ['sylius_command_normalizer_already_called' => true])
-            ->willReturn(['message' => 'Message'])
-        ;
+
+        $this->baseNormalizer->expects(self::once())
+            ->method('normalize')
+            ->with($objectMock, null, ['sylius_command_normalizer_already_called' => true])
+            ->willReturn(['message' => 'Message']);
+
         self::assertSame(['code' => 400, 'message' => 'Message'], $this->commandNormalizer->normalize($objectMock));
     }
 }

@@ -47,7 +47,12 @@ final class ProductNormalizerTest extends TestCase
         $this->iriConverter = $this->createMock(IriConverterInterface::class);
         $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
-        $this->productNormalizer = new ProductNormalizer($this->defaultProductVariantResolver, $this->iriConverter, $this->sectionProvider, ['sylius:product:index']);
+        $this->productNormalizer = new ProductNormalizer(
+            $this->defaultProductVariantResolver,
+            $this->iriConverter,
+            $this->sectionProvider,
+            ['sylius:product:index']
+        );
         $this->productNormalizer->setNormalizer($this->normalizer);
     }
 
@@ -66,16 +71,24 @@ final class ProductNormalizerTest extends TestCase
                 new AdminApiSection(),
             );
 
-        self::assertFalse($this->productNormalizer->supportsNormalization($orderMock, null, ['groups' => ['sylius:product:index']]));
-        self::assertTrue($this->productNormalizer->supportsNormalization($productMock, null, ['groups' => ['sylius:product:index']]));
-        self::assertFalse($this->productNormalizer->supportsNormalization($productMock, null, ['groups' => ['sylius:product:show']]));
-        self::assertFalse($this->productNormalizer->supportsNormalization($productMock, null, ['groups' => ['sylius:product:index']]));
+        self::assertFalse($this->productNormalizer
+            ->supportsNormalization($orderMock, null, ['groups' => ['sylius:product:index']]));
+
+        self::assertTrue($this->productNormalizer
+            ->supportsNormalization($productMock, null, ['groups' => ['sylius:product:index']]));
+
+        self::assertFalse($this->productNormalizer
+            ->supportsNormalization($productMock, null, ['groups' => ['sylius:product:show']]));
+
+        self::assertFalse($this->productNormalizer
+            ->supportsNormalization($productMock, null, ['groups' => ['sylius:product:index']]));
     }
 
     public function testDoesNotSupportIfTheNormalizerHasBeenAlreadyCalled(): void
     {
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
+
         self::assertFalse($this->productNormalizer
             ->supportsNormalization($productMock, null, [
                 'sylius_product_normalizer_already_called' => true,
@@ -143,14 +156,31 @@ final class ProductNormalizerTest extends TestCase
         $variantMock = $this->createMock(ProductVariantInterface::class);
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
+
         $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->normalizer->expects(self::once())->method('normalize')->with($productMock, null, [
-            'sylius_product_normalizer_already_called' => true,
-            'groups' => ['sylius:product:index'],
-        ])->willReturn([]);
-        $this->iriConverter->expects(self::once())->method('getIriFromResource')->with($variantMock)->willReturn('/api/v2/shop/product-variants/CODE');
-        $productMock->expects(self::once())->method('getEnabledVariants')->willReturn(new ArrayCollection([$variantMock]));
-        $this->defaultProductVariantResolver->expects(self::once())->method('getVariant')->with($productMock)->willReturn(null);
+
+        $this->normalizer->expects(self::once())
+            ->method('normalize')
+            ->with($productMock, null, [
+                'sylius_product_normalizer_already_called' => true,
+                'groups' => ['sylius:product:index'],
+            ]
+            )->willReturn([]);
+
+        $this->iriConverter->expects(self::once())
+            ->method('getIriFromResource')
+            ->with($variantMock)
+            ->willReturn('/api/v2/shop/product-variants/CODE');
+
+        $productMock->expects(self::once())
+            ->method('getEnabledVariants')
+            ->willReturn(new ArrayCollection([$variantMock]));
+
+        $this->defaultProductVariantResolver->expects(self::once())
+            ->method('getVariant')
+            ->with($productMock)
+            ->willReturn(null);
+
         self::assertSame([
             'variants' => ['/api/v2/shop/product-variants/CODE'],
             'defaultVariant' => null,
@@ -161,11 +191,16 @@ final class ProductNormalizerTest extends TestCase
     {
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
-        $this->normalizer->expects(self::never())->method('normalize')->with($productMock, null, [
+
+        $this->normalizer->expects(self::never())
+            ->method('normalize')
+            ->with($productMock, null, [
             'sylius_product_normalizer_already_called' => true,
             'groups' => ['sylius:product:index'],
         ]);
+
         self::expectException(InvalidArgumentException::class);
+
         $this->productNormalizer->normalize($productMock, null, [
             'sylius_product_normalizer_already_called' => true,
             'groups' => ['sylius:product:index'],
@@ -178,11 +213,17 @@ final class ProductNormalizerTest extends TestCase
         $shopApiSectionMock = $this->createMock(ShopApiSection::class);
         /** @var ProductInterface|MockObject $productMock */
         $productMock = $this->createMock(ProductInterface::class);
+
         $this->sectionProvider->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->normalizer->expects(self::never())->method('normalize')->with($productMock, null, [
+
+        $this->normalizer->expects(self::never())
+            ->method('normalize')
+            ->with($productMock, null, [
             'groups' => ['sylius:product:show'],
         ]);
+
         self::expectException(InvalidArgumentException::class);
+
         $this->productNormalizer->normalize($productMock, null, [
             'groups' => ['sylius:product:show'],
         ]);

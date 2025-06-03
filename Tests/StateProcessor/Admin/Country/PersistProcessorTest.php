@@ -43,9 +43,13 @@ final class PersistProcessorTest extends TestCase
     {
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
+
         $this->countryProvincesDeletionChecker->expects(self::never())->method('isDeletable');
+
         $this->processor->expects(self::never())->method('process')->with($this->any());
-        $this->expectException(\InvalidArgumentException::class);
+
+        self::expectException(\InvalidArgumentException::class);
+
         $this->persistProcessor->process(new \stdClass(), $operationMock, [], []);
     }
 
@@ -53,17 +57,23 @@ final class PersistProcessorTest extends TestCase
     {
         /** @var CountryInterface|MockObject $countryMock */
         $countryMock = $this->createMock(CountryInterface::class);
+
         $operation = new Post();
+
         $uriVariables = [];
+
         $context = [];
+
         $this->countryProvincesDeletionChecker->expects(self::once())
             ->method('isDeletable')
             ->with($countryMock)
             ->willReturn(true);
+
         $this->processor->expects(self::once())
             ->method('process')
             ->with($countryMock, $operation, $uriVariables, $context)
             ->willReturn($countryMock);
+
         self::assertSame($countryMock, $this->persistProcessor->process($countryMock, $operation, $uriVariables, $context));
     }
 
@@ -73,14 +83,20 @@ final class PersistProcessorTest extends TestCase
         $countryMock = $this->createMock(CountryInterface::class);
         /** @var HttpOperation|MockObject $operationMock */
         $operationMock = $this->createMock(HttpOperation::class);
+
         $uriVariables = [];
+
         $context = [];
+
         $this->countryProvincesDeletionChecker->expects(self::once())
             ->method('isDeletable')
             ->with($countryMock)
             ->willReturn(false);
+
         $this->processor->expects(self::never())->method('process')->with($this->any());
-        $this->expectException(ResourceDeleteException::class);
+
+        self::expectException(ResourceDeleteException::class);
+
         $this->persistProcessor->process($countryMock, $operationMock, $uriVariables, $context);
     }
 }

@@ -88,9 +88,9 @@ final class IriConverterTest extends TestCase
         $this->decoratedIriConverter->expects(self::once())
             ->method('getIriFromResource')
             ->with($this->country, UrlGeneratorInterface::ABS_PATH, $operation, [
-            'request_uri' => 'api/v2/admin/countries',
-            'force_resource_class' => Country::class,
-        ])
+                'request_uri' => 'api/v2/admin/countries',
+                'force_resource_class' => Country::class,
+            ])
             ->willReturn('api/v2/admin/countries/CODE');
 
         self::assertSame('api/v2/admin/countries/CODE', $this->iriConverter
@@ -102,7 +102,6 @@ final class IriConverterTest extends TestCase
                     'request_uri' => 'api/v2/admin/countries',
                     'force_resource_class' => Country::class,
                 ],
-            ))
-        ;
+            ));
     }
 }

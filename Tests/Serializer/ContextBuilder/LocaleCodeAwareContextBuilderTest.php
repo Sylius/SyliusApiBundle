@@ -36,35 +36,46 @@ final class LocaleCodeAwareContextBuilderTest extends TestCase
         parent::setUp();
         $this->decoratedContextBuilder = $this->createMock(SerializerContextBuilderInterface::class);
         $this->localeContext = $this->createMock(LocaleContextInterface::class);
-        $this->localeCodeAwareContextBuilder = new LocaleCodeAwareContextBuilder($this->decoratedContextBuilder, LocaleCodeAware::class, 'localeCode', $this->localeContext);
+        $this->localeCodeAwareContextBuilder = new LocaleCodeAwareContextBuilder(
+            $this->decoratedContextBuilder,
+            LocaleCodeAware::class,
+            'localeCode',
+            $this->localeContext
+        );
     }
 
     public function testSetsLocaleCodeAsAConstructorArgument(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn(['input' => ['class' => SendContactRequest::class]])
-        ;
+
+        $this->decoratedContextBuilder->expects(self::once())
+            ->method('createFromRequest')
+            ->with($requestMock, true, [])
+            ->willReturn(['input' => ['class' => SendContactRequest::class]]);
+
         $this->localeContext->expects(self::once())->method('getLocaleCode')->willReturn('en_US');
+
         self::assertSame([
             'input' => ['class' => SendContactRequest::class],
             AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS => [
                 SendContactRequest::class => ['localeCode' => 'en_US'],
             ],
-        ], $this->localeCodeAwareContextBuilder
-            ->createFromRequest($requestMock, true, []))
-        ;
+        ], $this->localeCodeAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
     public function testDoesNothingIfThereIsNoInputClass(): void
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn([])
-        ;
+
+        $this->decoratedContextBuilder->expects(self::once())
+            ->method('createFromRequest')
+            ->with($requestMock, true, [])
+            ->willReturn([]);
+
         $this->localeContext->expects(self::never())->method('getLocaleCode');
+
         self::assertSame([], $this->localeCodeAwareContextBuilder->createFromRequest($requestMock, true, []));
     }
 
@@ -72,12 +83,17 @@ final class LocaleCodeAwareContextBuilderTest extends TestCase
     {
         /** @var Request|MockObject $requestMock */
         $requestMock = $this->createMock(Request::class);
-        $this->decoratedContextBuilder->expects(self::once())->method('createFromRequest')->with($requestMock, true, [])
-            ->willReturn(['input' => ['class' => \stdClass::class]])
-        ;
+
+        $this->decoratedContextBuilder->expects(self::once())
+            ->method('createFromRequest')
+            ->with($requestMock, true, [])
+            ->willReturn(['input' => ['class' => \stdClass::class]]);
+
         $this->localeContext->expects(self::never())->method('getLocaleCode');
-        self::assertSame(['input' => ['class' => \stdClass::class]], $this->localeCodeAwareContextBuilder
-            ->createFromRequest($requestMock, true, []))
-        ;
+
+        self::assertSame(
+            ['input' => ['class' => \stdClass::class]],
+            $this->localeCodeAwareContextBuilder->createFromRequest($requestMock, true, [])
+        );
     }
 }

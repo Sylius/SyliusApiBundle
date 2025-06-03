@@ -39,17 +39,28 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
         parent::setUp();
         $this->iriConverter = $this->createMock(IriConverterInterface::class);
         $this->configFactory = $this->createMock(FactoryInterface::class);
-        $this->channelPriceHistoryConfigDenormalizer = new ChannelPriceHistoryConfigDenormalizer($this->iriConverter, $this->configFactory);
+        $this->channelPriceHistoryConfigDenormalizer = new ChannelPriceHistoryConfigDenormalizer(
+            $this->iriConverter,
+            $this->configFactory
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenTheDenormalizerHasAlreadyBeenCalled(): void
     {
-        self::assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization([], 'string', context: [self::ALREADY_CALLED => true]));
+        self::assertFalse(
+            $this->channelPriceHistoryConfigDenormalizer->supportsDenormalization(
+                [],
+                'string',
+                context: [self::ALREADY_CALLED => true]
+            )
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenDataIsNotAnArray(): void
     {
-        self::assertFalse($this->channelPriceHistoryConfigDenormalizer->supportsDenormalization('string', 'string'));
+        self::assertFalse(
+            $this->channelPriceHistoryConfigDenormalizer->supportsDenormalization('string', 'string')
+        );
     }
 
     public function testDoesNotSupportDenormalizationWhenTypeIsNotAChannelPriceHistoryConfig(): void
@@ -137,19 +148,29 @@ final class ChannelPriceHistoryConfigDenormalizerTest extends TestCase
         $configMock = $this->createMock(ChannelPriceHistoryConfigInterface::class);
         /** @var ChannelPriceHistoryConfigInterface|MockObject $dummyConfigMock */
         $dummyConfigMock = $this->createMock(ChannelPriceHistoryConfigInterface::class);
+
         $this->channelPriceHistoryConfigDenormalizer->setDenormalizer($denormalizerMock);
+
         $data = [];
+
         $this->configFactory->method('createNew')->willReturn($dummyConfigMock);
-        $denormalizerMock->expects(self::once())->method('denormalize')->with($data, 'string', null, [self::ALREADY_CALLED => true])
-            ->willReturn($configMock)
-        ;
+
+        $denormalizerMock->expects(self::once())
+            ->method('denormalize')
+            ->with($data, 'string', null, [self::ALREADY_CALLED => true])
+            ->willReturn($configMock);
+
         $configMock->method('getTaxonsExcludedFromShowingLowestPrice')->willReturn(new ArrayCollection([
             $firstTaxonMock,
             $secondTaxonMock,
         ]));
+
         $configMock->expects(self::once())->method('clearTaxonsExcludedFromShowingLowestPrice');
+
         $this->iriConverter->expects(self::never())->method('getResourceFromIri')->with($this->any());
+
         $configMock->expects(self::never())->method('addTaxonExcludedFromShowingLowestPrice');
+
         self::assertSame($configMock, $this->channelPriceHistoryConfigDenormalizer->denormalize($data, 'string'));
     }
 
