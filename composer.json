@@ -65,14 +65,13 @@
         },
         "exclude-from-classmap": [
             "spec/",
-            "Tests/"
+            "tests/"
         ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Sylius\\Bundle\\ApiBundle\\Application\\": "Tests/Application/src/",
-            "Tests\\Sylius\\Bundle\\ApiBundle\\": "Tests/",
-            "spec\\Sylius\\Bundle\\ApiBundle\\": "spec/"
+            "Sylius\\Bundle\\ApiBundle\\Application\\": "tests/Application/src/",
+            "Tests\\Sylius\\Bundle\\ApiBundle\\": "tests/"
         }
     },
     "repositories": [
