@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Payment\AddPaymentRequest;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\ChosenPaymentRequestActionEligibility;
 use Sylius\Bundle\ApiBundle\Validator\Constraints\ChosenPaymentRequestActionEligibilityValidator;
+use Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface;
 use Sylius\Bundle\PaymentBundle\CommandProvider\ServiceProviderAwareCommandProviderInterface;
 use Sylius\Bundle\PaymentBundle\Provider\GatewayFactoryNameProviderInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
@@ -51,18 +52,18 @@ final class ChosenPaymentRequestActionEligibilityValidatorTest extends TestCase
 
     public function test_it_implements(): void
     {
-        $this->assertInstanceOf(ConstraintValidatorInterface::class, $this->chosenPaymentRequestActionEligibilityValidator);
+        self::assertInstanceOf(ConstraintValidatorInterface::class, $this->chosenPaymentRequestActionEligibilityValidator);
     }
 
     public function test_it_throws_an_exception_if_value_is_not_an_add_payment_request(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->chosenPaymentRequestActionEligibilityValidator->validate('', new ChosenPaymentRequestActionEligibility());
     }
 
     public function test_it_throws_an_exception_if_constraint_is_not_an_instance_of_chosen_payment_request_action_eligibility(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->chosenPaymentRequestActionEligibilityValidator->validate(
             new AddPaymentRequest('ORDER_TOKEN', 123, 'PAYMENT_METHOD_CODE'),
             new class() extends Constraint {
@@ -143,8 +144,8 @@ final class ChosenPaymentRequestActionEligibilityValidatorTest extends TestCase
         $paymentMethodMock = $this->createMock(PaymentMethodInterface::class);
         /** @var GatewayConfigInterface|MockObject $gatewayConfigMock */
         $gatewayConfigMock = $this->createMock(GatewayConfigInterface::class);
-        /** @var \Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface|MockObject $commandProviderMock */
-        $commandProviderMock = $this->createMock(\Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface::class);
+        /** @var PaymentRequestCommandProviderInterface|MockObject $commandProviderMock */
+        $commandProviderMock = $this->createMock(PaymentRequestCommandProviderInterface::class);
         $command = new AddPaymentRequest(
             orderTokenValue: 'ORDER_TOKEN',
             paymentId: 123,
@@ -172,8 +173,8 @@ final class ChosenPaymentRequestActionEligibilityValidatorTest extends TestCase
         $gatewayConfigMock = $this->createMock(GatewayConfigInterface::class);
         /** @var ServiceProviderAwareCommandProviderInterface|MockObject $actionsCommandProviderMock */
         $actionsCommandProviderMock = $this->createMock(ServiceProviderAwareCommandProviderInterface::class);
-        /** @var \Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface|MockObject $commandProviderMock */
-        $commandProviderMock = $this->createMock(\Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface::class);
+        /** @var PaymentRequestCommandProviderInterface|MockObject $commandProviderMock */
+        $commandProviderMock = $this->createMock(PaymentRequestCommandProviderInterface::class);
         $command = new AddPaymentRequest(
             orderTokenValue: 'ORDER_TOKEN',
             paymentId: 123,

@@ -18,6 +18,8 @@ use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\UriVariablesConverterInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -54,11 +56,8 @@ final class IriToIdentifierConverterTest extends TestCase
         );
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider invalidIdentifierValues
-     */
+    #[DataProvider('invalidIdentifierValues')]
+    #[Test]
     public function it_treats_non_string_values_as_not_identifiers(mixed $invalidValue): void
     {
         $this->router->match(Argument::any())->shouldNotBeCalled();
@@ -66,7 +65,7 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertFalse($this->converter->isIdentifier($invalidValue));
     }
 
-    /** @test */
+    #[Test]
     public function it_treats_not_matched_strings_as_not_identifiers(): void
     {
         $this->router->match('test')->willThrow(new SymfonyRouteNotFoundException());
@@ -74,7 +73,7 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertFalse($this->converter->isIdentifier('test'));
     }
 
-    /** @test */
+    #[Test]
     public function it_treats_strings_matched_on_routes_with_no_resource_class_parameter_as_not_identifiers(): void
     {
         $this->router->match('test')->willReturn([]);
@@ -82,7 +81,7 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertFalse($this->converter->isIdentifier('test'));
     }
 
-    /** @test */
+    #[Test]
     public function it_treats_strings_matched_on_routes_with_resource_class_parameter_as_identifiers(): void
     {
         $this->router->match('test')->willReturn([
@@ -92,11 +91,8 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertTrue($this->converter->isIdentifier('test'));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider unicodeUrlValues
-     */
+    #[DataProvider('unicodeUrlValues')]
+    #[Test]
     public function it_sanitizes_url_before_matching_for_various_characters(string $rawUrl): void
     {
         $sanitized = filter_var($rawUrl, \FILTER_SANITIZE_URL);
@@ -107,11 +103,8 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertTrue($this->converter->isIdentifier($rawUrl));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider invalidUrlValues
-     */
+    #[DataProvider('invalidUrlValues')]
+    #[Test]
     public function it_treats_sanitized_invalid_strings_as_not_identifiers(string $rawUrl): void
     {
         $sanitized = filter_var($rawUrl, \FILTER_SANITIZE_URL);
@@ -123,7 +116,7 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertFalse($this->converter->isIdentifier($rawUrl));
     }
 
-    /** @test */
+    #[Test]
     public function it_accepts_url_sanitized_to_a_valid_route(): void
     {
         $rawUrl = "api/v2/produc\nts/2";
@@ -136,7 +129,7 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertTrue($this->converter->isIdentifier($rawUrl));
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_url_sanitized_but_not_matched(): void
     {
         $rawUrl = "api/v2/produc\nts/3";
@@ -149,22 +142,22 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertFalse($this->converter->isIdentifier($rawUrl));
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_invalid_argument_exception_if_no_route_matches(): void
     {
-        $this->expectException(ApiRouteNotFoundException::class);
-        $this->expectExceptionMessage('No route matches "/users/3".');
+        self::expectException(ApiRouteNotFoundException::class);
+        self::expectExceptionMessage('No route matches "/users/3".');
 
         $this->router->match('/users/3')->willThrow(new SymfonyRouteNotFoundException())->shouldBeCalledTimes(1);
 
         $this->converter->getIdentifier('/users/3');
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_invalid_argument_exception_if_parameter_api_resource_class_does_not_exist(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('No resource associated to "/users/3".');
+        self::expectException(InvalidArgumentException::class);
+        self::expectExceptionMessage('No resource associated to "/users/3".');
 
         $this->router->match('/users/3')->willReturn([
             '_api_operation_name' => 'get',
@@ -173,11 +166,11 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->converter->getIdentifier('/users/3');
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_invalid_argument_exception_if_parameter_api_operation_name_does_not_exist(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('No resource associated to "/users/3".');
+        self::expectException(InvalidArgumentException::class);
+        self::expectExceptionMessage('No resource associated to "/users/3".');
 
         $this->router->match('/users/3')->willReturn([
             '_api_resource_class' => AddProductReview::class,
@@ -186,11 +179,11 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->converter->getIdentifier('/users/3');
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_invalid_argument_exception_if_converter_returns_more_than_one_identifier(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('IriToIdentifierConverter does not support subresources');
+        self::expectException(InvalidArgumentException::class);
+        self::expectExceptionMessage('IriToIdentifierConverter does not support subresources');
 
         $operation = $this->prophesize(HttpOperation::class);
         $operation->getClass()->willReturn(AddProductReview::class);
@@ -215,7 +208,7 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->converter->getIdentifier('/users/3/nexts/5', $operation->reveal());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_identifier(): void
     {
         $operation = $this->prophesize(HttpOperation::class);
@@ -239,7 +232,7 @@ final class IriToIdentifierConverterTest extends TestCase
         $this->assertSame('3', $this->converter->getIdentifier('/users/3', $operation->reveal()));
     }
 
-    public function invalidIdentifierValues(): iterable
+    public static function invalidIdentifierValues(): iterable
     {
         yield [0];
         yield [0.1];
@@ -247,7 +240,7 @@ final class IriToIdentifierConverterTest extends TestCase
         yield [new \stdClass()];
     }
 
-    private function unicodeUrlValues(): array
+    private static function unicodeUrlValues(): array
     {
         return [
             ['/resource/zażółć'],
@@ -262,7 +255,7 @@ final class IriToIdentifierConverterTest extends TestCase
         ];
     }
 
-    private function invalidUrlValues(): array
+    private static function invalidUrlValues(): array
     {
         return [
             ['/resource/line\nbreak'],
