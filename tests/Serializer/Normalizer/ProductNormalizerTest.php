@@ -50,7 +50,7 @@ final class ProductNormalizerTest extends TestCase
             $this->defaultProductVariantResolver,
             $this->iriConverter,
             $this->sectionProvider,
-            ['sylius:product:index']
+            ['sylius:product:index'],
         );
         $this->productNormalizer->setNormalizer($this->normalizer);
     }
@@ -163,7 +163,7 @@ final class ProductNormalizerTest extends TestCase
 
         self::assertSame(
             ['defaultVariant' => null],
-            $this->productNormalizer->normalize($productMock, null, ['groups' => ['sylius:product:index']])
+            $this->productNormalizer->normalize($productMock, null, ['groups' => ['sylius:product:index']]),
         );
     }
 
