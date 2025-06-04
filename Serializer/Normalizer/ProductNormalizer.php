@@ -38,6 +38,7 @@ final class ProductNormalizer implements NormalizerInterface, NormalizerAwareInt
         private readonly SectionProviderInterface $sectionProvider,
         private readonly array $serializationGroups,
         private readonly ?AbstractObjectNormalizer $objectNormalizer = null,
+        private readonly array $defaultVariantSerializationGroups = [],
     ) {
         if (null === $this->objectNormalizer) {
             trigger_deprecation(
@@ -96,11 +97,12 @@ final class ProductNormalizer implements NormalizerInterface, NormalizerAwareInt
             return;
         }
 
-        $defaultVariantData = $this->objectNormalizer->normalize($defaultVariant, $format, $context);
-        if ([] === $defaultVariantData) {
+        $context['groups'] = array_merge($context['groups'] ?? [], $this->defaultVariantSerializationGroups);
+
+        if ([] === $this->objectNormalizer->normalize($defaultVariant, $format, $context)) {
             return;
         }
 
-        $data['defaultVariantData'] = $defaultVariantData;
+        $data['defaultVariantData'] = $this->normalizer->normalize($defaultVariant, $format, $context);
     }
 }
