@@ -96,8 +96,11 @@ final class ProductNormalizer implements NormalizerInterface, NormalizerAwareInt
             return;
         }
 
-        if ([] !== $this->objectNormalizer->normalize($defaultVariant, $format, $context)) {
-            $data['defaultVariantData'] = $this->normalizer->normalize($defaultVariant, $format, $context);
+        $defaultVariantData = $this->objectNormalizer->normalize($defaultVariant, $format, $context);
+        if ([] === $defaultVariantData) {
+            return;
         }
+
+        $data['defaultVariantData'] = $defaultVariantData;
     }
 }
