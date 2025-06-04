@@ -15,34 +15,23 @@ namespace Sylius\Bundle\ApiBundle\Doctrine\ORM\Filter;
 
 use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Sylius\Component\Product\Model\ProductOptionValueInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
-final class ProductVariantCatalogPromotionFilter extends AbstractFilter
+final class ProductBasedProductOptionValueFilter extends AbstractFilter
 {
     public function __construct(
-        private IriConverterInterface $iriConverter,
+        private string $productClass,
         ManagerRegistry $managerRegistry,
-        ?RequestStack $requestStack = null,
         ?LoggerInterface $logger = null,
         ?array $properties = null,
         ?NameConverterInterface $nameConverter = null,
     ) {
-        if (null !== $requestStack) {
-            trigger_deprecation(
-                'sylius/api-bundle',
-                '2.1',
-                'Passing a "%s" as the third constructor argument is deprecated and will be prohibited in 3.0.',
-                RequestStack::class,
-            );
-        }
-
         parent::__construct($managerRegistry, $logger, $properties, $nameConverter);
     }
 
@@ -55,40 +44,41 @@ final class ProductVariantCatalogPromotionFilter extends AbstractFilter
         ?Operation $operation = null,
         array $context = [],
     ): void {
-        if ('catalogPromotion' !== $property) {
+        if (!is_a($resourceClass, ProductOptionValueInterface::class, true)) {
+            return;
+        }
+        if ('productCode' !== $property || $value === null || $value === '') {
             return;
         }
 
-        $catalogPromotion = $this->iriConverter->getResourceFromIri($value);
-
-        $parameterName = $queryNameGenerator->generateParameterName($property);
-        $channelPricingJoinAlias = $queryNameGenerator->generateJoinAlias('channelPricing');
-        $appliedPromotionJoinAlias = $queryNameGenerator->generateJoinAlias('appliedPromotion');
         $rootAlias = $queryBuilder->getRootAliases()[0];
 
+        $productJoinAlias = $queryNameGenerator->generateJoinAlias('product');
+        $productOptionJoinAlias = $queryNameGenerator->generateJoinAlias('option');
+
+        $productCodeParameter = $queryNameGenerator->generateParameterName('productCode');
+
         $queryBuilder
-            ->leftJoin(sprintf('%s.channelPricings', $rootAlias), $channelPricingJoinAlias)
+            ->innerJoin($rootAlias . '.option', $productOptionJoinAlias)
             ->innerJoin(
-                sprintf('%s.appliedPromotions', $channelPricingJoinAlias),
-                $appliedPromotionJoinAlias,
+                $this->productClass,
+                $productJoinAlias,
                 Join::WITH,
-                sprintf('%s = :%s', $appliedPromotionJoinAlias, $parameterName),
+                sprintf('%s.code = :%s', $productJoinAlias, $productCodeParameter),
             )
-            ->setParameter($parameterName, $catalogPromotion)
+            ->andWhere(sprintf('%s MEMBER OF %s.options', $productOptionJoinAlias, $productJoinAlias))
+            ->setParameter($productCodeParameter, $value)
         ;
     }
 
     public function getDescription(string $resourceClass): array
     {
         return [
-            'catalogPromotion' => [
+            'productCode' => [
+                'property' => 'productCode',
                 'type' => 'string',
                 'required' => false,
-                'property' => null,
-                'description' => 'Get a collection of product variants with applied catalog promotion',
-                'schema' => [
-                    'type' => 'string',
-                ],
+                'description' => 'Filter product option values by product code.',
             ],
         ];
     }
