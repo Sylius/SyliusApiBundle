@@ -23,13 +23,13 @@ use Psr\Log\LoggerInterface;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
 use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
-use Sylius\Component\Product\Model\ProductAssociation;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 final class ProductByAssociationFilter extends AbstractFilter
 {
     public function __construct(
         private readonly SectionProviderInterface $sectionProvider,
+        private readonly string $productAssociationClass,
         ManagerRegistry $managerRegistry,
         ?LoggerInterface $logger = null,
         ?array $properties = null,
@@ -74,7 +74,7 @@ final class ProductByAssociationFilter extends AbstractFilter
 
         $queryBuilder
             ->innerJoin(
-                ProductAssociation::class,
+                $this->productAssociationClass,
                 $associationAlias,
                 Join::WITH,
                 sprintf('%s MEMBER OF %s.associatedProducts', $rootAlias, $associationAlias),
