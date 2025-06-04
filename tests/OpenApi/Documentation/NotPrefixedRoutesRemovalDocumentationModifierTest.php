@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\ApiPlatform\OpenApi\Documentation;
+namespace Tests\Sylius\Bundle\ApiBundle\ApiPlatform\OpenApi\Documentation;
 
 use ApiPlatform\OpenApi\Model\Info;
 use ApiPlatform\OpenApi\Model\PathItem;

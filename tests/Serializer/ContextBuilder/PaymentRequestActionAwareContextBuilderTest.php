@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\Serializer\ContextBuilder;
+namespace Tests\Sylius\Bundle\ApiBundle\Serializer\ContextBuilder;
 
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use PHPUnit\Framework\MockObject\MockObject;

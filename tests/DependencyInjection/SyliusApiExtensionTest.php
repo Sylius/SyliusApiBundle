@@ -11,17 +11,17 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\DependencyInjection;
+namespace Tests\Sylius\Bundle\ApiBundle\DependencyInjection;
 
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Sylius\Bundle\ApiBundle\Attribute\AsDocumentationModifier;
 use Sylius\Bundle\ApiBundle\Attribute\AsPaymentConfigurationProvider;
 use Sylius\Bundle\ApiBundle\DependencyInjection\SyliusApiExtension;
-use Sylius\Bundle\ApiBundle\Tests\Stub\DocumentationModifierStub;
-use Sylius\Bundle\ApiBundle\Tests\Stub\PaymentConfigurationProviderStub;
 use Sylius\Component\Core\Model\OrderInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Tests\Sylius\Bundle\ApiBundle\Stub\DocumentationModifierStub;
+use Tests\Sylius\Bundle\ApiBundle\Stub\PaymentConfigurationProviderStub;
 
 final class SyliusApiExtensionTest extends AbstractExtensionTestCase
 {

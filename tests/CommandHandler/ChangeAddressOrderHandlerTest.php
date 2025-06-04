@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler;
+namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler;
 
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\Persistence\ObjectManager;
@@ -56,11 +56,11 @@ final class ChangeAddressOrderHandlerTest extends KernelTestCase
 
         $loader->load(
             [
-                'Tests/config/fixtures/address.yaml',
-                'Tests/config/fixtures/channel.yaml',
-                'Tests/config/fixtures/currency.yaml',
-                'Tests/config/fixtures/locale.yaml',
-                'Tests/config/fixtures/order.yaml',
+                'tests/config/fixtures/address.yaml',
+                'tests/config/fixtures/channel.yaml',
+                'tests/config/fixtures/currency.yaml',
+                'tests/config/fixtures/locale.yaml',
+                'tests/config/fixtures/order.yaml',
             ],
             [],
             [],

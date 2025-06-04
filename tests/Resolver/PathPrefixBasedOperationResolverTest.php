@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\Resolver;
+namespace Tests\Sylius\Bundle\ApiBundle\Resolver;
 
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use PHPUnit\Framework\Attributes\Test;

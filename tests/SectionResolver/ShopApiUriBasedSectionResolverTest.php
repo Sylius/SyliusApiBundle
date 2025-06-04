@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\SectionResolver;
+namespace Tests\Sylius\Bundle\ApiBundle\SectionResolver;
 
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiOrdersSubSection;

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\ApiPlatform\Routing;
+namespace Tests\Sylius\Bundle\ApiBundle\ApiPlatform\Routing;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

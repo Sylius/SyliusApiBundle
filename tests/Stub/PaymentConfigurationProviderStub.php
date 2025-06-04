@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\Stub;
+namespace Tests\Sylius\Bundle\ApiBundle\Stub;
 
 use Sylius\Bundle\ApiBundle\Attribute\AsPaymentConfigurationProvider;
 use Sylius\Bundle\ApiBundle\Payment\PaymentConfigurationProviderInterface;
