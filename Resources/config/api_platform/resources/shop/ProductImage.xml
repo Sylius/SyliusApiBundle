@@ -23,9 +23,6 @@
                 class="ApiPlatform\Metadata\GetCollection"
                 uriTemplate="/shop/products/{code}/images"
             >
-                <parameters>
-                    <parameter key="imageFilter" description="Image filter to apply." />
-                </parameters>
                 <uriVariables>
                     <uriVariable parameterName="code" fromClass="%sylius.model.product.class%" fromProperty="images"/>
                 </uriVariables>

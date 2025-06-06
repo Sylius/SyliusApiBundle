@@ -22,6 +22,11 @@
 
     <parameters>
         <parameter key="sylius.model.address.interface">Sylius\Component\Addressing\Model\AddressInterface</parameter>
+        <parameter key="sylius_api.normalization.image_filter.supported_interfaces" type="collection">
+            <parameter>Sylius\Component\Core\Model\ImageInterface</parameter>
+            <parameter>Sylius\Component\Core\Model\ImageAwareInterface</parameter>
+            <parameter>Sylius\Component\Core\Model\ImagesAwareInterface</parameter>
+        </parameter>
     </parameters>
 
     <services>
@@ -108,13 +113,24 @@
             by ExtractorResourceMetadataCollectionFactory (decoration priority 800).
             This decorator should run immediately after to merge only non-null metadata.
         -->
-        <service id="sylius_api.api_platform.metadata.resource.metadata_collection_factory.duplicate_operation_replacer"
-                 class="Sylius\Bundle\ApiBundle\ApiPlatform\Metadata\Resource\Factory\DuplicateOperationReplacerResourceMetadataCollectionFactory"
-                 decorates="api_platform.metadata.resource.metadata_collection_factory"
-                 decoration-priority="799"
-                 public="false"
+        <service
+            id="sylius_api.api_platform.metadata.resource.metadata_collection_factory.duplicate_operation_replacer"
+            class="Sylius\Bundle\ApiBundle\ApiPlatform\Metadata\Resource\Factory\DuplicateOperationReplacerResourceMetadataCollectionFactory"
+            decorates="api_platform.metadata.resource.metadata_collection_factory"
+            decoration-priority="799"
+            public="false"
         >
             <argument type="service" id=".inner" />
+        </service>
+
+        <service
+            id="sylius_api.api_platform.metadata.resource.metadata_collection_factory.image_filter_aware"
+            class="Sylius\Bundle\ApiBundle\ApiPlatform\Metadata\Resource\Factory\ImageFilterAwareResourceMetadataCollectionFactory"
+            decorates="api_platform.metadata.resource.metadata_collection_factory"
+            public="false"
+        >
+            <argument type="service" id=".inner" />
+            <argument>%sylius_api.normalization.image_filter.supported_interfaces%</argument>
         </service>
     </services>
 </container>
