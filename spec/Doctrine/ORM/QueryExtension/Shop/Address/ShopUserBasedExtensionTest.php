@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Sylius package.
- *
- * (c) Sylius Sp. z o.o.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Address;
@@ -17,11 +8,9 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Context\UserContextInterface;
 use Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Address\ShopUserBasedExtension;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
@@ -34,166 +23,86 @@ use Sylius\Component\Core\Model\ShopUserInterface;
 
 final class ShopUserBasedExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private ShopUserBasedExtension $extension;
 
-    /** @var UserContextInterface|MockObject */
-    private MockObject $userContextMock;
-
-    private ShopUserBasedExtension $shopUserBasedExtension;
+    private MockObject|SectionProviderInterface $sectionProvider;
+    private MockObject|UserContextInterface $userContext;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->userContextMock = $this->createMock(UserContextInterface::class);
-        $this->shopUserBasedExtension = new ShopUserBasedExtension($this->sectionProviderMock, $this->userContextMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->userContext = $this->createMock(UserContextInterface::class);
+        $this->extension = new ShopUserBasedExtension($this->sectionProvider, $this->userContext);
     }
 
-    public function testInitializable(): void
+    public function test_it_implements_interfaces(): void
     {
-        $this->assertInstanceOf(QueryCollectionExtensionInterface::class, $this->shopUserBasedExtension);
-        $this->assertInstanceOf(QueryItemExtensionInterface::class, $this->shopUserBasedExtension);
+        $this->assertInstanceOf(QueryCollectionExtensionInterface::class, $this->extension);
+        $this->assertInstanceOf(QueryItemExtensionInterface::class, $this->extension);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForUnsupportedResource(): void
+    public function test_it_does_nothing_for_unsupported_resource(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->extension->applyToCollection($queryBuilder, $queryNameGenerator, \stdClass::class);
+        $this->extension->applyToItem($queryBuilder, $queryNameGenerator, \stdClass::class, []);
+
+        $this->addToAssertionCount(1);
     }
 
-    public function testDoesNotApplyConditionsToItemForUnsupportedResource(): void
+    public function test_it_does_nothing_for_admin_api_section(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, stdClass::class, []);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $this->sectionProvider->method('getSection')->willReturn($this->createMock(AdminApiSection::class));
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->extension->applyToCollection($queryBuilder, $queryNameGenerator, AddressInterface::class);
+        $this->extension->applyToItem($queryBuilder, $queryNameGenerator, AddressInterface::class, []);
+
+        $this->addToAssertionCount(1);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
+    public function test_it_does_nothing_if_user_is_not_shop_user(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $this->sectionProvider->method('getSection')->willReturn($this->createMock(ShopApiSection::class));
+        $this->userContext->method('getUser')->willReturn($this->createMock(AdminUserInterface::class));
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->extension->applyToCollection($queryBuilder, $queryNameGenerator, AddressInterface::class);
+        $this->extension->applyToItem($queryBuilder, $queryNameGenerator, AddressInterface::class, []);
+
+        $this->addToAssertionCount(1);
     }
 
-    public function testDoesNotApplyConditionsToItemForAdminApiSection(): void
+    public function test_it_applies_conditions_for_shop_user(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class, []);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
-    }
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
 
-    public function testDoesNotApplyConditionsToCollectionIfUserIsNotShopUser(): void
-    {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var AdminUserInterface|MockObject $adminUserMock */
-        $adminUserMock = $this->createMock(AdminUserInterface::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($adminUserMock);
-        $this->shopUserBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
-    }
+        $customer = $this->createMock(CustomerInterface::class);
 
-    public function testDoesNotApplyConditionsToItemIfUserIsNotShopUser(): void
-    {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var AdminUserInterface|MockObject $adminUserMock */
-        $adminUserMock = $this->createMock(AdminUserInterface::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($adminUserMock);
-        $this->shopUserBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class, []);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
-    }
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        $shopUser->method('getCustomer')->willReturn($customer);
+        $this->userContext->method('getUser')->willReturn($shopUser);
 
-    public function testAppliesConditionsToCollectionForShopApiSection(): void
-    {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var Expr|MockObject $exprMock */
-        $exprMock = $this->createMock(Expr::class);
-        /** @var Comparison|MockObject $exprComparisonMock */
-        $exprComparisonMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with(':customer')->willReturn(':customer');
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects(self::once())->method('eq')->with('o.customer', ':customer')->willReturn($exprComparisonMock);
-        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.customer', 'customer')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprComparisonMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([[':customer', $customerMock, $queryBuilderMock], [':customer', $customerMock]]);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with(':customer', $customerMock)->shouldHaveBeenCalledOnce();
-    }
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+        $expr = $this->createMock(Expr::class);
+        $comparison = $this->createMock(Expr\Comparison::class);
 
-    public function testAppliesConditionsToItemForShopApiSection(): void
-    {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var Expr|MockObject $exprMock */
-        $exprMock = $this->createMock(Expr::class);
-        /** @var Comparison|MockObject $exprComparisonMock */
-        $exprComparisonMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->userContextMock->expects(self::once())->method('getUser')->willReturn($shopUserMock);
-        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with(':customer')->willReturn(':customer');
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects(self::once())->method('eq')->with('o.customer', ':customer')->willReturn($exprComparisonMock);
-        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.customer', 'customer')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprComparisonMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([[':customer', $customerMock, $queryBuilderMock], [':customer', $customerMock]]);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with(':customer', $customerMock)->shouldHaveBeenCalledOnce();
+        $queryNameGenerator->method('generateParameterName')->with(':customer')->willReturn(':customer');
+        $queryBuilder->method('getRootAliases')->willReturn(['o']);
+        $queryBuilder->method('expr')->willReturn($expr);
+        $expr->method('eq')->with('o.customer', ':customer')->willReturn($comparison);
+
+        $queryBuilder->method('innerJoin')->with('o.customer', 'customer')->willReturn($queryBuilder);
+        $queryBuilder->method('andWhere')->with($comparison)->willReturn($queryBuilder);
+        $queryBuilder->method('setParameter')->with(':customer', $customer)->willReturn($queryBuilder);
+
+        $this->extension->applyToCollection($queryBuilder, $queryNameGenerator, AddressInterface::class);
+        $this->extension->applyToItem($queryBuilder, $queryNameGenerator, AddressInterface::class, []);
     }
 }

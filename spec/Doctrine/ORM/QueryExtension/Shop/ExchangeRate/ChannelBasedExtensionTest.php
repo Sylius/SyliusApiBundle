@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Sylius package.
- *
- * (c) Sylius Sp. z o.o.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\ExchangeRate;
@@ -17,16 +8,14 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\Query\Expr\Comparison;
-use Doctrine\ORM\Query\Expr\Orx;
 use Doctrine\ORM\QueryBuilder;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\ExchangeRate\ChannelBasedExtension;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
+use Sylius\Bundle\ApiBundle\Serializer\ContextKeys;
 use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Currency\Model\CurrencyInterface;
@@ -35,156 +24,141 @@ use Sylius\Component\Currency\Model\ExchangeRateInterface;
 
 final class ChannelBasedExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
-
-    private ChannelBasedExtension $channelBasedExtension;
+    private ChannelBasedExtension $extension;
+    private SectionProviderInterface&MockObject $sectionProvider;
+    private QueryBuilder&MockObject $queryBuilder;
+    private QueryNameGeneratorInterface&MockObject $nameGenerator;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->channelBasedExtension = new ChannelBasedExtension($this->sectionProviderMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->queryBuilder = $this->createMock(QueryBuilder::class);
+        $this->nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+        $this->extension = new ChannelBasedExtension($this->sectionProvider);
     }
 
-    public function testInitializable(): void
+    public function test_it_is_initializable(): void
     {
-        $this->assertInstanceOf(QueryCollectionExtensionInterface::class, $this->channelBasedExtension);
-        $this->assertInstanceOf(QueryItemExtensionInterface::class, $this->channelBasedExtension);
+        $this->assertInstanceOf(QueryCollectionExtensionInterface::class, $this->extension);
+        $this->assertInstanceOf(QueryItemExtensionInterface::class, $this->extension);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForUnsupportedResource(): void
+    public function test_it_does_not_apply_conditions_to_collection_for_unsupported_resource(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->nameGenerator, stdClass::class);
     }
 
-    public function testDoesNotApplyConditionsToItemForUnsupportedResource(): void
+    public function test_it_does_not_apply_conditions_to_item_for_unsupported_resource(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->channelBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, stdClass::class, []);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToItem($this->queryBuilder, $this->nameGenerator, stdClass::class, []);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
+    public function test_it_does_not_apply_conditions_to_collection_for_admin_api_section(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ExchangeRateInterface::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $adminApiSection = $this->createMock(AdminApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($adminApiSection);
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->nameGenerator, ExchangeRateInterface::class);
     }
 
-    public function testDoesNotApplyConditionsToItemForAdminApiSection(): void
+    public function test_it_does_not_apply_conditions_to_item_for_admin_api_section(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->channelBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, ExchangeRateInterface::class, []);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $adminApiSection = $this->createMock(AdminApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($adminApiSection);
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToItem($this->queryBuilder, $this->nameGenerator, ExchangeRateInterface::class, []);
     }
 
-    public function testThrowsAnExceptionDuringApplyCollectionIfContextHasNoChannel(): void
+    public function test_it_throws_an_exception_during_apply_collection_if_context_has_no_channel(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->expectException(InvalidArgumentException::class);
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ExchangeRate::class);
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->nameGenerator, ExchangeRate::class);
     }
 
-    public function testThrowsAnExceptionDuringApplyItemIfContextHasNoChannel(): void
+    public function test_it_throws_an_exception_during_apply_item_if_context_has_no_channel(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->expectException(InvalidArgumentException::class);
-        $this->channelBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, ExchangeRate::class, []);
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->extension->applyToItem($this->queryBuilder, $this->nameGenerator, ExchangeRate::class, []);
     }
 
-    public function testAppliesConditionsToCollectionForShopApiSection(): void
+    public function test_it_applies_conditions_to_collection_for_shop_api_section(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        /** @var CurrencyInterface|MockObject $currencyMock */
-        $currencyMock = $this->createMock(CurrencyInterface::class);
-        /** @var Expr|MockObject $exprMock */
-        $exprMock = $this->createMock(Expr::class);
-        /** @var Orx|MockObject $exprOrxMock */
-        $exprOrxMock = $this->createMock(Orx::class);
-        /** @var Comparison|MockObject $exprComparisonMock */
-        $exprComparisonMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $channelMock->expects(self::once())->method('getBaseCurrency')->willReturn($currencyMock);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with(':currency')->willReturn(':currency');
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->exactly(2))->method('eq')->willReturnMap([['o.sourceCurrency', ':currency', $exprComparisonMock], ['o.targetCurrency', ':currency', $exprComparisonMock]]);
-        $exprMock->expects(self::once())->method('orX')->with($exprComparisonMock, $exprComparisonMock)->willReturn($exprOrxMock);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprOrxMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with(':currency', $currencyMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([[':currency', $currencyMock, $queryBuilderMock], [':currency', $currencyMock]]);
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $channel = $this->createMock(ChannelInterface::class);
+        $currency = $this->createMock(CurrencyInterface::class);
+        $expr = $this->createMock(Expr::class);
+        $exprOrx = $this->createMock(Expr\Orx::class);
+        $exprComparison = $this->createMock(Expr\Comparison::class);
+
+        $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
+        $channel->method('getBaseCurrency')->willReturn($currency);
+        $this->nameGenerator->method('generateParameterName')->with(':currency')->willReturn(':currency');
+        $this->queryBuilder->method('getRootAliases')->willReturn(['o']);
+        $this->queryBuilder->method('expr')->willReturn($expr);
+        $expr->method('eq')->with('o.sourceCurrency', ':currency')->willReturn($exprComparison);
+        $expr->method('eq')->with('o.targetCurrency', ':currency')->willReturn($exprComparison);
+        $expr->method('orX')->with($exprComparison, $exprComparison)->willReturn($exprOrx);
+
+        $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturnSelf();
+        $this->queryBuilder->expects($this->once())->method('setParameter')->with(':currency', $currency)->willReturnSelf();
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->nameGenerator,
+            ExchangeRateInterface::class,
+            null,
+            [
+                ContextKeys::CHANNEL => $channel,
+            ]
+        );
     }
 
-    public function testAppliesConditionsToItemForShopApiSection(): void
+    public function test_it_applies_conditions_to_item_for_shop_api_section(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        /** @var CurrencyInterface|MockObject $currencyMock */
-        $currencyMock = $this->createMock(CurrencyInterface::class);
-        /** @var Expr|MockObject $exprMock */
-        $exprMock = $this->createMock(Expr::class);
-        /** @var Orx|MockObject $exprOrxMock */
-        $exprOrxMock = $this->createMock(Orx::class);
-        /** @var Comparison|MockObject $exprComparisonMock */
-        $exprComparisonMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $channelMock->expects(self::once())->method('getBaseCurrency')->willReturn($currencyMock);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with(':currency')->willReturn(':currency');
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects($this->exactly(2))->method('eq')->willReturnMap([['o.sourceCurrency', ':currency', $exprComparisonMock], ['o.targetCurrency', ':currency', $exprComparisonMock]]);
-        $exprMock->expects(self::once())->method('orX')->with($exprComparisonMock, $exprComparisonMock)->willReturn($exprOrxMock);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprOrxMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with(':currency', $currencyMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([[':currency', $currencyMock, $queryBuilderMock], [':currency', $currencyMock]]);
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $channel = $this->createMock(ChannelInterface::class);
+        $currency = $this->createMock(CurrencyInterface::class);
+        $expr = $this->createMock(Expr::class);
+        $exprOrx = $this->createMock(Expr\Orx::class);
+        $exprComparison = $this->createMock(Expr\Comparison::class);
+
+        $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
+        $channel->method('getBaseCurrency')->willReturn($currency);
+        $this->nameGenerator->method('generateParameterName')->with(':currency')->willReturn(':currency');
+        $this->queryBuilder->method('getRootAliases')->willReturn(['o']);
+        $this->queryBuilder->method('expr')->willReturn($expr);
+        $expr->method('eq')->with('o.sourceCurrency', ':currency')->willReturn($exprComparison);
+        $expr->method('eq')->with('o.targetCurrency', ':currency')->willReturn($exprComparison);
+        $expr->method('orX')->with($exprComparison, $exprComparison)->willReturn($exprOrx);
+
+        $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturnSelf();
+        $this->queryBuilder->expects($this->once())->method('setParameter')->with(':currency', $currency)->willReturnSelf();
+
+        $this->extension->applyToItem(
+            $this->queryBuilder,
+            $this->nameGenerator,
+            ExchangeRateInterface::class,
+            [],
+            null,
+            [
+                ContextKeys::CHANNEL => $channel,
+            ]
+        );
     }
 }

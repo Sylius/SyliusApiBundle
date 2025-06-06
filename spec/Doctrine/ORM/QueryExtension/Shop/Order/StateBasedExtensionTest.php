@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Sylius package.
- *
- * (c) Sylius Sp. z o.o.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Order;
@@ -17,7 +8,6 @@ use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Operation;
 use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -32,128 +22,105 @@ use Sylius\Resource\Model\ResourceInterface;
 
 final class StateBasedExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
-
-    private StateBasedExtension $stateBasedExtension;
+    private StateBasedExtension $extension;
+    private SectionProviderInterface&MockObject $sectionProvider;
+    private QueryBuilder&MockObject $queryBuilder;
+    private QueryNameGeneratorInterface&MockObject $nameGenerator;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->stateBasedExtension = new StateBasedExtension($this->sectionProviderMock, ['sylius_api_shop_order_get', 'sylius_api_shop_order_payment_get_configuration']);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->queryBuilder = $this->createMock(QueryBuilder::class);
+        $this->nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+        $this->extension = new StateBasedExtension(
+            $this->sectionProvider,
+            ['sylius_api_shop_order_get', 'sylius_api_shop_order_payment_get_configuration']
+        );
     }
 
-    public function testDoesNotApplyConditionsToCollectionForUnsupportedResource(): void
+    public function test_does_not_apply_conditions_to_collection_for_unsupported_resource(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $this->stateBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ResourceInterface::class, new Get());
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->nameGenerator, ResourceInterface::class, new Get());
     }
 
-    public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
+    public function test_does_not_apply_conditions_to_collection_for_admin_api_section(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var AdminApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $this->stateBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, new Get());
+        $section = $this->createMock(AdminApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->nameGenerator, OrderInterface::class, new Get());
     }
 
-    public function testAppliesConditionsToCollection(): void
+    public function test_applies_conditions_to_collection(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ShopApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(ShopApiSection::class);
-        /** @var ShopUserInterface|MockObject $userMock */
-        $userMock = $this->createMock(ShopUserInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        /** @var Expr|MockObject $exprMock */
-        $exprMock = $this->createMock(Expr::class);
-        /** @var Comparison|MockObject $exprNeqMock */
-        $exprNeqMock = $this->createMock(Comparison::class);
-        $userMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('state')->willReturn('state');
-        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects(self::once())->method('neq')->with('o.state', ':state')->willReturn($exprNeqMock);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprNeqMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturn($queryBuilderMock);
-        $this->stateBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, new Get());
+        $section = $this->createMock(ShopApiSection::class);
+        $user = $this->createMock(ShopUserInterface::class);
+        $customer = $this->createMock(CustomerInterface::class);
+        $expr = $this->createMock(Expr::class);
+        $exprNeq = $this->createMock(Expr\Comparison::class);
+
+        $user->method('getCustomer')->willReturn($customer);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+
+        $this->queryBuilder->method('getRootAliases')->willReturn(['o']);
+        $this->nameGenerator->method('generateParameterName')->with('state')->willReturn('state');
+        $this->queryBuilder->method('expr')->willReturn($expr);
+        $expr->method('neq')->with('o.state', ':state')->willReturn($exprNeq);
+
+        $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprNeq)->willReturnSelf();
+        $this->queryBuilder->expects($this->once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturnSelf();
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->nameGenerator, OrderInterface::class, new Get());
     }
 
-    public function testDoesNotApplyConditionsToItemForUnsupportedResource(): void
+    public function test_does_not_apply_conditions_to_item_for_unsupported_resource(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, ResourceInterface::class, [], new Get());
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+
+        $this->extension->applyToItem($this->queryBuilder, $this->nameGenerator, ResourceInterface::class, [], new Get());
     }
 
-    public function testDoesNotApplyConditionsToItemForAdminApiSection(): void
+    public function test_does_not_apply_conditions_to_item_for_admin_api_section(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var AdminApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, [], new Get());
+        $section = $this->createMock(AdminApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+
+        $this->extension->applyToItem($this->queryBuilder, $this->nameGenerator, OrderInterface::class, [], new Get());
     }
 
-    public function testDoesNotApplyConditionsToItemIfOperationIsAllowed(): void
+    public function test_does_not_apply_conditions_to_item_if_operation_is_allowed(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ShopApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(ShopApiSection::class);
-        /** @var Operation|MockObject $operationMock */
-        $operationMock = $this->createMock(Operation::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
-        $operationMock->expects(self::once())->method('getName')->willReturn('sylius_api_shop_order_payment_get_configuration');
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, [], $operationMock);
+        $section = $this->createMock(ShopApiSection::class);
+        $operation = $this->createMock(Operation::class);
+
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $operation->method('getName')->willReturn('sylius_api_shop_order_payment_get_configuration');
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+
+        $this->extension->applyToItem($this->queryBuilder, $this->nameGenerator, OrderInterface::class, [], $operation);
     }
 
-    public function testAppliesConditionsToItem(): void
+    public function test_applies_conditions_to_item(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ShopApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(ShopApiSection::class);
-        /** @var Operation|MockObject $operationMock */
-        $operationMock = $this->createMock(Operation::class);
-        /** @var Expr|MockObject $exprMock */
-        $exprMock = $this->createMock(Expr::class);
-        /** @var Comparison|MockObject $exprEqMock */
-        $exprEqMock = $this->createMock(Comparison::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
-        $operationMock->expects(self::once())->method('getName')->willReturn('sylius_api_shop_order_get_custom');
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('state')->willReturn('state');
-        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
-        $exprMock->expects(self::once())->method('eq')->with('o.state', ':state')->willReturn($exprEqMock);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with($exprEqMock)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturn($queryBuilderMock);
-        $this->stateBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, OrderInterface::class, [], $operationMock);
+        $section = $this->createMock(ShopApiSection::class);
+        $operation = $this->createMock(Operation::class);
+        $expr = $this->createMock(Expr::class);
+        $exprEq = $this->createMock(Expr\Comparison::class);
+
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $operation->method('getName')->willReturn('sylius_api_shop_order_get_custom');
+        $this->queryBuilder->method('getRootAliases')->willReturn(['o']);
+        $this->nameGenerator->method('generateParameterName')->with('state')->willReturn('state');
+        $this->queryBuilder->method('expr')->willReturn($expr);
+        $expr->method('eq')->with('o.state', ':state')->willReturn($exprEq);
+
+        $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprEq)->willReturnSelf();
+        $this->queryBuilder->expects($this->once())->method('setParameter')->with('state', OrderInterface::STATE_CART)->willReturnSelf();
+
+        $this->extension->applyToItem($this->queryBuilder, $this->nameGenerator, OrderInterface::class, [], $operation);
     }
 }

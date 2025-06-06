@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Sylius package.
- *
- * (c) Sylius Sp. z o.o.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Locale;
@@ -32,95 +23,90 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class ChannelBasedExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
-
-    private ChannelBasedExtension $channelBasedExtension;
+    private ChannelBasedExtension $extension;
+    private SectionProviderInterface&MockObject $sectionProvider;
+    private QueryBuilder&MockObject $queryBuilder;
+    private QueryNameGeneratorInterface&MockObject $nameGenerator;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->channelBasedExtension = new ChannelBasedExtension($this->sectionProviderMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->queryBuilder = $this->createMock(QueryBuilder::class);
+        $this->nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+        $this->extension = new ChannelBasedExtension($this->sectionProvider);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForUnsupportedResource(): void
+    public function test_does_not_apply_conditions_to_collection_for_unsupported_resource(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::never())->method('getSection');
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $queryBuilderMock->expects(self::never())->method('andWhere');
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
+        $this->sectionProvider->expects($this->never())->method('getSection');
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->nameGenerator, stdClass::class);
     }
 
-    public function testDoesNotApplyConditionsForNonShopApiSection(): void
+    public function test_does_not_apply_conditions_for_non_shop_api_section(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $queryBuilderMock->expects(self::never())->method('andWhere');
-        $this->channelBasedExtension->applyToCollection(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $adminApiSection = $this->createMock(AdminApiSection::class);
+        $channel = $this->createMock(ChannelInterface::class);
+
+        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($adminApiSection);
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->nameGenerator,
             LocaleInterface::class,
             new Get(),
             [
-                ContextKeys::CHANNEL => $channelMock,
+                ContextKeys::CHANNEL => $channel,
                 ContextKeys::HTTP_REQUEST_METHOD_TYPE => Request::METHOD_GET,
-            ],
+            ]
         );
     }
 
-    public function testAppliesConditionsForShopApiSection(): void
+    public function test_applies_conditions_for_shop_api_section(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        /** @var LocaleInterface|MockObject $localeMock */
-        $localeMock = $this->createMock(LocaleInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('locales')->willReturn('locales');
-        $locales = new ArrayCollection([$localeMock]);
-        $channelMock->expects(self::once())->method('getLocales')->willReturn($locales);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with('o.id in (:locales)')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('locales', $locales)->willReturn($queryBuilderMock);
-        $this->channelBasedExtension->applyToCollection(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $channel = $this->createMock(ChannelInterface::class);
+        $locale = $this->createMock(LocaleInterface::class);
+
+        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($shopApiSection);
+        $this->nameGenerator->expects($this->once())->method('generateParameterName')->with('locales')->willReturn('locales');
+
+        $locales = new ArrayCollection([$locale]);
+        $channel->expects($this->once())->method('getLocales')->willReturn($locales);
+
+        $this->queryBuilder->expects($this->once())->method('getRootAliases')->willReturn(['o']);
+        $this->queryBuilder->expects($this->once())->method('andWhere')->with('o.id in (:locales)')->willReturn($this->queryBuilder);
+        $this->queryBuilder->expects($this->once())->method('setParameter')->with('locales', $locales)->willReturn($this->queryBuilder);
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->nameGenerator,
             LocaleInterface::class,
             new Get(),
             [
-                ContextKeys::CHANNEL => $channelMock,
+                ContextKeys::CHANNEL => $channel,
                 ContextKeys::HTTP_REQUEST_METHOD_TYPE => Request::METHOD_GET,
-            ],
+            ]
         );
     }
 
-    public function testThrowsAnExceptionIfContextHasNoChannel(): void
+    public function test_throws_an_exception_if_context_has_no_channel(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+
+        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($shopApiSection);
+
         $this->expectException(InvalidArgumentException::class);
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, LocaleInterface::class, new Get());
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->nameGenerator,
+            LocaleInterface::class,
+            new Get()
+        );
     }
 }

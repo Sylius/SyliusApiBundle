@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Sylius package.
- *
- * (c) Sylius Sp. z o.o.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Admin\Promotion\PromotionCoupon;
@@ -18,7 +9,6 @@ use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Admin\Promotion\PromotionCoupon\PostResultExtension;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
@@ -27,66 +17,74 @@ use Sylius\Component\Core\Model\PromotionCouponInterface;
 
 final class PostResultExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private PostResultExtension $extension;
 
-    private PostResultExtension $postResultExtension;
+    /** @var MockObject&SectionProviderInterface */
+    private $sectionProvider;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->postResultExtension = new PostResultExtension($this->sectionProviderMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->extension = new PostResultExtension($this->sectionProvider);
     }
 
-    public function testQueryResultItemExtension(): void
+    public function test_it_is_a_post_result_extension(): void
     {
-        $this->assertInstanceOf(PostResultExtension::class, $this->postResultExtension);
+        $this->assertInstanceOf(PostResultExtension::class, $this->extension);
     }
 
-    public function testAppliesNothingToItem(): void
+    public function test_it_applies_nothing_to_item(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->postResultExtension->applyToItem(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->extension->applyToItem(
+            $queryBuilder,
+            $queryNameGenerator,
             'resourceClass',
             ['identifiers'],
         );
+
+        $this->addToAssertionCount(1);
     }
 
-    public function testDoesNotSupportIfOperationIsNotPost(): void
+    public function test_it_does_not_support_if_operation_is_not_post(): void
     {
-        self::assertFalse($this->postResultExtension->supportsResult(stdClass::class, null, []));
+        $this->assertFalse($this->extension->supportsResult(\stdClass::class, null, []));
     }
 
-    public function testDoesNotSupportIfSectionIsNotAdminApiSection(): void
+    public function test_it_does_not_support_if_section_is_not_admin(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        self::assertFalse($this->postResultExtension->supportsResult(stdClass::class, new Post(), []));
+        $shopSection = $this->createMock(ShopApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($shopSection);
+
+        $this->assertFalse($this->extension->supportsResult(\stdClass::class, new Post(), []));
     }
 
-    public function testDoesNotSupportIfResourceClassIsNotPromotionCouponInterface(): void
+    public function test_it_does_not_support_if_resource_class_is_not_promotion_coupon_interface(): void
     {
-        self::assertFalse($this->postResultExtension->supportsResult(stdClass::class, new Post(), []));
+        $this->assertFalse($this->extension->supportsResult(\stdClass::class, new Post(), []));
     }
 
-    public function testSupportsResultIfOperationIsPostAndResourceClassIsPromotionCouponInterface(): void
+    public function test_it_supports_result_if_post_and_promotion_coupon_interface_and_admin_section(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        self::assertTrue($this->postResultExtension->supportsResult(PromotionCouponInterface::class, new Post(), []));
+        $adminSection = $this->createMock(AdminApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($adminSection);
+
+        $this->assertTrue($this->extension->supportsResult(PromotionCouponInterface::class, new Post(), []));
     }
 
-    public function testReturnsNullResult(): void
+    public function test_it_returns_null_result(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        $this->assertNull($this->postResultExtension->getResult($queryBuilderMock, PromotionCouponInterface::class, new Post(), []));
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+
+        $result = $this->extension->getResult(
+            $queryBuilder,
+            PromotionCouponInterface::class,
+            new Post(),
+            []
+        );
+
+        $this->assertNull($result);
     }
 }
