@@ -19,7 +19,6 @@ use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\ShippingMethod\ChannelBasedExtension;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
@@ -30,107 +29,151 @@ use Sylius\Component\Core\Model\ShippingMethodInterface;
 
 final class ChannelBasedExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private ChannelBasedExtension $extension;
 
-    private ChannelBasedExtension $channelBasedExtension;
+    private MockObject&SectionProviderInterface $sectionProvider;
+
+    private MockObject&QueryBuilder $queryBuilder;
+
+    private MockObject&QueryNameGeneratorInterface $queryNameGenerator;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->channelBasedExtension = new ChannelBasedExtension($this->sectionProviderMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->queryBuilder = $this->createMock(QueryBuilder::class);
+        $this->queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->extension = new ChannelBasedExtension($this->sectionProvider);
     }
 
-    public function testFiltersShippingMethodByCurrentChannel(): void
+    public function test_it_filters_shipping_method_by_current_channel(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('channel')->willReturn('channel');
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with(':channel MEMBER OF o.channels')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('channel', $channelMock)->willReturn($queryBuilderMock);
-        $this->channelBasedExtension->applyToItem(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $channel = $this->createMock(ChannelInterface::class);
+
+        $this->sectionProvider->method('getSection')->willReturn(new ShopApiSection());
+
+        $this->queryNameGenerator->expects($this->once())
+            ->method('generateParameterName')
+            ->with('channel')
+            ->willReturn('channel');
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getRootAliases')
+            ->willReturn(['o']);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('andWhere')
+            ->with(':channel MEMBER OF o.channels')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with('channel', $channel)
+            ->willReturn($this->queryBuilder);
+
+        $this->extension->applyToItem(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
             ShippingMethodInterface::class,
             [],
             new Get(),
-            [ContextKeys::CHANNEL => $channelMock],
+            [ContextKeys::CHANNEL => $channel],
         );
     }
 
-    public function testFiltersShippingMethodsByCurrentChannel(): void
+    public function test_it_filters_shipping_methods_by_current_channel(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('channel')->willReturn('channel');
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with(':channel MEMBER OF o.channels')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('channel', $channelMock)->willReturn($queryBuilderMock);
-        $this->channelBasedExtension->applyToCollection(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $channel = $this->createMock(ChannelInterface::class);
+
+        $this->sectionProvider->method('getSection')->willReturn(new ShopApiSection());
+
+        $this->queryNameGenerator->expects($this->once())
+            ->method('generateParameterName')
+            ->with('channel')
+            ->willReturn('channel');
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getRootAliases')
+            ->willReturn(['o']);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('andWhere')
+            ->with(':channel MEMBER OF o.channels')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with('channel', $channel)
+            ->willReturn($this->queryBuilder);
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
             ShippingMethodInterface::class,
             new GetCollection(),
-            [ContextKeys::CHANNEL => $channelMock],
+            [ContextKeys::CHANNEL => $channel],
         );
     }
 
-    public function testDoesNothingIfTheCurrentResourceIsNotAShippingMethodForItem(): void
+    public function test_it_does_nothing_if_the_resource_is_not_shipping_method_for_item(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $queryBuilderMock->expects(self::never())->method('andWhere');
-        $this->channelBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, stdClass::class, [], new Get());
+        $this->sectionProvider->method('getSection')->willReturn(new ShopApiSection());
+
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToItem(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
+            \stdClass::class,
+            [],
+            new Get(),
+        );
     }
 
-    public function testDoesNothingIfTheCurrentResourceIsNotAShippingMethodForCollection(): void
+    public function test_it_does_nothing_if_the_resource_is_not_shipping_method_for_collection(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $queryBuilderMock->expects(self::never())->method('andWhere');
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class, new GetCollection());
+        $this->sectionProvider->method('getSection')->willReturn(new ShopApiSection());
+
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
+            \stdClass::class,
+            new GetCollection(),
+        );
     }
 
-    public function testDoesNothingIfTheCurrentSectionIsNotAShopForItem(): void
+    public function test_it_does_nothing_if_section_is_not_shop_for_item(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $queryBuilderMock->expects(self::never())->method('andWhere');
-        $this->channelBasedExtension->applyToItem($queryBuilderMock, $queryNameGeneratorMock, ShippingMethodInterface::class, [], new Get());
+        $this->sectionProvider->method('getSection')->willReturn(new AdminApiSection());
+
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToItem(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
+            ShippingMethodInterface::class,
+            [],
+            new Get(),
+        );
     }
 
-    public function testDoesNothingIfTheCurrentSectionIsNotAShopForCollection(): void
+    public function test_it_does_nothing_if_section_is_not_shop_for_collection(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $queryBuilderMock->expects(self::never())->method('andWhere');
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ShippingMethodInterface::class, new GetCollection());
+        $this->sectionProvider->method('getSection')->willReturn(new AdminApiSection());
+
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+        $this->queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
+            ShippingMethodInterface::class,
+            new GetCollection(),
+        );
     }
 }

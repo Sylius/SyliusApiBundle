@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Locale;
@@ -24,9 +33,12 @@ use Symfony\Component\HttpFoundation\Request;
 final class ChannelBasedExtensionTest extends TestCase
 {
     private ChannelBasedExtension $extension;
-    private SectionProviderInterface&MockObject $sectionProvider;
-    private QueryBuilder&MockObject $queryBuilder;
-    private QueryNameGeneratorInterface&MockObject $nameGenerator;
+
+    private MockObject&SectionProviderInterface $sectionProvider;
+
+    private MockObject&QueryBuilder $queryBuilder;
+
+    private MockObject&QueryNameGeneratorInterface $nameGenerator;
 
     protected function setUp(): void
     {
@@ -62,7 +74,7 @@ final class ChannelBasedExtensionTest extends TestCase
             [
                 ContextKeys::CHANNEL => $channel,
                 ContextKeys::HTTP_REQUEST_METHOD_TYPE => Request::METHOD_GET,
-            ]
+            ],
         );
     }
 
@@ -90,7 +102,7 @@ final class ChannelBasedExtensionTest extends TestCase
             [
                 ContextKeys::CHANNEL => $channel,
                 ContextKeys::HTTP_REQUEST_METHOD_TYPE => Request::METHOD_GET,
-            ]
+            ],
         );
     }
 
@@ -106,7 +118,7 @@ final class ChannelBasedExtensionTest extends TestCase
             $this->queryBuilder,
             $this->nameGenerator,
             LocaleInterface::class,
-            new Get()
+            new Get(),
         );
     }
 }

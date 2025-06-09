@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Currency;
@@ -25,9 +34,12 @@ use Sylius\Component\Currency\Model\CurrencyInterface;
 final class ChannelBasedExtensionTest extends TestCase
 {
     private ChannelBasedExtension $extension;
-    private SectionProviderInterface&MockObject $sectionProvider;
-    private QueryBuilder&MockObject $queryBuilder;
-    private QueryNameGeneratorInterface&MockObject $nameGenerator;
+
+    private MockObject&SectionProviderInterface $sectionProvider;
+
+    private MockObject&QueryBuilder $queryBuilder;
+
+    private MockObject&QueryNameGeneratorInterface $nameGenerator;
 
     protected function setUp(): void
     {
@@ -123,7 +135,7 @@ final class ChannelBasedExtensionTest extends TestCase
             null,
             [
                 ContextKeys::CHANNEL => $channel,
-            ]
+            ],
         );
     }
 
@@ -158,7 +170,7 @@ final class ChannelBasedExtensionTest extends TestCase
             null,
             [
                 ContextKeys::CHANNEL => $channel,
-            ]
+            ],
         );
     }
 }

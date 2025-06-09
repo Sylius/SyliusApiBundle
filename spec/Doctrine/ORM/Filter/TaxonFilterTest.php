@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\Filter;
@@ -63,7 +72,7 @@ final class TaxonFilterTest extends TestCase
             'api/taxon',
             $queryBuilder,
             $queryNameGenerator,
-            'resourceClass'
+            'resourceClass',
         );
     }
 
@@ -99,7 +108,7 @@ final class TaxonFilterTest extends TestCase
             $queryBuilder,
             $queryNameGenerator,
             'resourceClass',
-            context: $context
+            context: $context,
         );
     }
 
@@ -127,7 +136,7 @@ final class TaxonFilterTest extends TestCase
             'api/taxon',
             $queryBuilder,
             $queryNameGenerator,
-            'resourceClass'
+            'resourceClass',
         );
     }
 
@@ -155,7 +164,7 @@ final class TaxonFilterTest extends TestCase
             'non-existing-taxon',
             $queryBuilder,
             $queryNameGenerator,
-            'resourceClass'
+            'resourceClass',
         );
     }
 }

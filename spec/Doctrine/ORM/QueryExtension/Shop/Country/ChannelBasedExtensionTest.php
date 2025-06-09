@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Country;
@@ -23,6 +32,7 @@ use Symfony\Component\HttpFoundation\Request;
 final class ChannelBasedExtensionTest extends TestCase
 {
     private ChannelBasedExtension $extension;
+
     private MockObject&SectionProviderInterface $sectionProvider;
 
     protected function setUp(): void
@@ -67,7 +77,7 @@ final class ChannelBasedExtensionTest extends TestCase
             $queryBuilder,
             $queryNameGenerator,
             CountryInterface::class,
-            new Get()
+            new Get(),
         );
     }
 
@@ -98,7 +108,7 @@ final class ChannelBasedExtensionTest extends TestCase
             [
                 ContextKeys::CHANNEL => $channel,
                 ContextKeys::HTTP_REQUEST_METHOD_TYPE => Request::METHOD_GET,
-            ]
+            ],
         );
     }
 }

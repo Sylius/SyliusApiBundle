@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Order;
@@ -23,9 +32,12 @@ use Sylius\Resource\Model\ResourceInterface;
 final class StateBasedExtensionTest extends TestCase
 {
     private StateBasedExtension $extension;
-    private SectionProviderInterface&MockObject $sectionProvider;
-    private QueryBuilder&MockObject $queryBuilder;
-    private QueryNameGeneratorInterface&MockObject $nameGenerator;
+
+    private MockObject&SectionProviderInterface $sectionProvider;
+
+    private MockObject&QueryBuilder $queryBuilder;
+
+    private MockObject&QueryNameGeneratorInterface $nameGenerator;
 
     protected function setUp(): void
     {
@@ -34,7 +46,7 @@ final class StateBasedExtensionTest extends TestCase
         $this->nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
         $this->extension = new StateBasedExtension(
             $this->sectionProvider,
-            ['sylius_api_shop_order_get', 'sylius_api_shop_order_payment_get_configuration']
+            ['sylius_api_shop_order_get', 'sylius_api_shop_order_payment_get_configuration'],
         );
     }
 

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Sylius package.
+ *
+ * (c) Sylius Sp. z o.o.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\OrderItem;
@@ -26,8 +35,10 @@ use Sylius\Resource\Model\ResourceInterface;
 final class VisitorBasedExtensionTest extends TestCase
 {
     private VisitorBasedExtension $extension;
-    private SectionProviderInterface&MockObject $sectionProvider;
-    private UserContextInterface&MockObject $userContext;
+
+    private MockObject&SectionProviderInterface $sectionProvider;
+
+    private MockObject&UserContextInterface $userContext;
 
     protected function setUp(): void
     {
@@ -74,56 +85,6 @@ final class VisitorBasedExtensionTest extends TestCase
         $this->extension->applyToCollection($queryBuilder, $nameGenerator, OrderInterface::class, new Get());
     }
 
-    public function test_applies_conditions_to_collection(): void
-    {
-        $queryBuilder = $this->createMock(QueryBuilder::class);
-        $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
-        $section = $this->createMock(ShopApiSection::class);
-        $expr = $this->createMock(Expr::class);
-        $exprEq = $this->createMock(Comparison::class);
-        $exprAndx = $this->createMock(Andx::class);
-        $exprOrx = $this->createMock(Orx::class);
-
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->once())->method('getUser')->willReturn(null);
-
-        $queryBuilder->expects($this->once())->method('getRootAliases')->willReturn(['o']);
-
-        // Callbacks for sequential join alias and leftJoin calls
-        $nameGenerator->expects($this->exactly(3))
-            ->method('generateJoinAlias')
-            ->with($this->logicalOr('order', 'customer', 'user'))
-            ->willReturnCallback(fn($arg) => $arg);
-        $nameGenerator->expects($this->once())
-            ->method('generateParameterName')
-            ->with('createdByGuest')
-            ->willReturn('createdByGuest');
-
-        $queryBuilder->expects($this->exactly(3))
-            ->method('leftJoin')
-            ->withConsecutive(
-                ['o.order', 'order'],
-                ['order.customer', 'customer'],
-                ['customer.user', 'user']
-            )
-            ->willReturn($queryBuilder);
-
-        $queryBuilder->expects($this->once())->method('expr')->willReturn($expr);
-
-        $expr->expects($this->once())->method('isNull')->with('user')->willReturn('user IS NULL');
-        $expr->expects($this->once())->method('isNull')->with('order.customer')->willReturn('order.customer IS NULL');
-        $expr->expects($this->once())->method('isNotNull')->with('user')->willReturn('user IS NOT NULL');
-        $expr->expects($this->once())->method('eq')->with('order.createdByGuest', ':createdByGuest')->willReturn($exprEq);
-        $expr->expects($this->once())->method('andX')->with('user IS NOT NULL', $exprEq)->willReturn($exprAndx);
-        $expr->expects($this->once())->method('orX')->with('user IS NULL', 'order.customer IS NULL', $exprAndx)->willReturn($exprOrx);
-
-        $queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturn($queryBuilder);
-        $queryBuilder->expects($this->once())->method('setParameter')->with('createdByGuest', true)->willReturn($queryBuilder);
-        $queryBuilder->expects($this->once())->method('addOrderBy')->with('o.id', 'ASC')->willReturn($queryBuilder);
-
-        $this->extension->applyToCollection($queryBuilder, $nameGenerator, OrderItemInterface::class, new Get());
-    }
-
     public function test_does_not_apply_conditions_to_item_for_unsupported_resource(): void
     {
         $queryBuilder = $this->createMock(QueryBuilder::class);
@@ -162,6 +123,66 @@ final class VisitorBasedExtensionTest extends TestCase
         $this->extension->applyToItem($queryBuilder, $nameGenerator, OrderInterface::class, [], new Get());
     }
 
+    public function test_applies_conditions_to_collection(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+        $section = $this->createMock(ShopApiSection::class);
+        $expr = $this->createMock(Expr::class);
+        $exprEq = $this->createMock(Comparison::class);
+        $exprAndx = $this->createMock(Andx::class);
+        $exprOrx = $this->createMock(Orx::class);
+
+        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
+        $this->userContext->expects($this->once())->method('getUser')->willReturn(null);
+
+        $queryBuilder->expects($this->once())->method('getRootAliases')->willReturn(['o']);
+
+        $nameGenerator->expects($this->exactly(3))
+            ->method('generateJoinAlias')
+            ->with($this->logicalOr('order', 'customer', 'user'))
+            ->willReturnCallback(fn ($arg) => $arg);
+        $nameGenerator->expects($this->once())
+            ->method('generateParameterName')
+            ->with('createdByGuest')
+            ->willReturn('createdByGuest');
+
+        $expectedLeftJoins = [
+            ['o.order', 'order'],
+            ['order.customer', 'customer'],
+            ['customer.user', 'user'],
+        ];
+        $leftJoinCall = 0;
+        $queryBuilder->expects($this->exactly(3))
+            ->method('leftJoin')
+            ->with(
+                $this->callback(function ($arg1) use (&$expectedLeftJoins, &$leftJoinCall) {
+                    return $arg1 === $expectedLeftJoins[$leftJoinCall][0];
+                }),
+                $this->callback(function ($arg2) use (&$expectedLeftJoins, &$leftJoinCall) {
+                    $result = $arg2 === $expectedLeftJoins[$leftJoinCall][1];
+                    $leftJoinCall++;
+                    return $result;
+                })
+            )
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->expects($this->once())->method('expr')->willReturn($expr);
+
+        $expr->expects($this->once())->method('isNull')->with('user')->willReturn('user IS NULL');
+        $expr->expects($this->once())->method('isNull')->with('order.customer')->willReturn('order.customer IS NULL');
+        $expr->expects($this->once())->method('isNotNull')->with('user')->willReturn('user IS NOT NULL');
+        $expr->expects($this->once())->method('eq')->with('order.createdByGuest', ':createdByGuest')->willReturn($exprEq);
+        $expr->expects($this->once())->method('andX')->with('user IS NOT NULL', $exprEq)->willReturn($exprAndx);
+        $expr->expects($this->once())->method('orX')->with('user IS NULL', 'order.customer IS NULL', $exprAndx)->willReturn($exprOrx);
+
+        $queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturn($queryBuilder);
+        $queryBuilder->expects($this->once())->method('setParameter')->with('createdByGuest', true)->willReturn($queryBuilder);
+        $queryBuilder->expects($this->once())->method('addOrderBy')->with('o.id', 'ASC')->willReturn($queryBuilder);
+
+        $this->extension->applyToCollection($queryBuilder, $nameGenerator, OrderItemInterface::class, new Get());
+    }
+
     public function test_applies_conditions_to_item(): void
     {
         $queryBuilder = $this->createMock(QueryBuilder::class);
@@ -180,18 +201,29 @@ final class VisitorBasedExtensionTest extends TestCase
         $nameGenerator->expects($this->exactly(3))
             ->method('generateJoinAlias')
             ->with($this->logicalOr('order', 'customer', 'user'))
-            ->willReturnCallback(fn($arg) => $arg);
+            ->willReturnCallback(fn ($arg) => $arg);
         $nameGenerator->expects($this->once())
             ->method('generateParameterName')
             ->with('createdByGuest')
             ->willReturn('createdByGuest');
 
+        $expectedLeftJoins = [
+            ['o.order', 'order'],
+            ['order.customer', 'customer'],
+            ['customer.user', 'user'],
+        ];
+        $leftJoinCall = 0;
         $queryBuilder->expects($this->exactly(3))
             ->method('leftJoin')
-            ->withConsecutive(
-                ['o.order', 'order'],
-                ['order.customer', 'customer'],
-                ['customer.user', 'user']
+            ->with(
+                $this->callback(function ($arg1) use (&$expectedLeftJoins, &$leftJoinCall) {
+                    return $arg1 === $expectedLeftJoins[$leftJoinCall][0];
+                }),
+                $this->callback(function ($arg2) use (&$expectedLeftJoins, &$leftJoinCall) {
+                    $result = $arg2 === $expectedLeftJoins[$leftJoinCall][1];
+                    $leftJoinCall++;
+                    return $result;
+                })
             )
             ->willReturn($queryBuilder);
 

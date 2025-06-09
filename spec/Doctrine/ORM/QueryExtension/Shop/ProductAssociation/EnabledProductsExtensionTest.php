@@ -21,76 +21,110 @@ use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\ProductAssociation\EnabledProductsExtension;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
+use Sylius\Bundle\ApiBundle\Serializer\ContextKeys;
 use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Product\Model\ProductAssociationInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 final class EnabledProductsExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private EnabledProductsExtension $extension;
 
-    private EnabledProductsExtension $enabledProductsExtension;
+    private MockObject&SectionProviderInterface $sectionProvider;
+
+    private MockObject&QueryBuilder $queryBuilder;
+
+    private MockObject&QueryNameGeneratorInterface $queryNameGenerator;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->enabledProductsExtension = new EnabledProductsExtension($this->sectionProviderMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->queryBuilder = $this->createMock(QueryBuilder::class);
+        $this->queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->extension = new EnabledProductsExtension($this->sectionProvider);
     }
 
-    public function testDoesNothingIfCurrentResourceIsNotAProductAssociation(): void
+    public function test_it_does_nothing_if_current_resource_is_not_a_product_association(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::never())->method('getSection');
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $this->enabledProductsExtension->applyToItem(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $this->sectionProvider->expects($this->never())->method('getSection');
+        $this->queryBuilder->expects($this->never())->method('getRootAliases');
+
+        $this->extension->applyToItem(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
             ProductVariantInterface::class,
             [],
             new Get(),
         );
     }
 
-    public function testDoesNothingIfSectionIsNotShopApi(): void
+    public function test_it_does_nothing_if_section_is_not_shop_api(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var AdminApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(AdminApiSection::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
-        $this->enabledProductsExtension->applyToItem(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $section = $this->createMock(AdminApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+
+        $this->extension->applyToItem(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
             ProductAssociationInterface::class,
             [],
             new Get(),
         );
     }
 
-    public function testAppliesConditionsForCustomer(): void
+    public function test_it_applies_conditions_for_customer(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        /** @var ShopApiSection|MockObject $sectionMock */
-        $sectionMock = $this->createMock(ShopApiSection::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($sectionMock);
-        $queryNameGeneratorMock->expects($this->exactly(2))->method('generateParameterName')->willReturnMap([['enabled', 'enabled'], ['channel', 'channel']]);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('addSelect')->with('associatedProduct')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('o.associatedProducts', 'associatedProduct', 'WITH', 'associatedProduct.enabled = :enabled')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('associatedProduct.channels', 'channel', 'WITH', 'channel = :channel')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('enabled', true)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([['enabled', true, $queryBuilderMock], ['channel', $channelMock, $queryBuilderMock]]);
+        $section = $this->createMock(ShopApiSection::class);
+        $channel = $this->createMock(ChannelInterface::class);
+
+        $this->sectionProvider->method('getSection')->willReturn($section);
+
+        $this->queryNameGenerator->expects($this->exactly(2))
+            ->method('generateParameterName')
+            ->willReturnMap([
+                ['enabled', 'enabled'],
+                ['channel', 'channel'],
+            ]);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getRootAliases')
+            ->willReturn(['o']);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('addSelect')
+            ->with('associatedProduct')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('leftJoin')
+            ->with('o.associatedProducts', 'associatedProduct', 'WITH', 'associatedProduct.enabled = :enabled')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('innerJoin')
+            ->with('associatedProduct.channels', 'channel', 'WITH', 'channel = :channel')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->exactly(2))
+            ->method('setParameter')
+            ->willReturnMap([
+                ['enabled', true, $this->queryBuilder],
+                ['channel', $channel, $this->queryBuilder],
+            ]);
+
+        $this->extension->applyToItem(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
+            ProductAssociationInterface::class,
+            [],
+            new Get(),
+            [
+                ContextKeys::CHANNEL => $channel,
+                ContextKeys::HTTP_REQUEST_METHOD_TYPE => Request::METHOD_GET,
+            ],
+        );
     }
 }

@@ -13,17 +13,13 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Product;
 
+use ApiPlatform\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Get;
 use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\Query\Expr\Andx;
-use Doctrine\ORM\Query\Expr\Comparison;
-use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Product\TaxonBasedExtension;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
@@ -33,90 +29,134 @@ use Sylius\Component\Core\Model\ProductInterface;
 
 final class TaxonBasedExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private TaxonBasedExtension $extension;
 
-    private TaxonBasedExtension $taxonBasedExtension;
+    private MockObject&SectionProviderInterface $sectionProvider;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->taxonBasedExtension = new TaxonBasedExtension($this->sectionProviderMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->extension = new TaxonBasedExtension($this->sectionProvider);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForUnsupportedResource(): void
+    public function test_it_is_a_constraint_validator(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->taxonBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $this->assertInstanceOf(QueryCollectionExtensionInterface::class, $this->extension);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
+    public function test_it_does_not_apply_conditions_to_collection_for_unsupported_resource(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->taxonBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $queryBuilder->expects($this->never())->method('getRootAliases');
+        $queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection($queryBuilder, $queryNameGenerator, \stdClass::class);
     }
 
-    public function testDoesNothingIfFilterIsNotSet(): void
+    public function test_it_does_not_apply_conditions_to_collection_for_admin_api_section(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryBuilderMock->expects(self::never())->method('getRootAliases');
-        $this->taxonBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, ProductInterface::class, new Get());
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->sectionProvider->method('getSection')->willReturn(new AdminApiSection());
+
+        $queryBuilder->expects($this->never())->method('getRootAliases');
+        $queryBuilder->expects($this->never())->method('andWhere');
+
+        $this->extension->applyToCollection($queryBuilder, $queryNameGenerator, AddressInterface::class);
     }
 
-    public function testFiltersProductsByTaxon(): void
+    public function test_it_does_nothing_if_filter_is_not_set(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        /** @var Expr|MockObject $exprMock */
-        $exprMock = $this->createMock(Expr::class);
-        /** @var Func|MockObject $exprInMock */
-        $exprInMock = $this->createMock(Func::class);
-        /** @var Comparison|MockObject $exprEqMock */
-        $exprEqMock = $this->createMock(Comparison::class);
-        /** @var Andx|MockObject $exprAndxMock */
-        $exprAndxMock = $this->createMock(Andx::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $queryNameGeneratorMock->expects(self::once())->method('generateParameterName')->with('taxonCode')->willReturn('taxonCode');
-        $queryNameGeneratorMock->expects($this->exactly(2))->method('generateJoinAlias')->willReturnMap([['productTaxons', 'productTaxons'], ['taxon', 'taxon']]);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('addSelect')->with('productTaxons')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('o.productTaxons', 'productTaxons', 'WITH', 'productTaxons.product = o.id')
-            ->willReturn($queryBuilderMock)
-        ;
-        $queryBuilderMock->expects($this->exactly(2))->method('leftJoin')->willReturnMap([['o.productTaxons', 'productTaxons', 'WITH', 'productTaxons.product = o.id', $queryBuilderMock], ['productTaxons.taxon', 'taxon', 'WITH', Argument::type(Andx::class), $queryBuilderMock]]);
-        $exprMock->expects(self::once())->method('eq')->with('taxon.enabled', 'true')->willReturn($exprEqMock);
-        $queryBuilderMock->expects(self::once())->method('expr')->willReturn($exprMock);
-        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('productTaxons.taxon', 'taxon', 'WITH', $this->isInstanceOf(Andx::class))
-            ->willReturn($queryBuilderMock)
-        ;
-        $queryBuilderMock->expects(self::once())->method('orderBy')->with('productTaxons.position', 'ASC')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('taxonCode', ['t_shirts'])->willReturn($queryBuilderMock);
-        $this->taxonBasedExtension->applyToCollection(
-            $queryBuilderMock,
-            $queryNameGeneratorMock,
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->sectionProvider->method('getSection')->willReturn(new ShopApiSection());
+
+        $queryBuilder->expects($this->never())->method('getRootAliases');
+
+        $this->extension->applyToCollection($queryBuilder, $queryNameGenerator, ProductInterface::class, new Get());
+    }
+
+    public function test_it_filters_products_by_taxon(): void
+    {
+        $this->sectionProvider->method('getSection')->willReturn(new ShopApiSection());
+
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+        $expr = $this->createMock(Expr::class);
+        $exprIn = $this->createMock(Expr\Func::class);
+        $exprEq = $this->createMock(Expr\Comparison::class);
+        $exprAndx = $this->createMock(Expr\Andx::class);
+
+        $queryNameGenerator->expects($this->once())
+            ->method('generateParameterName')
+            ->with('taxonCode')
+            ->willReturn('taxonCode');
+
+        $queryNameGenerator->expects($this->once())
+            ->method('generateJoinAlias')
+            ->with('productTaxons')
+            ->willReturn('productTaxons');
+
+        $queryNameGenerator->expects($this->once())
+            ->method('generateJoinAlias')
+            ->with('taxon')
+            ->willReturn('taxon');
+
+        $queryBuilder->expects($this->once())
+            ->method('getRootAliases')
+            ->willReturn(['o']);
+
+        $queryBuilder->expects($this->once())
+            ->method('addSelect')
+            ->with('productTaxons')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->expects($this->once())
+            ->method('leftJoin')
+            ->with('o.productTaxons', 'productTaxons', 'WITH', 'productTaxons.product = o.id')
+            ->willReturn($queryBuilder);
+
+        $expr->expects($this->once())
+            ->method('in')
+            ->with('taxon.code', ':taxonCode')
+            ->willReturn($exprIn);
+
+        $expr->expects($this->once())
+            ->method('eq')
+            ->with('taxon.enabled', 'true')
+            ->willReturn($exprEq);
+
+        $expr->expects($this->once())
+            ->method('andX')
+            ->with($exprIn, $exprEq)
+            ->willReturn($exprAndx);
+
+        $queryBuilder->expects($this->once())
+            ->method('expr')
+            ->willReturn($expr);
+
+        $queryBuilder->expects($this->once())
+            ->method('leftJoin')
+            ->with('productTaxons.taxon', 'taxon', 'WITH', $exprAndx)
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->expects($this->once())
+            ->method('orderBy')
+            ->with('productTaxons.position', 'ASC')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with('taxonCode', ['t_shirts'])
+            ->willReturn($queryBuilder);
+
+        $this->extension->applyToCollection(
+            $queryBuilder,
+            $queryNameGenerator,
             ProductInterface::class,
             new Get(),
             ['filters' => ['productTaxons.taxon.code' => 't_shirts']],

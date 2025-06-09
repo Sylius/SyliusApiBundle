@@ -16,100 +16,154 @@ namespace Tests\Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Taxon;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Get;
 use Doctrine\ORM\QueryBuilder;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Sylius\Bundle\ApiBundle\Doctrine\ORM\QueryExtension\Shop\Taxon\ChannelBasedExtension;
 use Sylius\Bundle\ApiBundle\SectionResolver\AdminApiSection;
 use Sylius\Bundle\ApiBundle\SectionResolver\ShopApiSection;
+use Sylius\Bundle\ApiBundle\Serializer\ContextKeys;
 use Sylius\Bundle\CoreBundle\SectionResolver\SectionProviderInterface;
 use Sylius\Component\Core\Model\AddressInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Component\Taxonomy\Repository\TaxonRepositoryInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 final class ChannelBasedExtensionTest extends TestCase
 {
-    /** @var SectionProviderInterface|MockObject */
-    private MockObject $sectionProviderMock;
+    private ChannelBasedExtension $extension;
 
-    private ChannelBasedExtension $channelBasedExtension;
+    private MockObject&SectionProviderInterface $sectionProvider;
+
+    private MockObject&QueryBuilder $queryBuilder;
+
+    private MockObject&QueryNameGeneratorInterface $queryNameGenerator;
 
     protected function setUp(): void
     {
-        $this->sectionProviderMock = $this->createMock(SectionProviderInterface::class);
-        $this->channelBasedExtension = new ChannelBasedExtension($this->sectionProviderMock);
+        $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
+        $this->queryBuilder = $this->createMock(QueryBuilder::class);
+        $this->queryNameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
+
+        $this->extension = new ChannelBasedExtension($this->sectionProvider);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForUnsupportedResource(): void
+    public function test_does_not_apply_conditions_to_collection_for_unsupported_resource(): void
     {
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, stdClass::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $this->queryBuilder->expects(self::never())->method('getRootAliases');
+        $this->queryBuilder->expects(self::never())->method('andWhere');
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->queryNameGenerator, \stdClass::class);
     }
 
-    public function testDoesNotApplyConditionsToCollectionForAdminApiSection(): void
+    public function test_does_not_apply_conditions_to_collection_for_admin_api_section(): void
     {
-        /** @var AdminApiSection|MockObject $adminApiSectionMock */
-        $adminApiSectionMock = $this->createMock(AdminApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($adminApiSectionMock);
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, AddressInterface::class);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->shouldNotHaveBeenCalled();
-        $queryBuilderMock->expects(self::once())->method('andWhere')->shouldNotHaveBeenCalled();
+        $adminApiSection = $this->createMock(AdminApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($adminApiSection);
+
+        $this->queryBuilder->expects(self::never())->method('getRootAliases');
+        $this->queryBuilder->expects(self::never())->method('andWhere');
+
+        $this->extension->applyToCollection($this->queryBuilder, $this->queryNameGenerator, AddressInterface::class);
     }
 
-    public function testThrowsAnExceptionIfContextHasNotChannel(): void
+    public function test_throws_exception_if_context_has_not_channel(): void
     {
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $this->expectException(InvalidArgumentException::class);
-        $this->channelBasedExtension->applyToCollection($queryBuilderMock, $queryNameGeneratorMock, TaxonInterface::class, new Get());
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
+            TaxonInterface::class,
+            new Get(),
+        );
     }
 
-    public function testAppliesConditionsForShopApiSection(): void
+    public function test_applies_conditions_for_shop_api_section(): void
     {
-        /** @var TaxonRepositoryInterface|MockObject $taxonRepositoryMock */
-        $taxonRepositoryMock = $this->createMock(TaxonRepositoryInterface::class);
-        /** @var ShopApiSection|MockObject $shopApiSectionMock */
-        $shopApiSectionMock = $this->createMock(ShopApiSection::class);
-        /** @var TaxonInterface|MockObject $menuTaxonMock */
-        $menuTaxonMock = $this->createMock(TaxonInterface::class);
-        /** @var TaxonInterface|MockObject $firstTaxonMock */
-        $firstTaxonMock = $this->createMock(TaxonInterface::class);
-        /** @var TaxonInterface|MockObject $secondTaxonMock */
-        $secondTaxonMock = $this->createMock(TaxonInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        /** @var QueryBuilder|MockObject $queryBuilderMock */
-        $queryBuilderMock = $this->createMock(QueryBuilder::class);
-        /** @var QueryNameGeneratorInterface|MockObject $queryNameGeneratorMock */
-        $queryNameGeneratorMock = $this->createMock(QueryNameGeneratorInterface::class);
-        $this->sectionProviderMock->expects(self::once())->method('getSection')->willReturn($shopApiSectionMock);
-        $channelMock->expects(self::once())->method('getMenuTaxon')->willReturn($menuTaxonMock);
-        $menuTaxonMock->expects(self::once())->method('getCode')->willReturn('code');
-        $queryNameGeneratorMock->expects($this->exactly(2))->method('generateParameterName')->willReturnMap([['parentCode', 'parentCode'], ['enabled', 'enabled']]);
-        $queryBuilderMock->expects(self::once())->method('getRootAliases')->willReturn(['o']);
-        $queryBuilderMock->expects(self::once())->method('addSelect')->with('child')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('innerJoin')->with('o.parent', 'parent')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('leftJoin')->with('o.children', 'child', 'WITH', 'child.enabled = true')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('andWhere')->with('o.enabled = :enabled')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->exactly(2))->method('andWhere')->willReturnMap([['o.enabled = :enabled', $queryBuilderMock], ['parent.code = :parentCode', $queryBuilderMock]]);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('parentCode', 'code')->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects(self::once())->method('setParameter')->with('enabled', true)->willReturn($queryBuilderMock);
-        $queryBuilderMock->expects($this->exactly(2))->method('setParameter')->willReturnMap([['parentCode', 'code', $queryBuilderMock], ['enabled', true, $queryBuilderMock]]);
+        $taxonRepository = $this->createMock(TaxonRepositoryInterface::class);
+        $shopApiSection = $this->createMock(ShopApiSection::class);
+        $menuTaxon = $this->createMock(TaxonInterface::class);
+        $firstTaxon = $this->createMock(TaxonInterface::class);
+        $secondTaxon = $this->createMock(TaxonInterface::class);
+        $channel = $this->createMock(ChannelInterface::class);
+
+        $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
+
+        $channel->method('getMenuTaxon')->willReturn($menuTaxon);
+        $menuTaxon->method('getCode')->willReturn('code');
+
+        $this->queryNameGenerator->expects(self::exactly(2))
+            ->method('generateParameterName')
+            ->with($this->callback(fn ($param) => $param === 'parentCode' || $param === 'enabled'))
+            ->willReturnCallback(fn ($param) => $param);
+
+        $this->queryBuilder->expects(self::once())
+            ->method('getRootAliases')
+            ->willReturn(['o']);
+
+        $this->queryBuilder->expects(self::once())
+            ->method('addSelect')
+            ->with('child')
+            ->willReturnSelf();
+
+        $this->queryBuilder->expects(self::once())
+            ->method('innerJoin')
+            ->with('o.parent', 'parent')
+            ->willReturnSelf();
+
+        $this->queryBuilder->expects(self::once())
+            ->method('leftJoin')
+            ->with('o.children', 'child', 'WITH', 'child.enabled = true')
+            ->willReturnSelf();
+
+        $this->queryBuilder->expects(self::once())
+            ->method('andWhere')
+            ->with('o.enabled = :enabled')
+            ->willReturnSelf();
+
+        $this->queryBuilder->expects(self::once())
+            ->method('andWhere')
+            ->with('parent.code = :parentCode')
+            ->willReturnSelf();
+
+        $this->queryBuilder->expects(self::once())
+            ->method('addOrderBy')
+            ->with('o.position')
+            ->willReturnSelf();
+
+        $expectedParams = [
+            ['parentCode', 'code'],
+            ['enabled', true],
+        ];
+        $callIndex = 0;
+        $this->queryBuilder->expects(self::exactly(2))
+            ->method('setParameter')
+            ->with(
+                $this->callback(function ($name) use (&$expectedParams, &$callIndex) {
+                    return $name === $expectedParams[$callIndex][0];
+                }),
+                $this->callback(function ($value) use (&$expectedParams, &$callIndex) {
+                    $result = $value === $expectedParams[$callIndex][1];
+                    ++$callIndex;
+
+                    return $result;
+                }),
+            )
+            ->willReturnSelf();
+
+        $this->extension->applyToCollection(
+            $this->queryBuilder,
+            $this->queryNameGenerator,
+            TaxonInterface::class,
+            new Get(),
+            [
+                ContextKeys::CHANNEL => $channel,
+                ContextKeys::HTTP_REQUEST_METHOD_TYPE => Request::METHOD_GET,
+            ],
+        );
     }
 }
