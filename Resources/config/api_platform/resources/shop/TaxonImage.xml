@@ -35,6 +35,9 @@
                         </value>
                     </values>
                 </normalizationContext>
+                <filters>
+                    <filter>sylius_api.search_filter.shop.image</filter>
+                </filters>
             </operation>
 
             <operation
