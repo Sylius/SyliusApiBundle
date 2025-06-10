@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Account;
+namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
 use DateTimeImmutable;
 use InvalidArgumentException;

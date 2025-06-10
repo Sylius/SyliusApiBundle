@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler;
+namespace Sylius\Bundle\ApiBundle\spec\CommandHandler;
 
 use PhpSpec\ObjectBehavior;
 use ReflectionClass;

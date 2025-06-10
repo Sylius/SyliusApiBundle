@@ -11,15 +11,15 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Account;
+namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Changer\PaymentMethodChangerInterface;
 use Sylius\Bundle\ApiBundle\Command\Account\ChangePaymentMethod;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\ChangePaymentMethodHandler;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
 
@@ -58,7 +58,6 @@ final class ChangePaymentMethodHandlerTest extends TestCase
 
     public function testAssignsShopUserSChangePaymentMethodToSpecifiedPaymentAfterCheckoutCompleted(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
         $changePaymentMethod = new ChangePaymentMethod(
             orderTokenValue: 'ORDERTOKEN',
@@ -69,6 +68,6 @@ final class ChangePaymentMethodHandlerTest extends TestCase
         $this->paymentMethodChangerMock->expects(self::once())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $orderMock)
             ->willReturn($orderMock)
         ;
-        self::assertSame($orderMock, $this($changePaymentMethod));
+        self::assertSame($orderMock, $this->changePaymentMethodHandler->__invoke($changePaymentMethod));
     }
 }
