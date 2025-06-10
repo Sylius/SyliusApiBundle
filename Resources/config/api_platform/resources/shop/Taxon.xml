@@ -49,7 +49,11 @@
                 provider="sylius_api.state_provider.shop.taxon_tree.branch"
             >
                 <parameters>
-                    <parameter key="includeRoot" required="false" />
+                    <parameter
+                        key="includeRoot"
+                        required="false"
+                        description="Should root taxon be included, default: no"
+                    />
                 </parameters>
                 <normalizationContext>
                     <values>
@@ -68,7 +72,11 @@
                 provider="sylius_api.state_provider.shop.taxon_tree.path"
             >
                 <parameters>
-                    <parameter key="includeRoot" required="false" />
+                    <parameter
+                        key="includeRoot"
+                        required="false"
+                        description="Should root taxon be included, default: no"
+                    />
                 </parameters>
                 <normalizationContext>
                     <values>
