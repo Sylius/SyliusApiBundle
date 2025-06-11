@@ -23,7 +23,7 @@ trait MessageHandlerAttributeTrait
 {
     public function testAMessageHandler(): void
     {
-        $messageHandlerAttributes = (new ReflectionClass($this->getWrappedObject()::class))
+        $messageHandlerAttributes = (new ReflectionClass($this->handler::class))
             ->getAttributes(AsMessageHandler::class);
 
         Assert::count($messageHandlerAttributes, 1);

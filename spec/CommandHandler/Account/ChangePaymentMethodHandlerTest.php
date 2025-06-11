@@ -31,7 +31,7 @@ final class ChangePaymentMethodHandlerTest extends TestCase
     /** @var OrderRepositoryInterface|MockObject */
     private MockObject $orderRepositoryMock;
 
-    private ChangePaymentMethodHandler $changePaymentMethodHandler;
+    private ChangePaymentMethodHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -39,7 +39,7 @@ final class ChangePaymentMethodHandlerTest extends TestCase
     {
         $this->paymentMethodChangerMock = $this->createMock(PaymentMethodChangerInterface::class);
         $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->changePaymentMethodHandler = new ChangePaymentMethodHandler($this->paymentMethodChangerMock, $this->orderRepositoryMock);
+        $this->handler = new ChangePaymentMethodHandler($this->paymentMethodChangerMock, $this->orderRepositoryMock);
     }
 
     public function testThrowsAnExceptionIfOrderWithGivenTokenHasNotBeenFound(): void
@@ -53,7 +53,7 @@ final class ChangePaymentMethodHandlerTest extends TestCase
         $this->paymentMethodChangerMock->expects(self::never())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $this->isInstanceOf(OrderInterface::class))
         ;
         $this->expectException(InvalidArgumentException::class);
-        $this->changePaymentMethodHandler->__invoke($changePaymentMethod);
+        $this->handler->__invoke($changePaymentMethod);
     }
 
     public function testAssignsShopUserSChangePaymentMethodToSpecifiedPaymentAfterCheckoutCompleted(): void
@@ -68,6 +68,6 @@ final class ChangePaymentMethodHandlerTest extends TestCase
         $this->paymentMethodChangerMock->expects(self::once())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $orderMock)
             ->willReturn($orderMock)
         ;
-        self::assertSame($orderMock, $this->changePaymentMethodHandler->__invoke($changePaymentMethod));
+        self::assertSame($orderMock, $this->handler->__invoke($changePaymentMethod));
     }
 }

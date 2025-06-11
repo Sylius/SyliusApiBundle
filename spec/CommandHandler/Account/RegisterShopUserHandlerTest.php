@@ -53,7 +53,7 @@ final class RegisterShopUserHandlerTest extends TestCase
     /** @var MessageBusInterface|MockObject */
     private MockObject $commandBusMock;
 
-    private RegisterShopUserHandler $registerShopUserHandler;
+    private RegisterShopUserHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -65,7 +65,7 @@ final class RegisterShopUserHandlerTest extends TestCase
         $this->channelRepositoryMock = $this->createMock(ChannelRepositoryInterface::class);
         $this->generatorMock = $this->createMock(GeneratorInterface::class);
         $this->commandBusMock = $this->createMock(MessageBusInterface::class);
-        $this->registerShopUserHandler = new RegisterShopUserHandler($this->shopUserFactoryMock, $this->shopUserManagerMock, $this->customerResolverMock, $this->channelRepositoryMock, $this->generatorMock, $this->commandBusMock);
+        $this->handler = new RegisterShopUserHandler($this->shopUserFactoryMock, $this->shopUserManagerMock, $this->customerResolverMock, $this->channelRepositoryMock, $this->generatorMock, $this->commandBusMock);
     }
 
     public function testCreatesAShopUserWithGivenData(): void
@@ -99,14 +99,20 @@ final class RegisterShopUserHandlerTest extends TestCase
         $shopUserMock->expects(self::once())->method('setEmailVerificationToken')->with('TOKEN');
         $this->shopUserManagerMock->expects(self::once())->method('persist')->with($shopUserMock);
         $sendRegistrationEmailCommand = new SendAccountRegistrationEmail('WILL.SMITH@example.com', 'en_US', 'CHANNEL_CODE');
-        $this->commandBusMock->expects(self::once())->method('dispatch')->with($sendRegistrationEmailCommand, [new DispatchAfterCurrentBusStamp()])
-            ->willReturn(new Envelope($sendRegistrationEmailCommand))
-        ;
         $sendVerificationEmailCommand = new SendShopUserVerificationEmail('WILL.SMITH@example.com', 'en_US', 'CHANNEL_CODE');
-        $this->commandBusMock->expects(self::once())->method('dispatch')->with($sendVerificationEmailCommand, [new DispatchAfterCurrentBusStamp()])
-            ->willReturn(new Envelope($sendVerificationEmailCommand))
-        ;
-        self::assertSame($shopUserMock, $this($command));
+       $this->commandBusMock->expects(self::exactly(2))
+           ->method('dispatch')
+           ->with(
+               self::callback(function ($command) use ($sendRegistrationEmailCommand, $sendVerificationEmailCommand) {
+                   return $command == $sendRegistrationEmailCommand || $command == $sendVerificationEmailCommand;
+               }),
+               [new DispatchAfterCurrentBusStamp()]
+           )
+           ->willReturnOnConsecutiveCalls(
+               new Envelope($sendRegistrationEmailCommand),
+               new Envelope($sendVerificationEmailCommand)
+           );
+        self::assertSame($shopUserMock, $this->handler->__invoke($command));
     }
 
     public function testCreatesAShopUserWithGivenDataAndVerifiesIt(): void
@@ -142,7 +148,7 @@ final class RegisterShopUserHandlerTest extends TestCase
         $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CHANNEL_CODE')->willReturn($channelMock);
         $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(false);
         $shopUserMock->setEnabled(true);
-        self::assertSame($shopUserMock, $this($command));
+        self::assertSame($shopUserMock, $this->handler->__invoke($command));
     }
 
     public function testThrowsAnExceptionIfCustomerWithUserAlreadyExists(): void
@@ -160,7 +166,7 @@ final class RegisterShopUserHandlerTest extends TestCase
         $sendRegistrationEmailCommand = new SendAccountRegistrationEmail('WILL.SMITH@example.com', 'en_US', 'CHANNEL_CODE');
         $this->commandBusMock->expects(self::never())->method('dispatch')->with($sendRegistrationEmailCommand)->willReturn(new Envelope($sendRegistrationEmailCommand));
         $this->expectException(DomainException::class);
-        $this->registerShopUserHandler->__invoke(new RegisterShopUser(
+        $this->handler->__invoke(new RegisterShopUser(
             channelCode: 'CHANNEL_CODE',
             localeCode: 'en_US',
             firstName: 'Will',

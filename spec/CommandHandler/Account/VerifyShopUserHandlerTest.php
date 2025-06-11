@@ -17,7 +17,7 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use stdClass;
 use Sylius\Bundle\ApiBundle\Command\Account\SendAccountRegistrationEmail;
 use Sylius\Bundle\ApiBundle\Command\Account\VerifyShopUser;
@@ -40,7 +40,7 @@ final class VerifyShopUserHandlerTest extends TestCase
     /** @var MessageBusInterface|MockObject */
     private MockObject $commandBusMock;
 
-    private VerifyShopUserHandler $verifyShopUserHandler;
+    private VerifyShopUserHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -49,7 +49,7 @@ final class VerifyShopUserHandlerTest extends TestCase
         $this->shopUserRepositoryMock = $this->createMock(RepositoryInterface::class);
         $this->clockMock = $this->createMock(ClockInterface::class);
         $this->commandBusMock = $this->createMock(MessageBusInterface::class);
-        $this->verifyShopUserHandler = new VerifyShopUserHandler($this->shopUserRepositoryMock, $this->clockMock, $this->commandBusMock);
+        $this->handler = new VerifyShopUserHandler($this->shopUserRepositoryMock, $this->clockMock, $this->commandBusMock);
     }
 
     public function testVerifiesShopUser(): void
@@ -63,13 +63,13 @@ final class VerifyShopUserHandlerTest extends TestCase
         $userMock->expects(self::once())->method('setEmailVerificationToken')->with(null);
         $userMock->expects(self::once())->method('enable');
         $this->commandBusMock->expects(self::once())->method('dispatch')->with(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'), [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope(new stdClass()));
-        $this(new VerifyShopUser(channelCode: 'WEB', localeCode:  'en_US', token: 'ToKeN'));
+        $this->handler->__invoke(new VerifyShopUser(channelCode: 'WEB', localeCode:  'en_US', token: 'ToKeN'));
     }
 
     public function testThrowsErrorIfUserDoesNotExist(): void
     {
         $this->shopUserRepositoryMock->expects(self::once())->method('findOneBy')->with(['emailVerificationToken' => 'ToKeN'])->willReturn(null);
         $this->expectException(InvalidArgumentException::class);
-        $this->verifyShopUserHandler->__invoke(new VerifyShopUser(channelCode: 'WEB', localeCode:  'en_US', token: 'ToKeN'));
+        $this->handler->__invoke(new VerifyShopUser(channelCode: 'WEB', localeCode:  'en_US', token: 'ToKeN'));
     }
 }

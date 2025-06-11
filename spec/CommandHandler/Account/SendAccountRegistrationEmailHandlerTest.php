@@ -15,7 +15,7 @@ namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Account\SendAccountRegistrationEmail;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\SendAccountRegistrationEmailHandler;
 use Sylius\Bundle\CoreBundle\Mailer\AccountRegistrationEmailManagerInterface;
@@ -35,7 +35,7 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
     /** @var AccountRegistrationEmailManagerInterface|MockObject */
     private MockObject $accountRegistrationEmailManagerMock;
 
-    private SendAccountRegistrationEmailHandler $sendAccountRegistrationEmailHandler;
+    private SendAccountRegistrationEmailHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -44,7 +44,7 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
         $this->shopUserRepositoryMock = $this->createMock(UserRepositoryInterface::class);
         $this->channelRepositoryMock = $this->createMock(ChannelRepositoryInterface::class);
         $this->accountRegistrationEmailManagerMock = $this->createMock(AccountRegistrationEmailManagerInterface::class);
-        $this->sendAccountRegistrationEmailHandler = new SendAccountRegistrationEmailHandler($this->shopUserRepositoryMock, $this->channelRepositoryMock, $this->accountRegistrationEmailManagerMock);
+        $this->handler = new SendAccountRegistrationEmailHandler($this->shopUserRepositoryMock, $this->channelRepositoryMock, $this->accountRegistrationEmailManagerMock);
     }
 
     public function testSendsUserAccountRegistrationEmailWhenAccountVerificationIsNotRequired(): void
@@ -58,7 +58,7 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
         $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(false);
         $this->accountRegistrationEmailManagerMock->expects(self::once())->method('sendAccountRegistrationEmail')->with($shopUserMock, $channelMock, 'en_US')
         ;
-        $this(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
+        $this->handler->__invoke(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 
     public function testSendsUserRegistrationEmailWhenAccountVerificationRequiredAndUserIsEnabled(): void
@@ -73,7 +73,7 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
         $shopUserMock->expects(self::once())->method('isEnabled')->willReturn(true);
         $this->accountRegistrationEmailManagerMock->expects(self::once())->method('sendAccountRegistrationEmail')->with($shopUserMock, $channelMock, 'en_US')
         ;
-        $this(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
+        $this->handler->__invoke(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 
     public function testDoesNothingWhenAccountVerificationIsRequiredAndUserIsDisabled(): void
@@ -87,6 +87,6 @@ final class SendAccountRegistrationEmailHandlerTest extends TestCase
         $channelMock->expects(self::once())->method('isAccountVerificationRequired')->willReturn(true);
         $shopUserMock->expects(self::once())->method('isEnabled')->willReturn(false);
         $this->accountRegistrationEmailManagerMock->expects(self::never())->method('sendAccountRegistrationEmail')->with($this->any());
-        $this(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
+        $this->handler->__invoke(new SendAccountRegistrationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 }

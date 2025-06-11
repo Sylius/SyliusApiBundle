@@ -16,7 +16,7 @@ namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Account\RequestShopUserVerification;
 use Sylius\Bundle\ApiBundle\Command\Account\SendShopUserVerificationEmail;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\RequestShopUserVerificationHandler;
@@ -39,7 +39,7 @@ final class RequestShopUserVerificationHandlerTest extends TestCase
     /** @var MessageBusInterface|MockObject */
     private MockObject $messageBusMock;
 
-    private RequestShopUserVerificationHandler $requestShopUserVerificationHandler;
+    private RequestShopUserVerificationHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -48,7 +48,7 @@ final class RequestShopUserVerificationHandlerTest extends TestCase
         $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
         $this->generatorMock = $this->createMock(GeneratorInterface::class);
         $this->messageBusMock = $this->createMock(MessageBusInterface::class);
-        $this->requestShopUserVerificationHandler = new RequestShopUserVerificationHandler($this->userRepositoryMock, $this->generatorMock, $this->messageBusMock);
+        $this->handler = new RequestShopUserVerificationHandler($this->userRepositoryMock, $this->generatorMock, $this->messageBusMock);
     }
 
     public function testThrowsExceptionIfShopUserDoesNotExist(): void
@@ -60,7 +60,7 @@ final class RequestShopUserVerificationHandlerTest extends TestCase
             localeCode: 'en_US',
         );
         $this->expectException(InvalidArgumentException::class);
-        $this->requestShopUserVerificationHandler->__invoke($resendVerificationEmail);
+        $this->handler->__invoke($resendVerificationEmail);
     }
 
     public function testHandlesRequestForResendVerificationEmail(): void
@@ -81,6 +81,6 @@ final class RequestShopUserVerificationHandlerTest extends TestCase
             channelCode: 'WEB',
             localeCode: 'en_US',
         );
-        $this($resendVerificationEmail);
+        $this->handler->__invoke($resendVerificationEmail);
     }
 }

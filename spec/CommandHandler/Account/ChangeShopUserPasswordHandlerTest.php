@@ -31,7 +31,7 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
     /** @var UserRepositoryInterface|MockObject */
     private MockObject $userRepositoryMock;
 
-    private ChangeShopUserPasswordHandler $changeShopUserPasswordHandler;
+    private ChangeShopUserPasswordHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -39,7 +39,7 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
     {
         $this->passwordUpdaterMock = $this->createMock(PasswordUpdaterInterface::class);
         $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->changeShopUserPasswordHandler = new ChangeShopUserPasswordHandler($this->passwordUpdaterMock, $this->userRepositoryMock);
+        $this->handler = new ChangeShopUserPasswordHandler($this->passwordUpdaterMock, $this->userRepositoryMock);
     }
 
     public function testUpdatesUserPassword(): void
@@ -55,7 +55,7 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
             currentPassword: 'OLD_PASSWORD',
             shopUserId: 42,
         );
-        $this->changeShopUserPasswordHandler->__invoke($changePasswordShopUser);
+        $this->handler->__invoke($changePasswordShopUser);
     }
 
     public function testThrowsExceptionIfNewPasswordsDoNotMatch(): void
@@ -72,7 +72,7 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
             shopUserId: 42,
         );
         $this->expectException(InvalidArgumentException::class);
-        $this->changeShopUserPasswordHandler->__invoke($changePasswordShopUser);
+        $this->handler->__invoke($changePasswordShopUser);
     }
 
     public function testThrowsExceptionIfShopUserHasNotBeenFound(): void
@@ -89,6 +89,6 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
             shopUserId: 42,
         );
         $this->expectException(InvalidArgumentException::class);
-        $this->changeShopUserPasswordHandler->__invoke($changePasswordShopUser);
+        $this->handler->__invoke($changePasswordShopUser);
     }
 }
