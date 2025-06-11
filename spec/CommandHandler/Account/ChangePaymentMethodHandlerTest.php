@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Changer\PaymentMethodChangerInterface;
@@ -25,11 +24,9 @@ use Sylius\Component\Core\Repository\OrderRepositoryInterface;
 
 final class ChangePaymentMethodHandlerTest extends TestCase
 {
-    /** @var PaymentMethodChangerInterface|MockObject */
-    private MockObject $paymentMethodChangerMock;
+    private MockObject&PaymentMethodChangerInterface $paymentMethodChanger;
 
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
     private ChangePaymentMethodHandler $handler;
 
@@ -37,9 +34,10 @@ final class ChangePaymentMethodHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->paymentMethodChangerMock = $this->createMock(PaymentMethodChangerInterface::class);
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->handler = new ChangePaymentMethodHandler($this->paymentMethodChangerMock, $this->orderRepositoryMock);
+        parent::setUp();
+        $this->paymentMethodChanger = $this->createMock(PaymentMethodChangerInterface::class);
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->handler = new ChangePaymentMethodHandler($this->paymentMethodChanger, $this->orderRepository);
     }
 
     public function testThrowsAnExceptionIfOrderWithGivenTokenHasNotBeenFound(): void
@@ -49,25 +47,34 @@ final class ChangePaymentMethodHandlerTest extends TestCase
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
-        $this->paymentMethodChangerMock->expects(self::never())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $this->isInstanceOf(OrderInterface::class))
-        ;
-        $this->expectException(InvalidArgumentException::class);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn(null);
+        $this->paymentMethodChanger->expects(self::never())
+            ->method('changePaymentMethod')
+            ->with('CASH_ON_DELIVERY_METHOD', 123, $this
+                ->isInstanceOf(OrderInterface::class));
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($changePaymentMethod);
     }
 
     public function testAssignsShopUserSChangePaymentMethodToSpecifiedPaymentAfterCheckoutCompleted(): void
     {
-        $orderMock = $this->createMock(OrderInterface::class);
+        $order = $this->createMock(OrderInterface::class);
         $changePaymentMethod = new ChangePaymentMethod(
             orderTokenValue: 'ORDERTOKEN',
             paymentId: 123,
             paymentMethodCode: 'CASH_ON_DELIVERY_METHOD',
         );
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $this->paymentMethodChangerMock->expects(self::once())->method('changePaymentMethod')->with('CASH_ON_DELIVERY_METHOD', 123, $orderMock)
-            ->willReturn($orderMock)
-        ;
-        self::assertSame($orderMock, $this->handler->__invoke($changePaymentMethod));
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn($order);
+        $this->paymentMethodChanger->expects(self::once())
+            ->method('changePaymentMethod')
+            ->with('CASH_ON_DELIVERY_METHOD', 123, $order)
+            ->willReturn($order);
+        self::assertSame($order, $this->handler->__invoke($changePaymentMethod));
     }
 }

@@ -13,12 +13,11 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Cart;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Cart\RemoveItemFromCart;
 use Sylius\Bundle\ApiBundle\CommandHandler\Cart\RemoveItemFromCartHandler;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
@@ -27,61 +26,69 @@ use Sylius\Component\Product\Resolver\ProductVariantResolverInterface;
 
 final class RemoveItemFromCartHandlerTest extends TestCase
 {
-    /** @var OrderItemRepositoryInterface|MockObject */
-    private MockObject $orderItemRepositoryMock;
+    private MockObject&OrderItemRepositoryInterface $orderItemRepository;
 
-    /** @var OrderModifierInterface|MockObject */
-    private MockObject $orderModifierMock;
+    private MockObject&OrderModifierInterface $orderModifier;
 
-    /** @var ProductVariantResolverInterface|MockObject */
-    private MockObject $variantResolverMock;
+    private MockObject&ProductVariantResolverInterface $variantResolver;
 
-    private RemoveItemFromCartHandler $removeItemFromCartHandler;
+    private RemoveItemFromCartHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
     {
-        $this->orderItemRepositoryMock = $this->createMock(OrderItemRepositoryInterface::class);
-        $this->orderModifierMock = $this->createMock(OrderModifierInterface::class);
-        $this->variantResolverMock = $this->createMock(ProductVariantResolverInterface::class);
-        $this->removeItemFromCartHandler = new RemoveItemFromCartHandler($this->orderItemRepositoryMock, $this->orderModifierMock, $this->variantResolverMock);
+        parent::setUp();
+        $this->orderItemRepository = $this->createMock(OrderItemRepositoryInterface::class);
+        $this->orderModifier = $this->createMock(OrderModifierInterface::class);
+        $this->variantResolver = $this->createMock(ProductVariantResolverInterface::class);
+        $this->handler = new RemoveItemFromCartHandler($this->orderItemRepository, $this->orderModifier, $this->variantResolver);
     }
 
     public function testRemovesOrderItemFromCart(): void
     {
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        /** @var OrderItemInterface|MockObject $cartItemMock */
-        $cartItemMock = $this->createMock(OrderItemInterface::class);
-        $this->orderItemRepositoryMock->expects(self::once())->method('findOneByIdAndCartTokenValue')->with('ORDER_ITEM_ID', 'TOKEN_VALUE')->willReturn($cartItemMock);
-        $cartItemMock->expects(self::once())->method('getOrder')->willReturn($cartMock);
-        $cartMock->expects(self::once())->method('getTokenValue')->willReturn('TOKEN_VALUE');
-        $this->orderModifierMock->expects(self::once())->method('removeFromOrder')->with($cartMock, $cartItemMock);
-        self::assertSame($cartMock, $this(new RemoveItemFromCart(orderTokenValue: 'TOKEN_VALUE', itemId: 'ORDER_ITEM_ID')));
+        /** @var OrderInterface|MockObject $cart */
+        $cart = $this->createMock(OrderInterface::class);
+        /** @var OrderItemInterface|MockObject $cartItem */
+        $cartItem = $this->createMock(OrderItemInterface::class);
+        $this->orderItemRepository->expects(self::once())
+            ->method('findOneByIdAndCartTokenValue')
+            ->with('ORDER_ITEM_ID', 'TOKEN_VALUE')
+            ->willReturn($cartItem);
+        $cartItem->expects(self::once())->method('getOrder')->willReturn($cart);
+        $cart->expects(self::once())->method('getTokenValue')->willReturn('TOKEN_VALUE');
+        $this->orderModifier->expects(self::once())->method('removeFromOrder')->with($cart, $cartItem);
+        self::assertSame($cart, $this->handler->__invoke(
+            new RemoveItemFromCart(orderTokenValue: 'TOKEN_VALUE', itemId: 'ORDER_ITEM_ID'),
+        ));
     }
 
     public function testThrowsAnExceptionIfOrderItemWasNotFound(): void
     {
-        /** @var OrderItemInterface|MockObject $cartItemMock */
-        $cartItemMock = $this->createMock(OrderItemInterface::class);
-        $this->orderItemRepositoryMock->expects(self::once())->method('findOneByIdAndCartTokenValue')->with('ORDER_ITEM_ID', 'TOKEN_VALUE')->willReturn(null);
-        $cartItemMock->expects(self::never())->method('getOrder');
-        $this->expectException(InvalidArgumentException::class);
-        $this->removeItemFromCartHandler->__invoke(new RemoveItemFromCart(orderTokenValue: 'TOKEN_VALUE', itemId: 'ORDER_ITEM_ID'));
+        /** @var OrderItemInterface|MockObject $cartItem */
+        $cartItem = $this->createMock(OrderItemInterface::class);
+        $this->orderItemRepository->expects(self::once())
+            ->method('findOneByIdAndCartTokenValue')
+            ->with('ORDER_ITEM_ID', 'TOKEN_VALUE')->willReturn(null);
+        $cartItem->expects(self::never())->method('getOrder');
+        self::expectException(\InvalidArgumentException::class);
+        $this->handler->__invoke(new RemoveItemFromCart(orderTokenValue: 'TOKEN_VALUE', itemId: 'ORDER_ITEM_ID'));
     }
 
     public function testThrowsAnExceptionIfCartTokenValueWasNotProperly(): void
     {
-        /** @var OrderItemInterface|MockObject $cartItemMock */
-        $cartItemMock = $this->createMock(OrderItemInterface::class);
-        /** @var OrderInterface|MockObject $cartMock */
-        $cartMock = $this->createMock(OrderInterface::class);
-        $this->orderItemRepositoryMock->expects(self::once())->method('findOneByIdAndCartTokenValue')->with('ORDER_ITEM_ID', 'TOKEN_VALUE')->willReturn($cartItemMock);
-        $cartItemMock->expects(self::once())->method('getOrder')->willReturn($cartMock);
-        $cartMock->expects(self::once())->method('getTokenValue')->willReturn('WRONG_TOKEN_VALUE_');
-        $this->orderModifierMock->expects(self::never())->method('removeFromOrder')->with(null, $cartItemMock);
-        $this->expectException(InvalidArgumentException::class);
-        $this->removeItemFromCartHandler->__invoke(new RemoveItemFromCart(orderTokenValue: 'TOKEN_VALUE', itemId: 'ORDER_ITEM_ID'));
+        /** @var OrderItemInterface|MockObject $cartItem */
+        $cartItem = $this->createMock(OrderItemInterface::class);
+        /** @var OrderInterface|MockObject $cart */
+        $cart = $this->createMock(OrderInterface::class);
+        $this->orderItemRepository->expects(self::once())
+            ->method('findOneByIdAndCartTokenValue')
+            ->with('ORDER_ITEM_ID', 'TOKEN_VALUE')
+            ->willReturn($cartItem);
+        $cartItem->expects(self::once())->method('getOrder')->willReturn($cart);
+        $cart->expects(self::once())->method('getTokenValue')->willReturn('WRONG_TOKEN_VALUE_');
+        $this->orderModifier->expects(self::never())->method('removeFromOrder')->with(null, $cartItem);
+        self::expectException(\InvalidArgumentException::class);
+        $this->handler->__invoke(new RemoveItemFromCart(orderTokenValue: 'TOKEN_VALUE', itemId: 'ORDER_ITEM_ID'));
     }
 }

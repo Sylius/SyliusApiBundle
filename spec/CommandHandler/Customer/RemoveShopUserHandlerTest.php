@@ -15,10 +15,10 @@ namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Customer;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Customer\RemoveShopUser;
 use Sylius\Bundle\ApiBundle\CommandHandler\Customer\RemoveShopUserHandler;
 use Sylius\Bundle\ApiBundle\Exception\UserNotFoundException;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\ShopUserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
 
@@ -27,21 +27,21 @@ final class RemoveShopUserHandlerTest extends TestCase
     /** @var UserRepositoryInterface|MockObject */
     private MockObject $userRepositoryMock;
 
-    private RemoveShopUserHandler $removeShopUserHandler;
+    private RemoveShopUserHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
     {
         $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->removeShopUserHandler = new RemoveShopUserHandler($this->userRepositoryMock);
+        $this->handler = new RemoveShopUserHandler($this->userRepositoryMock);
     }
 
     public function testThrowsAnExceptionIfUserHasNotBeenFound(): void
     {
         $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn(null);
-        $this->expectException(UserNotFoundException::class);
-        $this->removeShopUserHandler->__invoke(new RemoveShopUser(42));
+        self::expectException(UserNotFoundException::class);
+        $this->handler->__invoke(new RemoveShopUser(42));
     }
 
     public function testRemoveShopUser(): void
@@ -51,6 +51,6 @@ final class RemoveShopUserHandlerTest extends TestCase
         $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
         $shopUserMock->expects(self::once())->method('setCustomer')->with(null);
         $this->userRepositoryMock->expects(self::once())->method('remove')->with($shopUserMock);
-        $this->removeShopUserHandler->__invoke(new RemoveShopUser(42));
+        $this->handler->__invoke(new RemoveShopUser(42));
     }
 }

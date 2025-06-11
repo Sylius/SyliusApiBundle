@@ -13,13 +13,12 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Account\RequestShopUserVerification;
 use Sylius\Bundle\ApiBundle\Command\Account\SendShopUserVerificationEmail;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\RequestShopUserVerificationHandler;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Core\Model\ShopUserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
@@ -30,14 +29,11 @@ use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 
 final class RequestShopUserVerificationHandlerTest extends TestCase
 {
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $userRepositoryMock;
+    private MockObject&UserRepositoryInterface $userRepository;
 
-    /** @var GeneratorInterface|MockObject */
-    private MockObject $generatorMock;
+    private GeneratorInterface&MockObject $generator;
 
-    /** @var MessageBusInterface|MockObject */
-    private MockObject $messageBusMock;
+    private MessageBusInterface&MockObject $messageBus;
 
     private RequestShopUserVerificationHandler $handler;
 
@@ -45,37 +41,45 @@ final class RequestShopUserVerificationHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->generatorMock = $this->createMock(GeneratorInterface::class);
-        $this->messageBusMock = $this->createMock(MessageBusInterface::class);
-        $this->handler = new RequestShopUserVerificationHandler($this->userRepositoryMock, $this->generatorMock, $this->messageBusMock);
+        parent::setUp();
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->generator = $this->createMock(GeneratorInterface::class);
+        $this->messageBus = $this->createMock(MessageBusInterface::class);
+        $this->handler = new RequestShopUserVerificationHandler(
+            $this->userRepository,
+            $this->generator,
+            $this->messageBus,
+        );
     }
 
     public function testThrowsExceptionIfShopUserDoesNotExist(): void
     {
-        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn(null);
+        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn(null);
         $resendVerificationEmail = new RequestShopUserVerification(
             shopUserId: 42,
             channelCode: 'WEB',
             localeCode: 'en_US',
         );
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($resendVerificationEmail);
     }
 
     public function testHandlesRequestForResendVerificationEmail(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $customerMock->expects(self::once())->method('getEmail')->willReturn('test@email.com');
-        $this->generatorMock->expects(self::once())->method('generate')->willReturn('TOKEN');
-        $shopUserMock->expects(self::once())->method('setEmailVerificationToken')->with('TOKEN');
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        /** @var CustomerInterface|MockObject $customer */
+        $customer = $this->createMock(CustomerInterface::class);
+        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn($shopUser);
+        $shopUser->expects(self::once())->method('getCustomer')->willReturn($customer);
+        $customer->expects(self::once())->method('getEmail')->willReturn('test@email.com');
+        $this->generator->expects(self::once())->method('generate')->willReturn('TOKEN');
+        $shopUser->expects(self::once())->method('setEmailVerificationToken')->with('TOKEN');
         $sendAccountVerificationEmail = new SendShopUserVerificationEmail('test@email.com', 'en_US', 'WEB');
-        $this->messageBusMock->expects(self::once())->method('dispatch')->with($sendAccountVerificationEmail, [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope($sendAccountVerificationEmail));
+        $this->messageBus->expects(self::once())
+            ->method('dispatch')
+            ->with($sendAccountVerificationEmail, [new DispatchAfterCurrentBusStamp()])
+            ->willReturn(new Envelope($sendAccountVerificationEmail));
         $resendVerificationEmail = new RequestShopUserVerification(
             shopUserId: 42,
             channelCode: 'WEB',

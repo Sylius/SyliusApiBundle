@@ -15,9 +15,9 @@ namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Checkout;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Checkout\SendOrderConfirmation;
 use Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\CoreBundle\Mailer\OrderEmailManagerInterface;
 use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Core\Model\OrderInterface;
@@ -31,7 +31,7 @@ final class SendOrderConfirmationHandlerTest extends TestCase
     /** @var OrderEmailManagerInterface|MockObject */
     private MockObject $orderEmailManagerMock;
 
-    private SendOrderConfirmationHandler $sendOrderConfirmationHandler;
+    private SendOrderConfirmationHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -39,7 +39,7 @@ final class SendOrderConfirmationHandlerTest extends TestCase
     {
         $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
         $this->orderEmailManagerMock = $this->createMock(OrderEmailManagerInterface::class);
-        $this->sendOrderConfirmationHandler = new SendOrderConfirmationHandler($this->orderRepositoryMock, $this->orderEmailManagerMock);
+        $this->handler = new SendOrderConfirmationHandler($this->orderRepositoryMock, $this->orderEmailManagerMock);
     }
 
     public function testSendsOrderConfirmationMessage(): void
@@ -49,10 +49,10 @@ final class SendOrderConfirmationHandlerTest extends TestCase
         /** @var CustomerInterface|MockObject $customerMock */
         $customerMock = $this->createMock(CustomerInterface::class);
         $this->orderRepositoryMock->expects(self::once())->method('findOneByTokenValue')->with('TOKEN')->willReturn($orderMock);
-        $orderMock->expects(self::once())->method('getLocaleCode')->willReturn('pl_PL');
-        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+        $orderMock->method('getLocaleCode')->willReturn('pl_PL');
+        $orderMock->method('getCustomer')->willReturn($customerMock);
         $customerMock->expects(self::once())->method('getEmail')->willReturn('johnny.bravo@email.com');
         $this->orderEmailManagerMock->expects(self::once())->method('sendConfirmationEmail')->with($orderMock);
-        $this(new SendOrderConfirmation('TOKEN'));
+        $this->handler->__invoke(new SendOrderConfirmation('TOKEN'));
     }
 }

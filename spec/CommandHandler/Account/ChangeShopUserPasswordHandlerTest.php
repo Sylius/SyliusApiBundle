@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Account\ChangeShopUserPassword;
@@ -25,11 +24,9 @@ use Sylius\Component\User\Security\PasswordUpdaterInterface;
 
 final class ChangeShopUserPasswordHandlerTest extends TestCase
 {
-    /** @var PasswordUpdaterInterface|MockObject */
-    private MockObject $passwordUpdaterMock;
+    private MockObject&PasswordUpdaterInterface $passwordUpdater;
 
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $userRepositoryMock;
+    private MockObject&UserRepositoryInterface $userRepository;
 
     private ChangeShopUserPasswordHandler $handler;
 
@@ -37,18 +34,19 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->passwordUpdaterMock = $this->createMock(PasswordUpdaterInterface::class);
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->handler = new ChangeShopUserPasswordHandler($this->passwordUpdaterMock, $this->userRepositoryMock);
+        parent::setUp();
+        $this->passwordUpdater = $this->createMock(PasswordUpdaterInterface::class);
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->handler = new ChangeShopUserPasswordHandler($this->passwordUpdater, $this->userRepository);
     }
 
     public function testUpdatesUserPassword(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects(self::once())->method('setPlainPassword')->with('PLAIN_PASSWORD');
-        $this->passwordUpdaterMock->expects(self::once())->method('updatePassword')->with($shopUserMock);
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn($shopUser);
+        $shopUser->expects(self::once())->method('setPlainPassword')->with('PLAIN_PASSWORD');
+        $this->passwordUpdater->expects(self::once())->method('updatePassword')->with($shopUser);
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
             confirmNewPassword: 'PLAIN_PASSWORD',
@@ -60,35 +58,35 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
 
     public function testThrowsExceptionIfNewPasswordsDoNotMatch(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects(self::never())->method('find');
-        $shopUserMock->expects(self::never())->method('setPlainPassword');
-        $this->passwordUpdaterMock->expects(self::never())->method('updatePassword');
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        $this->userRepository->expects(self::never())->method('find');
+        $shopUser->expects(self::never())->method('setPlainPassword');
+        $this->passwordUpdater->expects(self::never())->method('updatePassword');
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
             confirmNewPassword: 'WRONG_PASSWORD',
             currentPassword: 'OLD_PASSWORD',
             shopUserId: 42,
         );
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($changePasswordShopUser);
     }
 
     public function testThrowsExceptionIfShopUserHasNotBeenFound(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn(null);
-        $shopUserMock->expects(self::never())->method('setPlainPassword');
-        $this->passwordUpdaterMock->expects(self::never())->method('updatePassword');
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn(null);
+        $shopUser->expects(self::never())->method('setPlainPassword');
+        $this->passwordUpdater->expects(self::never())->method('updatePassword');
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
             confirmNewPassword: 'PLAIN_PASSWORD',
             currentPassword: 'OLD_PASSWORD',
             shopUserId: 42,
         );
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($changePasswordShopUser);
     }
 }

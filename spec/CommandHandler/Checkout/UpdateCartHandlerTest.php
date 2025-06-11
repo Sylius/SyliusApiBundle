@@ -16,11 +16,11 @@ namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Checkout;
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Assigner\OrderPromotionCodeAssignerInterface;
 use Sylius\Bundle\ApiBundle\Command\Checkout\UpdateCart;
 use Sylius\Bundle\ApiBundle\CommandHandler\Checkout\UpdateCartHandler;
 use Sylius\Bundle\ApiBundle\Modifier\OrderAddressModifierInterface;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\CoreBundle\Resolver\CustomerResolverInterface;
 use Sylius\Component\Core\Model\AddressInterface;
 use Sylius\Component\Core\Model\CustomerInterface;
@@ -41,7 +41,7 @@ final class UpdateCartHandlerTest extends TestCase
     /** @var CustomerResolverInterface|MockObject */
     private MockObject $customerResolverMock;
 
-    private UpdateCartHandler $updateCartHandler;
+    private UpdateCartHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -51,7 +51,7 @@ final class UpdateCartHandlerTest extends TestCase
         $this->orderAddressModifierMock = $this->createMock(OrderAddressModifierInterface::class);
         $this->orderPromotionCodeAssignerMock = $this->createMock(OrderPromotionCodeAssignerInterface::class);
         $this->customerResolverMock = $this->createMock(CustomerResolverInterface::class);
-        $this->updateCartHandler = new UpdateCartHandler($this->orderRepositoryMock, $this->orderAddressModifierMock, $this->orderPromotionCodeAssignerMock, $this->customerResolverMock);
+        $this->handler = new UpdateCartHandler($this->orderRepositoryMock, $this->orderAddressModifierMock, $this->orderPromotionCodeAssignerMock, $this->customerResolverMock);
     }
 
     public function testThrowsExceptionIfCartIsNotFound(): void
@@ -73,8 +73,8 @@ final class UpdateCartHandlerTest extends TestCase
             couponCode: 'coupon',
             orderTokenValue: 'cart',
         );
-        $this->expectException(InvalidArgumentException::class);
-        $this->updateCartHandler->__invoke($updateCart);
+        self::expectException(InvalidArgumentException::class);
+        $this->handler->__invoke($updateCart);
     }
 
     public function testModifiesBillingAddress(): void
@@ -95,7 +95,7 @@ final class UpdateCartHandlerTest extends TestCase
         $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, null)
             ->willReturn($orderMock)
         ;
-        self::assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this->handler->__invoke($updateCart));
     }
 
     public function testModifiesShippingAddress(): void
@@ -116,7 +116,7 @@ final class UpdateCartHandlerTest extends TestCase
         $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, null)
             ->willReturn($orderMock)
         ;
-        self::assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this->handler->__invoke($updateCart));
     }
 
     public function testAppliesCoupon(): void
@@ -133,7 +133,7 @@ final class UpdateCartHandlerTest extends TestCase
         $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, 'couponCode')
             ->willReturn($orderMock)
         ;
-        self::assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this->handler->__invoke($updateCart));
     }
 
     public function testModifiesAddressAndEmailAndAppliesCoupon(): void
@@ -162,7 +162,7 @@ final class UpdateCartHandlerTest extends TestCase
         $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, 'couponCode')
             ->willReturn($orderMock)
         ;
-        self::assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this->handler->__invoke($updateCart));
     }
 
     public function testSetsTheCustomerByEmail(): void
@@ -191,6 +191,6 @@ final class UpdateCartHandlerTest extends TestCase
         $this->orderPromotionCodeAssignerMock->expects(self::once())->method('assign')->with($orderMock, 'couponCode')
             ->willReturn($orderMock)
         ;
-        self::assertSame($orderMock, $this($updateCart));
+        self::assertSame($orderMock, $this->handler->__invoke($updateCart));
     }
 }

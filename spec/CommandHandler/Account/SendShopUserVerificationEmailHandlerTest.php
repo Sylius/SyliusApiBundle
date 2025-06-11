@@ -15,11 +15,11 @@ namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Account\SendShopUserVerificationEmail;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\SendShopUserVerificationEmailHandler;
 use Sylius\Bundle\ApiBundle\Exception\ChannelNotFoundException;
 use Sylius\Bundle\ApiBundle\Exception\UserNotFoundException;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\CoreBundle\Mailer\AccountVerificationEmailManagerInterface;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
@@ -28,14 +28,11 @@ use Sylius\Component\User\Repository\UserRepositoryInterface;
 
 final class SendShopUserVerificationEmailHandlerTest extends TestCase
 {
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $shopUserRepositoryMock;
+    private MockObject&UserRepositoryInterface $shopUserRepository;
 
-    /** @var ChannelRepositoryInterface|MockObject */
-    private MockObject $channelRepositoryMock;
+    private ChannelRepositoryInterface&MockObject $channelRepository;
 
-    /** @var AccountVerificationEmailManagerInterface|MockObject */
-    private MockObject $accountVerificationEmailManagerMock;
+    private AccountVerificationEmailManagerInterface&MockObject $accountVerificationEmailManager;
 
     private SendShopUserVerificationEmailHandler $handler;
 
@@ -43,42 +40,69 @@ final class SendShopUserVerificationEmailHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->shopUserRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->channelRepositoryMock = $this->createMock(ChannelRepositoryInterface::class);
-        $this->accountVerificationEmailManagerMock = $this->createMock(AccountVerificationEmailManagerInterface::class);
-        $this->handler = new SendShopUserVerificationEmailHandler($this->shopUserRepositoryMock, $this->channelRepositoryMock, $this->accountVerificationEmailManagerMock);
+        parent::setUp();
+        $this->shopUserRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->channelRepository = $this->createMock(ChannelRepositoryInterface::class);
+        $this->accountVerificationEmailManager = $this->createMock(AccountVerificationEmailManagerInterface::class);
+        $this->handler = new SendShopUserVerificationEmailHandler(
+            $this->shopUserRepository,
+            $this->channelRepository,
+            $this->accountVerificationEmailManager,
+        );
     }
 
     public function testSendsUserAccountVerificationEmail(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
-        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
-        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('WEB')->willReturn($channelMock);
-        // Removed isAccountVerificationRequired expectation
-        $this->accountVerificationEmailManagerMock->expects(self::once())->method('sendAccountVerificationEmail')->with($shopUserMock, $channelMock, 'en_US');
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        /** @var ChannelInterface|MockObject $channel */
+        $channel = $this->createMock(ChannelInterface::class);
+        $this->shopUserRepository->expects(self::once())
+            ->method('findOneByEmail')
+            ->with('shop@example.com')
+            ->willReturn($shopUser);
+        $this->channelRepository->expects(self::once())
+            ->method('findOneByCode')
+            ->with('WEB')
+            ->willReturn($channel);
+        $this->accountVerificationEmailManager->expects(self::once())
+            ->method('sendAccountVerificationEmail')
+            ->with($shopUser, $channel, 'en_US');
         $this->handler->__invoke(new SendShopUserVerificationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 
     public function testThrowsAnExceptionIfUserHasNotBeenFound(): void
     {
-        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('shop@example.com')->willReturn(null);
-        $this->channelRepositoryMock->expects(self::never())->method('findOneByCode')->with('WEB');
-        $this->accountVerificationEmailManagerMock->expects(self::never())->method('sendAccountVerificationEmail')->with($this->any());
-        $this->expectException(UserNotFoundException::class);
+        $this->shopUserRepository->expects(self::once())
+            ->method('findOneByEmail')
+            ->with('shop@example.com')
+            ->willReturn(null);
+        $this->channelRepository->expects(self::never())
+            ->method('findOneByCode')
+            ->with('WEB');
+        $this->accountVerificationEmailManager->expects(self::never())
+            ->method('sendAccountVerificationEmail')
+            ->with($this->any());
+        self::expectException(UserNotFoundException::class);
         $this->handler->__invoke(new SendShopUserVerificationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 
     public function testThrowsAnExceptionIfChannelHasNotBeenFound(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->shopUserRepositoryMock->expects(self::once())->method('findOneByEmail')->with('shop@example.com')->willReturn($shopUserMock);
-        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('WEB')->willReturn(null);
-        $this->accountVerificationEmailManagerMock->expects(self::never())->method('sendAccountVerificationEmail')->with($this->any());
-        $this->expectException(ChannelNotFoundException::class);
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        $this->shopUserRepository->expects(self::once())
+            ->method('findOneByEmail')
+            ->with('shop@example.com')
+            ->willReturn($shopUser);
+        $this->channelRepository->expects(self::once())
+            ->method('findOneByCode')
+            ->with('WEB')
+            ->willReturn(null);
+        $this->accountVerificationEmailManager->expects(self::never())
+            ->method('sendAccountVerificationEmail')
+            ->with($this->any());
+        self::expectException(ChannelNotFoundException::class);
         $this->handler->__invoke(new SendShopUserVerificationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 }

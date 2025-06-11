@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\SendContactRequest;
 use Sylius\Bundle\ApiBundle\CommandHandler\SendContactRequestHandler;
 use Sylius\Bundle\ApiBundle\Exception\ChannelNotFoundException;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\CoreBundle\Mailer\ContactEmailManagerInterface;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
@@ -30,7 +31,7 @@ final class SendContactRequestHandlerTest extends TestCase
     /** @var ContactEmailManagerInterface|MockObject */
     private MockObject $contactEmailManagerMock;
 
-    private SendContactRequestHandler $sendContactRequestHandler;
+    private SendContactRequestHandler $handler;
 
     use MessageHandlerAttributeTrait;
 
@@ -38,7 +39,7 @@ final class SendContactRequestHandlerTest extends TestCase
     {
         $this->channelRepositoryMock = $this->createMock(ChannelRepositoryInterface::class);
         $this->contactEmailManagerMock = $this->createMock(ContactEmailManagerInterface::class);
-        $this->sendContactRequestHandler = new SendContactRequestHandler($this->channelRepositoryMock, $this->contactEmailManagerMock);
+        $this->handler = new SendContactRequestHandler($this->channelRepositoryMock, $this->contactEmailManagerMock);
     }
 
     public function testSendsContactRequest(): void
@@ -59,7 +60,7 @@ final class SendContactRequestHandlerTest extends TestCase
             $channelMock,
             'en_US',
         );
-        $this($command);
+        $this->handler->__invoke($command);
     }
 
     public function testThrowsAnExceptionIfChannelHasNotBeenFound(): void
@@ -71,7 +72,7 @@ final class SendContactRequestHandlerTest extends TestCase
             message: 'message',
         );
         $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CODE')->willReturn(null);
-        $this->expectException(ChannelNotFoundException::class);
-        $this->sendContactRequestHandler->__invoke($command);
+        self::expectException(ChannelNotFoundException::class);
+        $this->handler->__invoke($command);
     }
 }

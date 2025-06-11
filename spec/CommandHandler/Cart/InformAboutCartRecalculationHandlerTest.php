@@ -14,25 +14,26 @@ declare(strict_types=1);
 namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Cart;
 
 use PHPUnit\Framework\TestCase;
-use spec\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Cart\InformAboutCartRecalculation;
 use Sylius\Bundle\ApiBundle\CommandHandler\Cart\InformAboutCartRecalculationHandler;
 use Sylius\Bundle\ApiBundle\Exception\OrderNoLongerEligibleForPromotion;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 
 final class InformAboutCartRecalculationHandlerTest extends TestCase
 {
-    private InformAboutCartRecalculationHandler $informAboutCartRecalculationHandler;
+    private InformAboutCartRecalculationHandler $handler;
 
     protected function setUp(): void
     {
-        $this->informAboutCartRecalculationHandler = new InformAboutCartRecalculationHandler();
+        parent::setUp();
+        $this->handler = new InformAboutCartRecalculationHandler();
     }
 
     use MessageHandlerAttributeTrait;
 
     public function testThrowsOrderNoLongerEligibleForPromotionException(): void
     {
-        $this->expectException(OrderNoLongerEligibleForPromotion::class);
-        $this->informAboutCartRecalculationHandler->__invoke(new InformAboutCartRecalculation('Holiday Sale'));
+        self::expectException(OrderNoLongerEligibleForPromotion::class);
+        $this->handler->__invoke(new InformAboutCartRecalculation('Holiday Sale'));
     }
 }

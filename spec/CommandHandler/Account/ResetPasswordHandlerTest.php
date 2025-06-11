@@ -15,15 +15,14 @@ namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Account\ResetPassword;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\ResetPasswordHandler;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\CoreBundle\Security\UserPasswordResetterInterface;
 
 final class ResetPasswordHandlerTest extends TestCase
 {
-    /** @var UserPasswordResetterInterface|MockObject */
-    private MockObject $userPasswordResetterMock;
+    private MockObject&UserPasswordResetterInterface $userPasswordResetter;
 
     private ResetPasswordHandler $handler;
 
@@ -31,13 +30,21 @@ final class ResetPasswordHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->userPasswordResetterMock = $this->createMock(UserPasswordResetterInterface::class);
-        $this->handler = new ResetPasswordHandler($this->userPasswordResetterMock);
+        $this->userPasswordResetter = $this->createMock(UserPasswordResetterInterface::class);
+        $this->handler = new ResetPasswordHandler($this->userPasswordResetter);
     }
 
     public function testDelegatesPasswordResetting(): void
     {
-        $this->userPasswordResetterMock->expects(self::once())->method('reset')->with('TOKEN', 'newPassword');
-        $this->handler->__invoke(new ResetPassword('TOKEN', 'newPassword', 'newPassword'));
+        $this->userPasswordResetter->expects(self::once())
+            ->method('reset')
+            ->with('TOKEN', 'newPassword');
+        $this->handler->__invoke(
+            new ResetPassword(
+                'TOKEN',
+                'newPassword',
+                'newPassword',
+            ),
+        );
     }
 }

@@ -13,14 +13,12 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\spec\CommandHandler\Account;
 
-use DateTimeImmutable;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
-use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\ApiBundle\Command\Account\RequestResetPasswordToken;
 use Sylius\Bundle\ApiBundle\Command\Account\SendResetPasswordEmail;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\RequestResetPasswordTokenHandler;
+use Sylius\Bundle\ApiBundle\spec\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\ShopUserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
 use Sylius\Component\User\Security\Generator\GeneratorInterface;
@@ -31,17 +29,13 @@ use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 
 final class RequestResetPasswordTokenHandlerTest extends TestCase
 {
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $userRepositoryMock;
+    private MockObject&UserRepositoryInterface $userRepository;
 
-    /** @var MessageBusInterface|MockObject */
-    private MockObject $messageBusMock;
+    private MessageBusInterface&MockObject $messageBus;
 
-    /** @var GeneratorInterface|MockObject */
-    private MockObject $generatorMock;
+    private GeneratorInterface&MockObject $generator;
 
-    /** @var ClockInterface|MockObject */
-    private MockObject $clockMock;
+    private ClockInterface&MockObject $clock;
 
     private RequestResetPasswordTokenHandler $handler;
 
@@ -49,24 +43,38 @@ final class RequestResetPasswordTokenHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->messageBusMock = $this->createMock(MessageBusInterface::class);
-        $this->generatorMock = $this->createMock(GeneratorInterface::class);
-        $this->clockMock = $this->createMock(ClockInterface::class);
-        $this->handler = new RequestResetPasswordTokenHandler($this->userRepositoryMock, $this->messageBusMock, $this->generatorMock, $this->clockMock);
+        parent::setUp();
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->messageBus = $this->createMock(MessageBusInterface::class);
+        $this->generator = $this->createMock(GeneratorInterface::class);
+        $this->clock = $this->createMock(ClockInterface::class);
+        $this->handler = new RequestResetPasswordTokenHandler(
+            $this->userRepository,
+            $this->messageBus,
+            $this->generator,
+            $this->clock,
+        );
     }
 
     public function testHandlesRequestForPasswordResetToken(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects(self::once())->method('findOneByEmail')->with('test@email.com')->willReturn($shopUserMock);
-        $this->clockMock->expects(self::once())->method('now')->willReturn(new DateTimeImmutable());
-        $this->generatorMock->expects(self::once())->method('generate')->willReturn('TOKEN');
-        $shopUserMock->expects(self::once())->method('setPasswordResetToken')->with('TOKEN');
-        $shopUserMock->expects(self::once())->method('setPasswordRequestedAt')->with(self::isInstanceOf(DateTimeImmutable::class));
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        $this->userRepository->expects(self::once())
+            ->method('findOneByEmail')
+            ->with('test@email.com')
+            ->willReturn($shopUser);
+        $this->clock->expects(self::once())->method('now')->willReturn(new \DateTimeImmutable());
+        $this->generator->expects(self::once())->method('generate')->willReturn('TOKEN');
+        $shopUser->expects(self::once())->method('setPasswordResetToken')->with('TOKEN');
+        $shopUser->expects(self::once())
+            ->method('setPasswordRequestedAt')
+            ->with(self::isInstanceOf(\DateTimeImmutable::class));
         $sendResetPasswordEmail = new SendResetPasswordEmail('test@email.com', 'WEB', 'en_US');
-        $this->messageBusMock->expects(self::once())->method('dispatch')->with($sendResetPasswordEmail, [new DispatchAfterCurrentBusStamp()])->willReturn(new Envelope($sendResetPasswordEmail));
+        $this->messageBus->expects(self::once())
+            ->method('dispatch')
+            ->with($sendResetPasswordEmail, [new DispatchAfterCurrentBusStamp()])
+            ->willReturn(new Envelope($sendResetPasswordEmail));
         $requestResetPasswordToken = new RequestResetPasswordToken(
             channelCode: 'WEB',
             localeCode: 'en_US',
@@ -77,8 +85,8 @@ final class RequestResetPasswordTokenHandlerTest extends TestCase
 
     public function testDoesNothingWhenShopUserHasNotBeenFound(): void
     {
-        $this->userRepositoryMock->expects(self::once())->method('findOneByEmail')->with('test@email.com')->willReturn(null);
-        $this->messageBusMock->expects(self::never())->method('dispatch');
+        $this->userRepository->expects(self::once())->method('findOneByEmail')->with('test@email.com')->willReturn(null);
+        $this->messageBus->expects(self::never())->method('dispatch');
         $requestResetPasswordToken = new RequestResetPasswordToken(
             channelCode: 'WEB',
             localeCode: 'en_US',
