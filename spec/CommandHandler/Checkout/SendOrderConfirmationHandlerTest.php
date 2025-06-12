@@ -25,11 +25,9 @@ use Sylius\Component\Core\Repository\OrderRepositoryInterface;
 
 final class SendOrderConfirmationHandlerTest extends TestCase
 {
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
-    /** @var OrderEmailManagerInterface|MockObject */
-    private MockObject $orderEmailManagerMock;
+    private MockObject&OrderEmailManagerInterface $orderEmailManager;
 
     private SendOrderConfirmationHandler $handler;
 
@@ -37,22 +35,26 @@ final class SendOrderConfirmationHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->orderEmailManagerMock = $this->createMock(OrderEmailManagerInterface::class);
-        $this->handler = new SendOrderConfirmationHandler($this->orderRepositoryMock, $this->orderEmailManagerMock);
+        parent::setUp();
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->orderEmailManager = $this->createMock(OrderEmailManagerInterface::class);
+        $this->handler = new SendOrderConfirmationHandler($this->orderRepository, $this->orderEmailManager);
     }
 
     public function testSendsOrderConfirmationMessage(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        $this->orderRepositoryMock->expects(self::once())->method('findOneByTokenValue')->with('TOKEN')->willReturn($orderMock);
-        $orderMock->method('getLocaleCode')->willReturn('pl_PL');
-        $orderMock->method('getCustomer')->willReturn($customerMock);
-        $customerMock->expects(self::once())->method('getEmail')->willReturn('johnny.bravo@email.com');
-        $this->orderEmailManagerMock->expects(self::once())->method('sendConfirmationEmail')->with($orderMock);
+        /** @var OrderInterface|MockObject $order */
+        $order = $this->createMock(OrderInterface::class);
+        /** @var CustomerInterface|MockObject $customer */
+        $customer = $this->createMock(CustomerInterface::class);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneByTokenValue')
+            ->with('TOKEN')
+            ->willReturn($order);
+        $order->method('getLocaleCode')->willReturn('pl_PL');
+        $order->method('getCustomer')->willReturn($customer);
+        $customer->expects(self::once())->method('getEmail')->willReturn('johnny.bravo@email.com');
+        $this->orderEmailManager->expects(self::once())->method('sendConfirmationEmail')->with($order);
         $this->handler->__invoke(new SendOrderConfirmation('TOKEN'));
     }
 }

@@ -26,11 +26,9 @@ use Sylius\Component\Promotion\Generator\PromotionCouponGeneratorInterface;
 
 final class GeneratePromotionCouponHandlerTest extends TestCase
 {
-    /** @var PromotionRepositoryInterface|MockObject */
-    private MockObject $promotionRepositoryMock;
+    private MockObject&PromotionRepositoryInterface $promotionRepository;
 
-    /** @var PromotionCouponGeneratorInterface|MockObject */
-    private MockObject $promotionCouponGeneratorMock;
+    private MockObject&PromotionCouponGeneratorInterface $promotionCouponGenerator;
 
     private GeneratePromotionCouponHandler $handler;
 
@@ -38,14 +36,17 @@ final class GeneratePromotionCouponHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->promotionRepositoryMock = $this->createMock(PromotionRepositoryInterface::class);
-        $this->promotionCouponGeneratorMock = $this->createMock(PromotionCouponGeneratorInterface::class);
-        $this->handler = new GeneratePromotionCouponHandler($this->promotionRepositoryMock, $this->promotionCouponGeneratorMock);
+        $this->promotionRepository = $this->createMock(PromotionRepositoryInterface::class);
+        $this->promotionCouponGenerator = $this->createMock(PromotionCouponGeneratorInterface::class);
+        $this->handler = new GeneratePromotionCouponHandler($this->promotionRepository, $this->promotionCouponGenerator);
     }
 
     public function testThrowsExceptionIfPromotionIsNotFound(): void
     {
-        $this->promotionRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'promotion_code'])->willReturn(null);
+        $this->promotionRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['code' => 'promotion_code'])
+            ->willReturn(null);
         $generatePromotionCoupon = new GeneratePromotionCoupon('promotion_code');
         self::expectException(PromotionNotFoundException::class);
         $this->handler->__invoke($generatePromotionCoupon);
@@ -53,15 +54,24 @@ final class GeneratePromotionCouponHandlerTest extends TestCase
 
     public function testGeneratesPromotionCoupons(): void
     {
-        /** @var PromotionInterface|MockObject $promotionMock */
-        $promotionMock = $this->createMock(PromotionInterface::class);
-        /** @var PromotionCouponInterface|MockObject $promotionCouponOneMock */
-        $promotionCouponOneMock = $this->createMock(PromotionCouponInterface::class);
-        /** @var PromotionCouponInterface|MockObject $promotionCouponTwoMock */
-        $promotionCouponTwoMock = $this->createMock(PromotionCouponInterface::class);
-        $this->promotionRepositoryMock->expects(self::once())->method('findOneBy')->with(['code' => 'promotion_code'])->willReturn($promotionMock);
+        /** @var PromotionInterface|MockObject $promotion */
+        $promotion = $this->createMock(PromotionInterface::class);
+        /** @var PromotionCouponInterface|MockObject $promotionCouponOne */
+        $promotionCouponOne = $this->createMock(PromotionCouponInterface::class);
+        /** @var PromotionCouponInterface|MockObject $promotionCouponTwo */
+        $promotionCouponTwo = $this->createMock(PromotionCouponInterface::class);
+        $this->promotionRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['code' => 'promotion_code'])
+            ->willReturn($promotion);
         $generatePromotionCoupon = new GeneratePromotionCoupon('promotion_code');
-        $this->promotionCouponGeneratorMock->expects(self::once())->method('generate')->with($promotionMock, $generatePromotionCoupon)->willReturn([$promotionCouponOneMock, $promotionCouponTwoMock]);
-        self::assertSame([$promotionCouponOneMock, $promotionCouponTwoMock], iterator_to_array($this->handler->__invoke($generatePromotionCoupon)));
+        $this->promotionCouponGenerator->expects(self::once())
+            ->method('generate')
+            ->with($promotion, $generatePromotionCoupon)
+            ->willReturn([$promotionCouponOne, $promotionCouponTwo]);
+        self::assertSame(
+            [$promotionCouponOne, $promotionCouponTwo],
+            iterator_to_array($this->handler->__invoke($generatePromotionCoupon)),
+        );
     }
 }

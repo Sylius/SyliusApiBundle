@@ -25,11 +25,9 @@ use Sylius\Component\Core\Model\ChannelInterface;
 
 final class SendContactRequestHandlerTest extends TestCase
 {
-    /** @var ChannelRepositoryInterface|MockObject */
-    private MockObject $channelRepositoryMock;
+    private ChannelRepositoryInterface&MockObject $channelRepository;
 
-    /** @var ContactEmailManagerInterface|MockObject */
-    private MockObject $contactEmailManagerMock;
+    private ContactEmailManagerInterface&MockObject $contactEmailManager;
 
     private SendContactRequestHandler $handler;
 
@@ -37,27 +35,30 @@ final class SendContactRequestHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->channelRepositoryMock = $this->createMock(ChannelRepositoryInterface::class);
-        $this->contactEmailManagerMock = $this->createMock(ContactEmailManagerInterface::class);
-        $this->handler = new SendContactRequestHandler($this->channelRepositoryMock, $this->contactEmailManagerMock);
+        $this->channelRepository = $this->createMock(ChannelRepositoryInterface::class);
+        $this->contactEmailManager = $this->createMock(ContactEmailManagerInterface::class);
+        $this->handler = new SendContactRequestHandler($this->channelRepository, $this->contactEmailManager);
     }
 
     public function testSendsContactRequest(): void
     {
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
+        /** @var ChannelInterface|MockObject $channel */
+        $channel = $this->createMock(ChannelInterface::class);
         $command = new SendContactRequest(
             channelCode: 'CODE',
             localeCode: 'en_US',
             email: 'adam@sylius.com',
             message: 'message',
         );
-        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CODE')->willReturn($channelMock);
-        $channelMock->expects(self::once())->method('getContactEmail')->willReturn('channel@contact.com');
-        $this->contactEmailManagerMock->sendContactRequest(
+        $this->channelRepository->expects(self::once())
+            ->method('findOneByCode')
+            ->with('CODE')
+            ->willReturn($channel);
+        $channel->expects(self::once())->method('getContactEmail')->willReturn('channel@contact.com');
+        $this->contactEmailManager->sendContactRequest(
             ['message' => 'message', 'email' => 'adam@sylius.com'],
             ['channel@contact.com'],
-            $channelMock,
+            $channel,
             'en_US',
         );
         $this->handler->__invoke($command);
@@ -71,7 +72,10 @@ final class SendContactRequestHandlerTest extends TestCase
             email: 'adam@sylius.com',
             message: 'message',
         );
-        $this->channelRepositoryMock->expects(self::once())->method('findOneByCode')->with('CODE')->willReturn(null);
+        $this->channelRepository->expects(self::once())
+            ->method('findOneByCode')
+            ->with('CODE')
+            ->willReturn(null);
         self::expectException(ChannelNotFoundException::class);
         $this->handler->__invoke($command);
     }

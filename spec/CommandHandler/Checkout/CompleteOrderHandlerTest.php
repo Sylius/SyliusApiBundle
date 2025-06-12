@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Checkout;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Abstraction\StateMachine\StateMachineInterface;
@@ -35,149 +34,181 @@ use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 
 final class CompleteOrderHandlerTest extends TestCase
 {
-    /** @var OrderRepositoryInterface|MockObject */
-    private MockObject $orderRepositoryMock;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
-    /** @var StateMachineInterface|MockObject */
-    private MockObject $stateMachineMock;
+    private MockObject&StateMachineInterface $stateMachine;
 
-    /** @var MessageBusInterface|MockObject */
-    private MockObject $commandBusMock;
+    private MessageBusInterface&MockObject $commandBus;
 
-    /** @var MessageBusInterface|MockObject */
-    private MockObject $eventBusMock;
+    private MessageBusInterface&MockObject $eventBus;
 
-    /** @var OrderPromotionsIntegrityCheckerInterface|MockObject */
-    private MockObject $orderPromotionsIntegrityCheckerMock;
+    private MockObject&OrderPromotionsIntegrityCheckerInterface $orderPromotionsIntegrityChecker;
 
     private CompleteOrderHandler $handler;
+
+    private MockObject&OrderInterface $order;
+
+    private CustomerInterface&MockObject $customer;
 
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
     {
-        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
-        $this->stateMachineMock = $this->createMock(StateMachineInterface::class);
-        $this->commandBusMock = $this->createMock(MessageBusInterface::class);
-        $this->eventBusMock = $this->createMock(MessageBusInterface::class);
-        $this->orderPromotionsIntegrityCheckerMock = $this->createMock(OrderPromotionsIntegrityCheckerInterface::class);
-        $this->handler = new CompleteOrderHandler($this->orderRepositoryMock, $this->stateMachineMock, $this->commandBusMock, $this->eventBusMock, $this->orderPromotionsIntegrityCheckerMock);
+        parent::setUp();
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->commandBus = $this->createMock(MessageBusInterface::class);
+        $this->eventBus = $this->createMock(MessageBusInterface::class);
+        $this->orderPromotionsIntegrityChecker = $this->createMock(OrderPromotionsIntegrityCheckerInterface::class);
+        $this->handler = new CompleteOrderHandler(
+            $this->orderRepository,
+            $this->stateMachine,
+            $this->commandBus,
+            $this->eventBus,
+            $this->orderPromotionsIntegrityChecker,
+        );
+        $this->order = $this->createMock(OrderInterface::class);
+        $this->customer = $this->createMock(CustomerInterface::class);
     }
 
     public function testHandlesOrderCompletionWithoutNotes(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        $this->handler = new CompleteOrderHandler($this->orderRepositoryMock, $this->stateMachineMock, $this->commandBusMock, $this->eventBusMock, $this->orderPromotionsIntegrityCheckerMock);
+        $this->handler = new CompleteOrderHandler(
+            $this->orderRepository,
+            $this->stateMachine,
+            $this->commandBus,
+            $this->eventBus,
+            $this->orderPromotionsIntegrityChecker,
+        );
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->method('getTotal')->willReturn(1500);
-        $orderMock->expects(self::never())->method('setNotes')->with(null);
-        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
-        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete')->willReturn(true);
-        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
-        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete');
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn($this->order);
+        $this->order->expects(self::once())->method('getCustomer')->willReturn($this->customer);
+        $this->order->method('getTotal')->willReturn(1500);
+        $this->order->expects(self::never())->method('setNotes')->with(null);
+        $this->orderPromotionsIntegrityChecker->expects(self::once())->method('check')->with($this->order)->willReturn(null);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with($this->order, OrderCheckoutTransitions::GRAPH, 'complete')
+            ->willReturn(true);
+        $this->order->expects(self::once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with($this->order, OrderCheckoutTransitions::GRAPH, 'complete');
         $orderCompleted = new OrderCompleted('COMPLETED_ORDER_TOKEN');
-        $this->eventBusMock->expects(self::once())->method('dispatch')->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
-            ->willReturn(new Envelope($orderCompleted))
-        ;
-        self::assertSame($orderMock, $this->handler->__invoke($completeOrder));
+        $this->eventBus->expects(self::once())
+            ->method('dispatch')
+            ->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
+            ->willReturn(new Envelope($orderCompleted));
+        self::assertSame($this->order, $this->handler->__invoke($completeOrder));
     }
 
     public function testHandlesOrderCompletionWithNotes(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN', notes: 'ThankYou');
-        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->method('getTotal')->willReturn(1500);
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects(self::once())->method('setNotes')->with('ThankYou');
-        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
-        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete')->willReturn(true);
-        $orderMock->expects(self::once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
-        $this->stateMachineMock->expects(self::once())->method('apply')->with($orderMock, OrderCheckoutTransitions::GRAPH, 'complete');
+        $this->order->expects(self::once())->method('getCustomer')->willReturn($this->customer);
+        $this->order->method('getTotal')->willReturn(1500);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn($this->order);
+        $this->order->expects(self::once())->method('setNotes')->with('ThankYou');
+        $this->orderPromotionsIntegrityChecker->expects(self::once())->method('check')->with($this->order)->willReturn(null);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with($this->order, OrderCheckoutTransitions::GRAPH, 'complete')
+            ->willReturn(true);
+        $this->order->expects(self::once())->method('getTokenValue')->willReturn('COMPLETED_ORDER_TOKEN');
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with($this->order, OrderCheckoutTransitions::GRAPH, 'complete');
         $orderCompleted = new OrderCompleted('COMPLETED_ORDER_TOKEN');
-        $this->eventBusMock->expects(self::once())->method('dispatch')->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
-            ->willReturn(new Envelope($orderCompleted))
-        ;
-        self::assertSame($orderMock, $this->handler->__invoke($completeOrder));
+        $this->eventBus->expects(self::once())
+            ->method('dispatch')
+            ->with($orderCompleted, [new DispatchAfterCurrentBusStamp()])
+            ->willReturn(new Envelope($orderCompleted));
+        self::assertSame($this->order, $this->handler->__invoke($completeOrder));
     }
 
     public function testDelaysAnInformationAboutCartRecalculate(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        /** @var PromotionInterface|MockObject $promotionMock */
-        $promotionMock = $this->createMock(PromotionInterface::class);
+        /** @var PromotionInterface|MockObject $promotion */
+        $promotion = $this->createMock(PromotionInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN', notes: 'ThankYou');
-        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->method('getTotal')->willReturn(1000);
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects(self::once())->method('setNotes')->with('ThankYou');
-        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn($promotionMock);
-        $promotionMock->expects(self::once())->method('getName')->willReturn('Christmas');
+        $this->order->expects(self::once())->method('getCustomer')->willReturn($this->customer);
+        $this->order->method('getTotal')->willReturn(1000);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn($this->order);
+        $this->order->expects(self::once())->method('setNotes')->with('ThankYou');
+        $this->orderPromotionsIntegrityChecker->expects(self::once())
+            ->method('check')
+            ->with($this->order)
+            ->willReturn($promotion);
+        $promotion->expects(self::once())->method('getName')->willReturn('Christmas');
         $informAboutCartRecalculate = new InformAboutCartRecalculation('Christmas');
-        $this->commandBusMock->expects(self::once())->method('dispatch')->with($informAboutCartRecalculate, [new DispatchAfterCurrentBusStamp()])
-            ->willReturn(new Envelope($informAboutCartRecalculate))
-        ;
-        self::assertSame($orderMock, $this->handler->__invoke($completeOrder));
+        $this->commandBus->expects(self::once())
+            ->method('dispatch')
+            ->with($informAboutCartRecalculate, [new DispatchAfterCurrentBusStamp()])
+            ->willReturn(new Envelope($informAboutCartRecalculate));
+        self::assertSame($this->order, $this->handler->__invoke($completeOrder));
     }
 
     public function testThrowsAnExceptionIfOrderDoesNotExist(): void
     {
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn(null);
-        self::expectException(InvalidArgumentException::class);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn(null);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($completeOrder);
     }
 
     public function testThrowsAnExceptionIfOrderTotalHasChanged(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->method('getTotal')->willReturn(1500, 2000);
-        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn($this->order);
+        $this->order->expects(self::once())->method('getCustomer')->willReturn($this->customer);
+        $this->order->method('getTotal')->willReturn(1500, 2000);
+        $this->orderPromotionsIntegrityChecker->expects(self::once())->method('check')->with($this->order)->willReturn(null);
         self::expectException(OrderTotalHasChangedException::class);
         $this->handler->__invoke($completeOrder);
     }
 
     public function testThrowsAnExceptionIfOrderCannotBeCompleted(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $orderMock->method('getTotal')->willReturn(1500);
-        $this->orderPromotionsIntegrityCheckerMock->expects(self::once())->method('check')->with($orderMock)->willReturn(null);
-        $this->stateMachineMock->expects(self::once())->method('can')->with($orderMock, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_COMPLETE)->willReturn(false);
-        self::expectException(InvalidArgumentException::class);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn($this->order);
+        $this->order->expects(self::once())->method('getCustomer')->willReturn($this->customer);
+        $this->order->method('getTotal')->willReturn(1500);
+        $this->orderPromotionsIntegrityChecker->expects(self::once())->method('check')->with($this->order)->willReturn(null);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with($this->order, OrderCheckoutTransitions::GRAPH, OrderCheckoutTransitions::TRANSITION_COMPLETE)
+            ->willReturn(false);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($completeOrder);
     }
 
     public function testThrowsAnExceptionIfOrderCustomerIsNull(): void
     {
-        /** @var OrderInterface|MockObject $orderMock */
-        $orderMock = $this->createMock(OrderInterface::class);
         $completeOrder = new CompleteOrder(orderTokenValue: 'ORDERTOKEN');
-        $this->orderRepositoryMock->expects(self::once())->method('findOneBy')->with(['tokenValue' => 'ORDERTOKEN'])->willReturn($orderMock);
-        $orderMock->expects(self::once())->method('getCustomer')->willReturn(null);
-        self::expectException(InvalidArgumentException::class);
+        $this->orderRepository->expects(self::once())
+            ->method('findOneBy')
+            ->with(['tokenValue' => 'ORDERTOKEN'])
+            ->willReturn($this->order);
+        $this->order->expects(self::once())->method('getCustomer')->willReturn(null);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($completeOrder);
     }
 }

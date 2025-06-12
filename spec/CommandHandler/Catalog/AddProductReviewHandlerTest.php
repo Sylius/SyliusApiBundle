@@ -39,6 +39,8 @@ final class AddProductReviewHandlerTest extends TestCase
 
     private AddProductReviewHandler $handler;
 
+    private MockObject&ProductInterface $product;
+
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
@@ -54,12 +56,11 @@ final class AddProductReviewHandlerTest extends TestCase
             $this->productRepository,
             $this->customerResolver,
         );
+        $this->product = $this->createMock(ProductInterface::class);
     }
 
     public function testAddsProductReview(): void
     {
-        /** @var ProductInterface|MockObject $product */
-        $product = $this->createMock(ProductInterface::class);
         /** @var CustomerInterface|MockObject $customer */
         $customer = $this->createMock(CustomerInterface::class);
         /** @var ReviewInterface|MockObject $review */
@@ -67,7 +68,7 @@ final class AddProductReviewHandlerTest extends TestCase
         $this->productRepository->expects(self::once())
             ->method('findOneByCode')
             ->with('winter_cap')
-            ->willReturn($product);
+            ->willReturn($this->product);
         $this->customerResolver->expects(self::once())
             ->method('resolve')
             ->with('mark@example.com')
@@ -76,10 +77,10 @@ final class AddProductReviewHandlerTest extends TestCase
         $review->expects(self::once())->method('setTitle')->with('Good stuff');
         $review->expects(self::once())->method('setRating')->with(5);
         $review->expects(self::once())->method('setComment')->with('Really good stuff');
-        $review->expects(self::once())->method('setReviewSubject')->with($product);
+        $review->expects(self::once())->method('setReviewSubject')->with($this->product);
         $review->expects(self::once())->method('setAuthor')->with($customer);
         $this->productReviewRepository->add($review);
-        $product->expects(self::once())->method('addReview')->with($review);
+        $this->product->expects(self::once())->method('addReview')->with($review);
         $this->handler->__invoke(new AddProductReview(
             title: 'Good stuff',
             rating: 5,
@@ -91,12 +92,10 @@ final class AddProductReviewHandlerTest extends TestCase
 
     public function testThrowsAnExceptionIfEmailHasNotBeenFound(): void
     {
-        /** @var ProductInterface|MockObject $product */
-        $product = $this->createMock(ProductInterface::class);
         $this->productRepository->expects(self::once())
             ->method('findOneByCode')
             ->with('winter_cap')
-            ->willReturn($product);
+            ->willReturn($this->product);
         self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke(new AddProductReview(
             title: 'Good stuff',

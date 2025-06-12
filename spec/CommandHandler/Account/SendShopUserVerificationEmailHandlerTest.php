@@ -36,6 +36,8 @@ final class SendShopUserVerificationEmailHandlerTest extends TestCase
 
     private SendShopUserVerificationEmailHandler $handler;
 
+    private MockObject&ShopUserInterface $shopUser;
+
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
@@ -49,25 +51,24 @@ final class SendShopUserVerificationEmailHandlerTest extends TestCase
             $this->channelRepository,
             $this->accountVerificationEmailManager,
         );
+        $this->shopUser = $this->createMock(ShopUserInterface::class);
     }
 
     public function testSendsUserAccountVerificationEmail(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUser */
-        $shopUser = $this->createMock(ShopUserInterface::class);
         /** @var ChannelInterface|MockObject $channel */
         $channel = $this->createMock(ChannelInterface::class);
         $this->shopUserRepository->expects(self::once())
             ->method('findOneByEmail')
             ->with('shop@example.com')
-            ->willReturn($shopUser);
+            ->willReturn($this->shopUser);
         $this->channelRepository->expects(self::once())
             ->method('findOneByCode')
             ->with('WEB')
             ->willReturn($channel);
         $this->accountVerificationEmailManager->expects(self::once())
             ->method('sendAccountVerificationEmail')
-            ->with($shopUser, $channel, 'en_US');
+            ->with($this->shopUser, $channel, 'en_US');
         $this->handler->__invoke(new SendShopUserVerificationEmail('shop@example.com', 'en_US', 'WEB'));
     }
 
@@ -89,12 +90,10 @@ final class SendShopUserVerificationEmailHandlerTest extends TestCase
 
     public function testThrowsAnExceptionIfChannelHasNotBeenFound(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUser */
-        $shopUser = $this->createMock(ShopUserInterface::class);
         $this->shopUserRepository->expects(self::once())
             ->method('findOneByEmail')
             ->with('shop@example.com')
-            ->willReturn($shopUser);
+            ->willReturn($this->shopUser);
         $this->channelRepository->expects(self::once())
             ->method('findOneByCode')
             ->with('WEB')

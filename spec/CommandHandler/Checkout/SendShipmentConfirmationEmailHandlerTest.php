@@ -27,11 +27,9 @@ use Sylius\Component\Core\Repository\ShipmentRepositoryInterface;
 
 final class SendShipmentConfirmationEmailHandlerTest extends TestCase
 {
-    /** @var ShipmentRepositoryInterface|MockObject */
-    private MockObject $shipmentRepositoryMock;
+    private MockObject&ShipmentRepositoryInterface $shipmentRepository;
 
-    /** @var ShipmentEmailManagerInterface|MockObject */
-    private MockObject $shipmentEmailManagerMock;
+    private MockObject&ShipmentEmailManagerInterface $shipmentEmailManager;
 
     private SendShipmentConfirmationEmailHandler $handler;
 
@@ -39,28 +37,34 @@ final class SendShipmentConfirmationEmailHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->shipmentRepositoryMock = $this->createMock(ShipmentRepositoryInterface::class);
-        $this->shipmentEmailManagerMock = $this->createMock(ShipmentEmailManagerInterface::class);
-        $this->handler = new SendShipmentConfirmationEmailHandler($this->shipmentRepositoryMock, $this->shipmentEmailManagerMock);
+        $this->shipmentRepository = $this->createMock(ShipmentRepositoryInterface::class);
+        $this->shipmentEmailManager = $this->createMock(ShipmentEmailManagerInterface::class);
+        $this->handler = new SendShipmentConfirmationEmailHandler(
+            $this->shipmentRepository,
+            $this->shipmentEmailManager,
+        );
     }
 
     public function testSendsShipmentConfirmationMessage(): void
     {
-        /** @var ShipmentInterface|MockObject $shipmentMock */
-        $shipmentMock = $this->createMock(ShipmentInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
-        /** @var ChannelInterface|MockObject $channelMock */
-        $channelMock = $this->createMock(ChannelInterface::class);
+        /** @var ShipmentInterface|MockObject $shipment */
+        $shipment = $this->createMock(ShipmentInterface::class);
+        /** @var CustomerInterface|MockObject $customer */
+        $customer = $this->createMock(CustomerInterface::class);
+        /** @var ChannelInterface|MockObject $channel */
+        $channel = $this->createMock(ChannelInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
-        $this->shipmentRepositoryMock->expects(self::once())->method('find')->with(123)->willReturn($shipmentMock);
-        $shipmentMock->expects(self::once())->method('getOrder')->willReturn($orderMock);
-        $orderMock->method('getChannel')->willReturn($channelMock);
+        $this->shipmentRepository->expects(self::once())
+            ->method('find')
+            ->with(123)
+            ->willReturn($shipment);
+        $shipment->expects(self::once())->method('getOrder')->willReturn($orderMock);
+        $orderMock->method('getChannel')->willReturn($channel);
         $orderMock->method('getLocaleCode')->willReturn('pl_PL');
-        $orderMock->method('getCustomer')->willReturn($customerMock);
-        $customerMock->expects(self::once())->method('getEmail')->willReturn('johnny.bravo@email.com');
-        $this->shipmentEmailManagerMock->expects(self::once())->method('sendConfirmationEmail')->with($shipmentMock);
+        $orderMock->method('getCustomer')->willReturn($customer);
+        $customer->expects(self::once())->method('getEmail')->willReturn('johnny.bravo@email.com');
+        $this->shipmentEmailManager->expects(self::once())->method('sendConfirmationEmail')->with($shipment);
         $this->handler->__invoke(new SendShipmentConfirmationEmail(123));
     }
 }

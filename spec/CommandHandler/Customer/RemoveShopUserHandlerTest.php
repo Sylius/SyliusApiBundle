@@ -24,8 +24,7 @@ use Sylius\Component\User\Repository\UserRepositoryInterface;
 
 final class RemoveShopUserHandlerTest extends TestCase
 {
-    /** @var UserRepositoryInterface|MockObject */
-    private MockObject $userRepositoryMock;
+    private MockObject&UserRepositoryInterface $userRepository;
 
     private RemoveShopUserHandler $handler;
 
@@ -33,24 +32,25 @@ final class RemoveShopUserHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-        $this->handler = new RemoveShopUserHandler($this->userRepositoryMock);
+        parent::setUp();
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->handler = new RemoveShopUserHandler($this->userRepository);
     }
 
     public function testThrowsAnExceptionIfUserHasNotBeenFound(): void
     {
-        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn(null);
+        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn(null);
         self::expectException(UserNotFoundException::class);
         $this->handler->__invoke(new RemoveShopUser(42));
     }
 
     public function testRemoveShopUser(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUserMock */
-        $shopUserMock = $this->createMock(ShopUserInterface::class);
-        $this->userRepositoryMock->expects(self::once())->method('find')->with(42)->willReturn($shopUserMock);
-        $shopUserMock->expects(self::once())->method('setCustomer')->with(null);
-        $this->userRepositoryMock->expects(self::once())->method('remove')->with($shopUserMock);
+        /** @var ShopUserInterface|MockObject $shopUser */
+        $shopUser = $this->createMock(ShopUserInterface::class);
+        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn($shopUser);
+        $shopUser->expects(self::once())->method('setCustomer')->with(null);
+        $this->userRepository->expects(self::once())->method('remove')->with($shopUser);
         $this->handler->__invoke(new RemoveShopUser(42));
     }
 }

@@ -35,6 +35,12 @@ final class BlameCartHandlerTest extends TestCase
 
     private BlameCartHandler $handler;
 
+    private OrderInterface $cart;
+
+    private ShopUserInterface $user;
+
+    private CustomerInterface $customerMock;
+
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
@@ -44,56 +50,48 @@ final class BlameCartHandlerTest extends TestCase
         $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
         $this->orderProcessor = $this->createMock(OrderProcessorInterface::class);
         $this->handler = new BlameCartHandler($this->shopUserRepository, $this->orderRepository, $this->orderProcessor);
+        $this->cart = $this->createMock(OrderInterface::class);
+        $this->user = $this->createMock(ShopUserInterface::class);
+        $this->customerMock = $this->createMock(CustomerInterface::class);
     }
 
     public function testBlamesCartWithGivenData(): void
     {
-        /** @var OrderInterface|MockObject $cart */
-        $cart = $this->createMock(OrderInterface::class);
-        /** @var ShopUserInterface|MockObject $user */
-        $user = $this->createMock(ShopUserInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
         $this->shopUserRepository->expects(self::once())
             ->method('findOneByEmail')
             ->with('sylius@example.com')
-            ->willReturn($user);
+            ->willReturn($this->user);
         $this->orderRepository->expects(self::once())
             ->method('findCartByTokenValue')
             ->with('TOKEN')
-            ->willReturn($cart);
-        $cart->expects(self::once())->method('getCustomer')->willReturn(null);
-        $user->expects(self::once())->method('getCustomer')->willReturn($customerMock);
-        $cart->expects(self::once())->method('setCustomerWithAuthorization')->with($customerMock);
-        $this->orderProcessor->expects(self::once())->method('process')->with($cart);
+            ->willReturn($this->cart);
+        $this->cart->expects(self::once())->method('getCustomer')->willReturn(null);
+        $this->user->expects(self::once())->method('getCustomer')->willReturn($this->customerMock);
+        $this->cart->expects(self::once())->method('setCustomerWithAuthorization')->with($this->customerMock);
+        $this->orderProcessor->expects(self::once())->method('process')->with($this->cart);
         $this->handler->__invoke(new BlameCart('sylius@example.com', 'TOKEN'));
     }
 
     public function testThrowsAnExceptionIfCartIsOccupied(): void
     {
-        /** @var OrderInterface|MockObject $cart */
-        $cart = $this->createMock(OrderInterface::class);
-        /** @var ShopUserInterface|MockObject $user */
-        $user = $this->createMock(ShopUserInterface::class);
-        /** @var CustomerInterface|MockObject $customerMock */
-        $customerMock = $this->createMock(CustomerInterface::class);
         $this->shopUserRepository->expects(self::once())
             ->method('findOneByEmail')
             ->with('sylius@example.com')
-            ->willReturn($user);
+            ->willReturn($this->user);
         $this->orderRepository->expects(self::once())
             ->method('findCartByTokenValue')
-            ->with('TOKEN')->willReturn($cart);
-        $cart->expects(self::once())->method('getCustomer')->willReturn($customerMock);
+            ->with('TOKEN')->willReturn($this->cart);
+        $this->cart->expects(self::once())->method('getCustomer')->willReturn($this->customerMock);
         self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke(new BlameCart('sylius@example.com', 'TOKEN'));
     }
 
     public function testThrowsAnExceptionIfCartHasNotBeenFound(): void
     {
-        /** @var ShopUserInterface|MockObject $user */
-        $user = $this->createMock(ShopUserInterface::class);
-        $this->shopUserRepository->expects(self::once())->method('findOneByEmail')->with('sylius@example.com')->willReturn($user);
+        $this->shopUserRepository->expects(self::once())
+            ->method('findOneByEmail')
+            ->with('sylius@example.com')
+            ->willReturn($this->user);
         self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke(new BlameCart('sylius@example.com', 'TOKEN'));
     }

@@ -30,6 +30,8 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
 
     private ChangeShopUserPasswordHandler $handler;
 
+    private MockObject&ShopUserInterface $shopUser;
+
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
@@ -38,15 +40,14 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
         $this->passwordUpdater = $this->createMock(PasswordUpdaterInterface::class);
         $this->userRepository = $this->createMock(UserRepositoryInterface::class);
         $this->handler = new ChangeShopUserPasswordHandler($this->passwordUpdater, $this->userRepository);
+        $this->shopUser = $this->createMock(ShopUserInterface::class);
     }
 
     public function testUpdatesUserPassword(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUser */
-        $shopUser = $this->createMock(ShopUserInterface::class);
-        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn($shopUser);
-        $shopUser->expects(self::once())->method('setPlainPassword')->with('PLAIN_PASSWORD');
-        $this->passwordUpdater->expects(self::once())->method('updatePassword')->with($shopUser);
+        $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn($this->shopUser);
+        $this->shopUser->expects(self::once())->method('setPlainPassword')->with('PLAIN_PASSWORD');
+        $this->passwordUpdater->expects(self::once())->method('updatePassword')->with($this->shopUser);
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
             confirmNewPassword: 'PLAIN_PASSWORD',
@@ -58,10 +59,8 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
 
     public function testThrowsExceptionIfNewPasswordsDoNotMatch(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUser */
-        $shopUser = $this->createMock(ShopUserInterface::class);
         $this->userRepository->expects(self::never())->method('find');
-        $shopUser->expects(self::never())->method('setPlainPassword');
+        $this->shopUser->expects(self::never())->method('setPlainPassword');
         $this->passwordUpdater->expects(self::never())->method('updatePassword');
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',
@@ -75,10 +74,8 @@ final class ChangeShopUserPasswordHandlerTest extends TestCase
 
     public function testThrowsExceptionIfShopUserHasNotBeenFound(): void
     {
-        /** @var ShopUserInterface|MockObject $shopUser */
-        $shopUser = $this->createMock(ShopUserInterface::class);
         $this->userRepository->expects(self::once())->method('find')->with(42)->willReturn(null);
-        $shopUser->expects(self::never())->method('setPlainPassword');
+        $this->shopUser->expects(self::never())->method('setPlainPassword');
         $this->passwordUpdater->expects(self::never())->method('updatePassword');
         $changePasswordShopUser = new ChangeShopUserPassword(
             newPassword: 'PLAIN_PASSWORD',

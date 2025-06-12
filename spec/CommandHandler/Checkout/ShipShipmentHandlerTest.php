@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Checkout;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Abstraction\StateMachine\StateMachineInterface;
@@ -30,76 +29,86 @@ use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 
 final class ShipShipmentHandlerTest extends TestCase
 {
-    /** @var ShipmentRepositoryInterface|MockObject */
-    private MockObject $shipmentRepositoryMock;
+    private MockObject&ShipmentRepositoryInterface $shipmentRepository;
 
-    /** @var StateMachineInterface|MockObject */
-    private MockObject $stateMachineMock;
+    private MockObject&StateMachineInterface $stateMachine;
 
-    /** @var MessageBusInterface|MockObject */
-    private MockObject $eventBusMock;
+    private MessageBusInterface&MockObject $eventBus;
 
     private ShipShipmentHandler $handler;
+
+    private MockObject&ShipmentInterface $shipment;
 
     use MessageHandlerAttributeTrait;
 
     protected function setUp(): void
     {
-        $this->shipmentRepositoryMock = $this->createMock(ShipmentRepositoryInterface::class);
-        $this->stateMachineMock = $this->createMock(StateMachineInterface::class);
-        $this->eventBusMock = $this->createMock(MessageBusInterface::class);
-        $this->handler = new ShipShipmentHandler($this->shipmentRepositoryMock, $this->stateMachineMock, $this->eventBusMock);
+        parent::setUp();
+        $this->shipmentRepository = $this->createMock(ShipmentRepositoryInterface::class);
+        $this->stateMachine = $this->createMock(StateMachineInterface::class);
+        $this->eventBus = $this->createMock(MessageBusInterface::class);
+        $this->handler = new ShipShipmentHandler($this->shipmentRepository, $this->stateMachine, $this->eventBus);
+        $this->shipment = $this->createMock(ShipmentInterface::class);
     }
 
     public function testHandlesShippingWithoutTrackingNumber(): void
     {
-        /** @var ShipmentInterface|MockObject $shipmentMock */
-        $shipmentMock = $this->createMock(ShipmentInterface::class);
         $shipShipment = new ShipShipment(shipmentId: 123);
-        $this->shipmentRepositoryMock->expects(self::once())->method('find')->with(123)->willReturn($shipmentMock);
-        $shipmentMock->expects(self::never())->method('setTracking')->with(null);
-        $this->stateMachineMock->expects(self::once())->method('can')->with($shipmentMock, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP)->willReturn(true);
-        $this->stateMachineMock->expects(self::once())->method('apply')->with($shipmentMock, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP);
+        $this->shipmentRepository->expects(self::once())->method('find')->with(123)->willReturn($this->shipment);
+        $this->shipment->expects(self::never())->method('setTracking')->with(null);
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with($this->shipment, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP)
+            ->willReturn(true);
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with($this->shipment, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP);
         $sendShipmentConfirmationEmail = new SendShipmentConfirmationEmail(123);
-        $this->eventBusMock->expects(self::once())->method('dispatch')->with($sendShipmentConfirmationEmail, [new DispatchAfterCurrentBusStamp()])
-            ->willReturn(new Envelope($sendShipmentConfirmationEmail))
-        ;
-        self::assertSame($shipmentMock, $this->handler->__invoke($shipShipment));
+        $this->eventBus->expects(self::once())
+            ->method('dispatch')
+            ->with($sendShipmentConfirmationEmail, [new DispatchAfterCurrentBusStamp()])
+            ->willReturn(new Envelope($sendShipmentConfirmationEmail));
+        self::assertSame($this->shipment, $this->handler->__invoke($shipShipment));
     }
 
     public function testHandlesShippingWithTrackingNumber(): void
     {
-        /** @var ShipmentInterface|MockObject $shipmentMock */
-        $shipmentMock = $this->createMock(ShipmentInterface::class);
         $shipShipment = new ShipShipment(shipmentId: 123, trackingCode: 'TRACK');
-        $this->shipmentRepositoryMock->expects(self::once())->method('find')->with(123)->willReturn($shipmentMock);
-        $shipmentMock->expects(self::once())->method('setTracking')->with('TRACK');
-        $this->stateMachineMock->expects(self::once())->method('can')->with($shipmentMock, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP)->willReturn(true);
-        $this->stateMachineMock->expects(self::once())->method('apply')->with($shipmentMock, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP);
+        $this->shipmentRepository->expects(self::once())->method('find')->with(123)->willReturn($this->shipment);
+        $this->shipment->expects(self::once())->method('setTracking')->with('TRACK');
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with($this->shipment, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP)
+            ->willReturn(true);
+        $this->stateMachine->expects(self::once())
+            ->method('apply')
+            ->with($this->shipment, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP);
         $sendShipmentConfirmationEmail = new SendShipmentConfirmationEmail(123);
-        $this->eventBusMock->expects(self::once())->method('dispatch')->with($sendShipmentConfirmationEmail, [new DispatchAfterCurrentBusStamp()])
-            ->willReturn(new Envelope($sendShipmentConfirmationEmail))
-        ;
-        self::assertSame($shipmentMock, $this->handler->__invoke($shipShipment));
+        $this->eventBus->expects(self::once())
+            ->method('dispatch')
+            ->with($sendShipmentConfirmationEmail, [new DispatchAfterCurrentBusStamp()])
+            ->willReturn(new Envelope($sendShipmentConfirmationEmail));
+        self::assertSame($this->shipment, $this->handler->__invoke($shipShipment));
     }
 
     public function testThrowsAnExceptionIfShipmentDoesNotExist(): void
     {
         $shipShipment = new ShipShipment(shipmentId: 123, trackingCode: 'TRACK');
-        $this->shipmentRepositoryMock->expects(self::once())->method('find')->with(123)->willReturn(null);
-        self::expectException(InvalidArgumentException::class);
+        $this->shipmentRepository->expects(self::once())->method('find')->with(123)->willReturn(null);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($shipShipment);
     }
 
     public function testThrowsAnExceptionIfShipmentCannotBeShipped(): void
     {
-        /** @var ShipmentInterface|MockObject $shipmentMock */
-        $shipmentMock = $this->createMock(ShipmentInterface::class);
         $shipShipment = new ShipShipment(shipmentId: 123, trackingCode: 'TRACK');
-        $this->shipmentRepositoryMock->expects(self::once())->method('find')->with(123)->willReturn($shipmentMock);
-        $shipmentMock->expects(self::once())->method('setTracking')->with('TRACK');
-        $this->stateMachineMock->expects(self::once())->method('can')->with($shipmentMock, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP)->willReturn(false);
-        self::expectException(InvalidArgumentException::class);
+        $this->shipmentRepository->expects(self::once())->method('find')->with(123)->willReturn($this->shipment);
+        $this->shipment->expects(self::once())->method('setTracking')->with('TRACK');
+        $this->stateMachine->expects(self::once())
+            ->method('can')
+            ->with($this->shipment, ShipmentTransitions::GRAPH, ShipmentTransitions::TRANSITION_SHIP)
+            ->willReturn(false);
+        self::expectException(\InvalidArgumentException::class);
         $this->handler->__invoke($shipShipment);
     }
 }
