@@ -35,7 +35,10 @@ final class PathPrefixBasedOperationResolverTest extends TestCase
         parent::setUp();
         $this->resourceMetadataCollectionFactory = $this->createMock(ResourceMetadataCollectionFactoryInterface::class);
         $this->pathPrefixProvider = $this->createMock(PathPrefixProviderInterface::class);
-        $this->pathPrefixBasedOperationResolver = new PathPrefixBasedOperationResolver($this->resourceMetadataCollectionFactory, $this->pathPrefixProvider);
+        $this->pathPrefixBasedOperationResolver = new PathPrefixBasedOperationResolver(
+            $this->resourceMetadataCollectionFactory,
+            $this->pathPrefixProvider,
+        );
     }
 
     public function testImplementsTheOperationResolverInterface(): void

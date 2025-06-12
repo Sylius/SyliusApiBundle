@@ -28,49 +28,64 @@ final class ProductAttributeValueNormalizerTest extends TestCase
 
     private ProductAttributeValueNormalizer $productAttributeValueNormalizer;
 
+    private MockObject&NormalizerInterface $normalizer;
+
+    private MockObject&ProductAttributeValueInterface $productAttributeValue;
+
+    private MockObject&ProductAttributeInterface $productAttribute;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->localeProvider = $this->createMock(LocaleProviderInterface::class);
-        $this->productAttributeValueNormalizer = new ProductAttributeValueNormalizer($this->localeProvider, 'en_US');
+        $this->productAttributeValueNormalizer = new ProductAttributeValueNormalizer(
+            $this->localeProvider,
+            'en_US',
+        );
+        $this->normalizer = $this->createMock(NormalizerInterface::class);
+        $this->productAttributeValue = $this->createMock(ProductAttributeValueInterface::class);
+        $this->productAttribute = $this->createMock(ProductAttributeInterface::class);
     }
 
     public function testSupportsOnlyProductAttributeValueInterface(): void
     {
-        /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
-        $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
         /** @var OrderInterface|MockObject $orderMock */
         $orderMock = $this->createMock(OrderInterface::class);
-        self::assertTrue($this->productAttributeValueNormalizer->supportsNormalization($productAttributeValueMock));
+        self::assertTrue($this->productAttributeValueNormalizer->supportsNormalization($this->productAttributeValue));
         self::assertFalse($this->productAttributeValueNormalizer->supportsNormalization($orderMock));
     }
 
     public function testSupportsTheNormalizerHasNotCalledYet(): void
     {
-        /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
-        $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
         self::assertTrue($this->productAttributeValueNormalizer
-            ->supportsNormalization($productAttributeValueMock, null, []))
-        ;
-        self::assertFalse($this->productAttributeValueNormalizer
-            ->supportsNormalization($productAttributeValueMock, null, ['sylius_product_attribute_value_normalizer_already_called' => true]))
-        ;
+            ->supportsNormalization($this->productAttributeValue, null, []));
+        self::assertFalse(
+            $this->productAttributeValueNormalizer
+            ->supportsNormalization(
+                $this->productAttributeValue,
+                null,
+                ['sylius_product_attribute_value_normalizer_already_called' => true],
+            ),
+        );
     }
 
     public function testSerializesProductAttributeSelectValues(): void
     {
-        /** @var NormalizerInterface|MockObject $normalizerMock */
-        $normalizerMock = $this->createMock(NormalizerInterface::class);
-        /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
-        $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
-        /** @var ProductAttributeInterface|MockObject $productAttributeMock */
-        $productAttributeMock = $this->createMock(ProductAttributeInterface::class);
-        $normalizerMock->expects(self::once())->method('normalize')->with($productAttributeValueMock, null, ['sylius_product_attribute_value_normalizer_already_called' => true])
-            ->willReturn([])
-        ;
-        $productAttributeValueMock->expects(self::once())->method('getType')->willReturn('select');
-        $productAttributeValueMock->expects(self::once())->method('getAttribute')->willReturn($productAttributeMock);
-        $productAttributeMock->expects(self::once())->method('getConfiguration')->willReturn([
+        $this->normalizer->expects(self::once())
+            ->method('normalize')
+            ->with(
+                $this->productAttributeValue,
+                null,
+                ['sylius_product_attribute_value_normalizer_already_called' => true],
+            )
+            ->willReturn([]);
+        $this->productAttributeValue->expects(self::once())->method('getType')->willReturn('select');
+        $this->productAttributeValue->expects(self::once())
+            ->method('getAttribute')
+            ->willReturn($this->productAttribute);
+        $this->productAttribute->expects(self::once())
+            ->method('getConfiguration')
+            ->willReturn([
             'choices' => [
                 'uuid1' => [
                     'de_DE' => 'de text1',
@@ -96,10 +111,12 @@ final class ProductAttributeValueNormalizerTest extends TestCase
                 ],
             ],
         ]);
-        $productAttributeValueMock->expects(self::once())->method('getValue')->willReturn(['uuid1', 'uuid2', 'uuid3', 'uuid4']);
-        $productAttributeValueMock->expects(self::once())->method('getLocaleCode')->willReturn('pl_PL');
+        $this->productAttributeValue->expects(self::once())
+            ->method('getValue')
+            ->willReturn(['uuid1', 'uuid2', 'uuid3', 'uuid4']);
+        $this->productAttributeValue->method('getLocaleCode')->willReturn('pl_PL');
         $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('fr_FR');
-        $this->productAttributeValueNormalizer->setNormalizer($normalizerMock);
+        $this->productAttributeValueNormalizer->setNormalizer($this->normalizer);
         self::assertSame([
             'value' => [
                 'pl text1',
@@ -107,65 +124,62 @@ final class ProductAttributeValueNormalizerTest extends TestCase
                 'en text3',
                 'de text4',
             ],
-        ], $this->productAttributeValueNormalizer->normalize($productAttributeValueMock, null, []));
+        ], $this->productAttributeValueNormalizer->normalize($this->productAttributeValue, null, []));
     }
 
     public function testSerializesProductAttributeSelectValuesWhenAttributeHasNoValue(): void
     {
-        /** @var NormalizerInterface|MockObject $normalizerMock */
-        $normalizerMock = $this->createMock(NormalizerInterface::class);
-        /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
-        $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
-        /** @var ProductAttributeInterface|MockObject $productAttributeMock */
-        $productAttributeMock = $this->createMock(ProductAttributeInterface::class);
-        $normalizerMock->expects(self::once())->method('normalize')->with($productAttributeValueMock, null, ['sylius_product_attribute_value_normalizer_already_called' => true])
-            ->willReturn([])
-        ;
-        $productAttributeValueMock->expects(self::once())->method('getType')->willReturn('select');
-        $productAttributeValueMock->expects(self::once())->method('getAttribute')->willReturn($productAttributeMock);
-        $productAttributeValueMock->expects(self::once())->method('getValue')->willReturn(null);
-        $productAttributeMock->expects(self::never())->method('getConfiguration');
-        $productAttributeValueMock->expects(self::never())->method('getLocaleCode');
+        $this->normalizer->expects(self::once())
+            ->method('normalize')
+            ->with(
+                $this->productAttributeValue,
+                null,
+                ['sylius_product_attribute_value_normalizer_already_called' => true],
+            )->willReturn([]);
+        $this->productAttributeValue->expects(self::once())->method('getType')->willReturn('select');
+        $this->productAttributeValue->method('getAttribute')->willReturn($this->productAttribute);
+        $this->productAttributeValue->expects(self::once())->method('getValue')->willReturn(null);
+        $this->productAttribute->expects(self::never())->method('getConfiguration');
+        $this->productAttributeValue->expects(self::never())->method('getLocaleCode');
         $this->localeProvider->expects(self::never())->method('getDefaultLocaleCode');
-        $this->productAttributeValueNormalizer->setNormalizer($normalizerMock);
-        self::assertSame(['value' => []], $this->productAttributeValueNormalizer->normalize($productAttributeValueMock, null, []));
+        $this->productAttributeValueNormalizer->setNormalizer($this->normalizer);
+        self::assertSame(
+            ['value' => []],
+            $this->productAttributeValueNormalizer->normalize($this->productAttributeValue, null, []),
+        );
     }
 
     public function testSerializesProductAttributeDateValues(): void
     {
-        /** @var NormalizerInterface|MockObject $normalizerMock */
-        $normalizerMock = $this->createMock(NormalizerInterface::class);
-        /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
-        $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
-        /** @var ProductAttributeInterface|MockObject $productAttributeMock */
-        $productAttributeMock = $this->createMock(ProductAttributeInterface::class);
-        $normalizerMock->expects(self::once())->method('normalize')->with($productAttributeValueMock, null, ['sylius_product_attribute_value_normalizer_already_called' => true])
-            ->willReturn([])
-        ;
-        $productAttributeValueMock->expects(self::once())->method('getType')->willReturn('date');
-        $productAttributeValueMock->expects(self::once())->method('getAttribute')->willReturn($productAttributeMock);
-        $productAttributeValueMock->expects(self::once())->method('getValue')->willReturn(new \DateTime('2022-01-01 14:16:53'));
-        $productAttributeValueMock->expects(self::once())->method('getLocaleCode')->willReturn('pl_PL');
-        $this->localeProvider->expects(self::once())->method('getDefaultLocaleCode')->willReturn('fr_FR');
-        $this->productAttributeValueNormalizer->setNormalizer($normalizerMock);
+        $this->normalizer->expects(self::once())
+            ->method('normalize')
+            ->with(
+                $this->productAttributeValue,
+                null,
+                ['sylius_product_attribute_value_normalizer_already_called' => true],
+            )->willReturn([]);
+        $this->productAttributeValue->method('getType')->willReturn('date');
+        $this->productAttributeValue->method('getAttribute')->willReturn($this->productAttribute);
+        $this->productAttributeValue->method('getValue')->willReturn(new \DateTime('2022-01-01 14:16:53'));
+        $this->productAttributeValue->method('getLocaleCode')->willReturn('pl_PL');
+        $this->localeProvider->method('getDefaultLocaleCode')->willReturn('fr_FR');
+        $this->productAttributeValueNormalizer->setNormalizer($this->normalizer);
         self::assertSame([
             'value' => '2022-01-01',
-        ], $this->productAttributeValueNormalizer->normalize($productAttributeValueMock, null, []));
+        ], $this->productAttributeValueNormalizer->normalize($this->productAttributeValue, null, []));
     }
 
     public function testDoesNotChangeTheValueOnIntegerType(): void
     {
-        /** @var NormalizerInterface|MockObject $normalizerMock */
-        $normalizerMock = $this->createMock(NormalizerInterface::class);
-        /** @var ProductAttributeValueInterface|MockObject $productAttributeValueMock */
-        $productAttributeValueMock = $this->createMock(ProductAttributeValueInterface::class);
-        /** @var ProductAttributeInterface|MockObject $productAttributeMock */
-        $productAttributeMock = $this->createMock(ProductAttributeInterface::class);
-        $normalizerMock->expects(self::once())->method('normalize')->with($productAttributeValueMock, null, ['sylius_product_attribute_value_normalizer_already_called' => true])
-            ->willReturn(['value' => 42])
-        ;
-        $productAttributeValueMock->expects(self::once())->method('getType')->willReturn('integer');
-        $this->productAttributeValueNormalizer->setNormalizer($normalizerMock);
-        self::assertSame(['value' => 42], $this->productAttributeValueNormalizer->normalize($productAttributeValueMock));
+        $this->normalizer->expects(self::once())
+            ->method('normalize')
+            ->with(
+                $this->productAttributeValue,
+                null,
+                ['sylius_product_attribute_value_normalizer_already_called' => true],
+            )->willReturn(['value' => 42]);
+        $this->productAttributeValue->expects(self::once())->method('getType')->willReturn('integer');
+        $this->productAttributeValueNormalizer->setNormalizer($this->normalizer);
+        self::assertSame(['value' => 42], $this->productAttributeValueNormalizer->normalize($this->productAttributeValue));
     }
 }

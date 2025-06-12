@@ -32,50 +32,56 @@ final class GeneratedPromotionCouponsNormalizerTest extends TestCase
 
     private GeneratedPromotionCouponsNormalizer $generatedPromotionCouponsNormalizer;
 
+    private MockObject&PromotionCouponInterface $promotionCoupon;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->sectionProvider = $this->createMock(SectionProviderInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
-
         $this->generatedPromotionCouponsNormalizer = new GeneratedPromotionCouponsNormalizer(
             $this->sectionProvider,
             ['sylius:promotion_coupon:index'],
         );
         $this->generatedPromotionCouponsNormalizer->setNormalizer($this->normalizer);
+        $this->promotionCoupon = $this->createMock(PromotionCouponInterface::class);
     }
 
     public function testSupportsOnlyArrayCollectionThatContainsCouponsInAdminSectionWithProperData(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
-        self::assertTrue($this->generatedPromotionCouponsNormalizer
-            ->supportsNormalization(new ArrayCollection([$promotionCouponMock]), null, ['groups' => ['sylius:promotion_coupon:index']]))
-        ;
         $this->sectionProvider->method('getSection')->willReturn(new AdminApiSection());
+        self::assertTrue(
+            $this->generatedPromotionCouponsNormalizer->supportsNormalization(
+                new ArrayCollection([$this->promotionCoupon]),
+                null,
+                ['groups' => ['sylius:promotion_coupon:index']],
+            ),
+        );
         self::assertFalse($this->generatedPromotionCouponsNormalizer
-            ->supportsNormalization(new \stdClass(), null, ['groups' => ['sylius:promotion_coupon:index']]))
-        ;
-        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
-        self::assertFalse($this->generatedPromotionCouponsNormalizer
-            ->supportsNormalization(new ArrayCollection([$promotionCouponMock]), null, ['groups' => ['sylius:promotion_coupon:shop']]))
-        ;
-        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        self::assertFalse($this->generatedPromotionCouponsNormalizer
-            ->supportsNormalization(new ArrayCollection([$promotionCouponMock]), null, ['groups' => ['sylius:promotion_coupon:index']]))
-        ;
-        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        self::assertFalse($this->generatedPromotionCouponsNormalizer->supportsNormalization($promotionCouponMock, null, ['groups' => ['sylius:promotion_coupon:index']]));
+            ->supportsNormalization(new \stdClass(), null, ['groups' => ['sylius:promotion_coupon:index']]));
+        self::assertFalse(
+            $this->generatedPromotionCouponsNormalizer
+            ->supportsNormalization(
+                new ArrayCollection([$this->promotionCoupon]),
+                null,
+                ['groups' => ['sylius:promotion_coupon:shop']],
+            ),
+        );
+        self::assertFalse(
+            $this->generatedPromotionCouponsNormalizer
+            ->supportsNormalization(
+                $this->promotionCoupon,
+                null,
+                ['groups' => ['sylius:promotion_coupon:index']],
+            ),
+        );
     }
 
     public function testDoesNotSupportIfTheNormalizerHasBeenAlreadyCalled(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
-        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
+        $this->sectionProvider->expects(self::never())->method('getSection')->willReturn(new ShopApiSection());
         self::assertFalse($this->generatedPromotionCouponsNormalizer
-            ->supportsNormalization(new ArrayCollection([$promotionCouponMock]), null, [
+            ->supportsNormalization(new ArrayCollection([$this->promotionCoupon]), null, [
                 'sylius_generated_promotion_coupons_normalizer_already_called' => true,
                 'groups' => ['sylius:promotion_coupon:index'],
             ]))
@@ -84,72 +90,107 @@ final class GeneratedPromotionCouponsNormalizerTest extends TestCase
 
     public function testCallsDefaultNormalizerWhenGivenResourceIsNotAnInstanceOfArrayCollectionContainingPromotionCouponInterface(): void
     {
-        $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->normalizer->expects(self::once())->method('normalize')->with(new ArrayCollection([new \stdClass()]), null, [
+        $this->sectionProvider->expects(self::once())
+            ->method('getSection')
+            ->willReturn(new AdminApiSection());
+        $this->normalizer->expects(self::once())
+            ->method('normalize')
+            ->with(
+                new ArrayCollection([new \stdClass()]),
+                null,
+                [
             'sylius_generated_promotion_coupons_normalizer_already_called' => true,
             'groups' => ['sylius:promotion_coupon:index'],
-        ])
-            ->willReturn([])
-        ;
-        $this->generatedPromotionCouponsNormalizer->normalize(new ArrayCollection([new \stdClass()]), null, ['groups' => ['sylius:promotion_coupon:index']]);
+                    ],
+            )
+            ->willReturn([]);
+        $this->generatedPromotionCouponsNormalizer->normalize(
+            new ArrayCollection([new \stdClass()]),
+            null,
+            ['groups' => ['sylius:promotion_coupon:index']],
+        );
     }
 
     public function testThrowsAnExceptionIfTheGivenResourceIsNotAnInstanceOfArrayCollection(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
         $this->sectionProvider->expects(self::never())->method('getSection');
-        $this->normalizer->expects(self::never())->method('normalize')->with($promotionCouponMock, null, [
+        $this->normalizer->expects(self::never())
+            ->method('normalize')
+            ->with($this->promotionCoupon, null, [
             'sylius_generated_promotion_coupons_normalizer_already_called' => true,
             'groups' => ['sylius:promotion_coupon:index'],
-        ])
-        ;
+        ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->generatedPromotionCouponsNormalizer->normalize($promotionCouponMock, null, ['groups' => ['sylius:promotion_coupon:index']]);
+        $this->generatedPromotionCouponsNormalizer->normalize(
+            $this->promotionCoupon,
+            null,
+            ['groups' => ['sylius:promotion_coupon:index']],
+        );
     }
 
     public function testThrowsAnExceptionIfSerializerHasAlreadyBeenCalled(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
         $this->sectionProvider->expects(self::never())->method('getSection');
-        $this->normalizer->expects(self::never())->method('normalize')->with(new ArrayCollection([$promotionCouponMock]), null, [
-            'sylius_generated_promotion_coupons_normalizer_already_called' => true,
-            'groups' => ['sylius:promotion_coupon:index'],
-        ])
-        ;
+        $this->normalizer->expects(self::never())
+            ->method('normalize')
+            ->with(
+                new ArrayCollection([$this->promotionCoupon]),
+                null,
+                [
+                    'sylius_generated_promotion_coupons_normalizer_already_called' => true,
+                    'groups' => ['sylius:promotion_coupon:index'],
+                ],
+            );
         $this->expectException(InvalidArgumentException::class);
-        $this->generatedPromotionCouponsNormalizer->normalize(new ArrayCollection([$promotionCouponMock]), null, [
-            'sylius_generated_promotion_coupons_normalizer_already_called' => true,
-            'groups' => ['sylius:promotion_coupon:index'],
-        ]);
+        $this->generatedPromotionCouponsNormalizer->normalize(
+            new ArrayCollection([$this->promotionCoupon]),
+            null,
+            [
+                'sylius_generated_promotion_coupons_normalizer_already_called' => true,
+                'groups' => ['sylius:promotion_coupon:index'],
+            ],
+        );
     }
 
     public function testThrowsAnExceptionIfItIsNotAdminSection(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
         $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new ShopApiSection());
-        $this->normalizer->expects(self::never())->method('normalize')->with(new ArrayCollection([$promotionCouponMock]), null, [
-            'sylius_generated_promotion_coupons_normalizer_already_called' => true,
-            'groups' => ['sylius:promotion_coupon:index'],
-        ])
-        ;
+        $this->normalizer->expects(self::never())
+            ->method('normalize')
+            ->with(
+                new ArrayCollection([$this->promotionCoupon]),
+                null,
+                [
+                    'sylius_generated_promotion_coupons_normalizer_already_called' => true,
+                    'groups' => ['sylius:promotion_coupon:index'],
+                ],
+            );
         $this->expectException(InvalidArgumentException::class);
-        $this->generatedPromotionCouponsNormalizer->normalize(new ArrayCollection([$promotionCouponMock]), null, ['groups' => ['sylius:promotion_coupon:index']]);
+        $this->generatedPromotionCouponsNormalizer->normalize(
+            new ArrayCollection([$this->promotionCoupon]),
+            null,
+            ['groups' => ['sylius:promotion_coupon:index']],
+        );
     }
 
     public function testThrowsAnExceptionIfSerializationGroupIsNotSupported(): void
     {
-        /** @var PromotionCouponInterface|MockObject $promotionCouponMock */
-        $promotionCouponMock = $this->createMock(PromotionCouponInterface::class);
         $this->sectionProvider->expects(self::once())->method('getSection')->willReturn(new AdminApiSection());
-        $this->normalizer->expects(self::never())->method('normalize')->with(new ArrayCollection([$promotionCouponMock]), null, [
-            'sylius_generated_promotion_coupons_normalizer_already_called' => true,
-            'groups' => ['sylius:promotion_coupon:show'],
-        ])
-        ;
+        $this->normalizer->expects(self::never())
+            ->method('normalize')
+            ->with(
+                new ArrayCollection([$this->promotionCoupon]),
+                null,
+                [
+                    'sylius_generated_promotion_coupons_normalizer_already_called' => true,
+                    'groups' => ['sylius:promotion_coupon:show'],
+                ],
+            );
         $this->expectException(InvalidArgumentException::class);
-        $this->generatedPromotionCouponsNormalizer->normalize(new ArrayCollection([$promotionCouponMock]), null, ['groups' => ['sylius:promotion_coupon:show']]);
+        $this->generatedPromotionCouponsNormalizer->normalize(
+            new ArrayCollection([$this->promotionCoupon]),
+            null,
+            ['groups' => ['sylius:promotion_coupon:show']],
+        );
     }
 }
