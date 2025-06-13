@@ -90,71 +90,59 @@ final class ChannelBasedExtensionTest extends TestCase
         $firstTaxon = $this->createMock(TaxonInterface::class);
         $secondTaxon = $this->createMock(TaxonInterface::class);
         $channel = $this->createMock(ChannelInterface::class);
-
         $this->sectionProvider->method('getSection')->willReturn($shopApiSection);
-
         $channel->method('getMenuTaxon')->willReturn($menuTaxon);
         $menuTaxon->method('getCode')->willReturn('code');
-
         $this->queryNameGenerator->expects(self::exactly(2))
             ->method('generateParameterName')
             ->with($this->callback(fn ($param) => $param === 'parentCode' || $param === 'enabled'))
             ->willReturnCallback(fn ($param) => $param);
-
         $this->queryBuilder->expects(self::once())
             ->method('getRootAliases')
             ->willReturn(['o']);
-
         $this->queryBuilder->expects(self::once())
             ->method('addSelect')
             ->with('child')
             ->willReturnSelf();
-
         $this->queryBuilder->expects(self::once())
             ->method('innerJoin')
             ->with('o.parent', 'parent')
             ->willReturnSelf();
-
         $this->queryBuilder->expects(self::once())
             ->method('leftJoin')
             ->with('o.children', 'child', 'WITH', 'child.enabled = true')
             ->willReturnSelf();
-
-        $this->queryBuilder->expects(self::once())
+        $expectedConditions = [
+            'o.enabled = :enabled',
+            'parent.code = :parentCode',
+        ];
+        $callIndex = 0;
+        $this->queryBuilder->expects(self::exactly(2))
             ->method('andWhere')
-            ->with('o.enabled = :enabled')
-            ->willReturnSelf();
+            ->willReturnCallback(function ($condition) use (&$callIndex, $expectedConditions) {
+                self::assertEquals($expectedConditions[$callIndex], $condition);
+                ++$callIndex;
 
-        $this->queryBuilder->expects(self::once())
-            ->method('andWhere')
-            ->with('parent.code = :parentCode')
-            ->willReturnSelf();
-
+                return $this->queryBuilder;
+            });
         $this->queryBuilder->expects(self::once())
             ->method('addOrderBy')
             ->with('o.position')
             ->willReturnSelf();
-
         $expectedParams = [
             ['parentCode', 'code'],
             ['enabled', true],
         ];
-        $callIndex = 0;
+        $paramIndex = 0;
         $this->queryBuilder->expects(self::exactly(2))
             ->method('setParameter')
-            ->with(
-                $this->callback(function ($name) use (&$expectedParams, &$callIndex) {
-                    return $name === $expectedParams[$callIndex][0];
-                }),
-                $this->callback(function ($value) use (&$expectedParams, &$callIndex) {
-                    $result = $value === $expectedParams[$callIndex][1];
-                    ++$callIndex;
+            ->willReturnCallback(function ($name, $value) use (&$paramIndex, $expectedParams) {
+                self::assertEquals($expectedParams[$paramIndex][0], $name);
+                self::assertEquals($expectedParams[$paramIndex][1], $value);
+                ++$paramIndex;
 
-                    return $result;
-                }),
-            )
-            ->willReturnSelf();
-
+                return $this->queryBuilder;
+            });
         $this->extension->applyToCollection(
             $this->queryBuilder,
             $this->queryNameGenerator,

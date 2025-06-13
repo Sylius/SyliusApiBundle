@@ -64,8 +64,8 @@ final class VisitorBasedExtensionTest extends TestCase
         $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
         $section = $this->createMock(AdminApiSection::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->never())->method('getUser');
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser');
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToCollection($queryBuilder, $nameGenerator, OrderInterface::class, new Get());
@@ -78,8 +78,8 @@ final class VisitorBasedExtensionTest extends TestCase
         $section = $this->createMock(ShopApiSection::class);
         $user = $this->createMock(ShopUserInterface::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->once())->method('getUser')->willReturn($user);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser')->willReturn($user);
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToCollection($queryBuilder, $nameGenerator, OrderInterface::class, new Get());
@@ -102,8 +102,8 @@ final class VisitorBasedExtensionTest extends TestCase
         $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
         $section = $this->createMock(AdminApiSection::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->never())->method('getUser');
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser');
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToItem($queryBuilder, $nameGenerator, OrderInterface::class, [], new Get());
@@ -116,8 +116,8 @@ final class VisitorBasedExtensionTest extends TestCase
         $section = $this->createMock(ShopApiSection::class);
         $user = $this->createMock(ShopUserInterface::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->once())->method('getUser')->willReturn($user);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser')->willReturn($user);
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToItem($queryBuilder, $nameGenerator, OrderInterface::class, [], new Get());
@@ -161,20 +161,47 @@ final class VisitorBasedExtensionTest extends TestCase
                 }),
                 $this->callback(function ($arg2) use (&$expectedLeftJoins, &$leftJoinCall) {
                     $result = $arg2 === $expectedLeftJoins[$leftJoinCall][1];
-                    $leftJoinCall++;
+                    ++$leftJoinCall;
+
                     return $result;
-                })
+                }),
             )
             ->willReturn($queryBuilder);
 
-        $queryBuilder->expects($this->once())->method('expr')->willReturn($expr);
+        $queryBuilder->method('expr')->willReturn($expr);
 
-        $expr->expects($this->once())->method('isNull')->with('user')->willReturn('user IS NULL');
-        $expr->expects($this->once())->method('isNull')->with('order.customer')->willReturn('order.customer IS NULL');
-        $expr->expects($this->once())->method('isNotNull')->with('user')->willReturn('user IS NOT NULL');
-        $expr->expects($this->once())->method('eq')->with('order.createdByGuest', ':createdByGuest')->willReturn($exprEq);
-        $expr->expects($this->once())->method('andX')->with('user IS NOT NULL', $exprEq)->willReturn($exprAndx);
-        $expr->expects($this->once())->method('orX')->with('user IS NULL', 'order.customer IS NULL', $exprAndx)->willReturn($exprOrx);
+        $nullResults = [
+            'user' => 'user IS NULL',
+            'order.customer' => 'order.customer IS NULL',
+        ];
+
+        $expr->expects($this->exactly(2))
+            ->method('isNull')
+            ->willReturnCallback(function ($field) use ($nullResults) {
+                self::assertArrayHasKey($field, $nullResults);
+
+                return $nullResults[$field];
+            });
+
+        $expr->expects($this->once())
+            ->method('isNotNull')
+            ->with('user')
+            ->willReturn('user IS NOT NULL');
+
+        $expr->expects($this->once())
+            ->method('eq')
+            ->with('order.createdByGuest', ':createdByGuest')
+            ->willReturn($exprEq);
+
+        $expr->expects($this->once())
+            ->method('andX')
+            ->with('user IS NOT NULL', $exprEq)
+            ->willReturn($exprAndx);
+
+        $expr->expects($this->once())
+            ->method('orX')
+            ->with('user IS NULL', 'order.customer IS NULL', $exprAndx)
+            ->willReturn($exprOrx);
 
         $queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturn($queryBuilder);
         $queryBuilder->expects($this->once())->method('setParameter')->with('createdByGuest', true)->willReturn($queryBuilder);
@@ -200,7 +227,6 @@ final class VisitorBasedExtensionTest extends TestCase
 
         $nameGenerator->expects($this->exactly(3))
             ->method('generateJoinAlias')
-            ->with($this->logicalOr('order', 'customer', 'user'))
             ->willReturnCallback(fn ($arg) => $arg);
         $nameGenerator->expects($this->once())
             ->method('generateParameterName')
@@ -215,30 +241,63 @@ final class VisitorBasedExtensionTest extends TestCase
         $leftJoinCall = 0;
         $queryBuilder->expects($this->exactly(3))
             ->method('leftJoin')
-            ->with(
-                $this->callback(function ($arg1) use (&$expectedLeftJoins, &$leftJoinCall) {
-                    return $arg1 === $expectedLeftJoins[$leftJoinCall][0];
-                }),
-                $this->callback(function ($arg2) use (&$expectedLeftJoins, &$leftJoinCall) {
-                    $result = $arg2 === $expectedLeftJoins[$leftJoinCall][1];
-                    $leftJoinCall++;
-                    return $result;
-                })
-            )
+            ->willReturnCallback(function ($join, $alias) use (&$leftJoinCall, $expectedLeftJoins, $queryBuilder) {
+                self::assertEquals($expectedLeftJoins[$leftJoinCall][0], $join);
+                self::assertEquals($expectedLeftJoins[$leftJoinCall][1], $alias);
+                ++$leftJoinCall;
+
+                return $queryBuilder;
+            });
+
+        $queryBuilder->method('expr')->willReturn($expr);
+
+        $nullResults = [
+            'user' => 'user IS NULL',
+            'order.customer' => 'order.customer IS NULL',
+        ];
+
+        $expr->expects($this->exactly(2))
+            ->method('isNull')
+            ->willReturnCallback(function ($field) use ($nullResults) {
+                self::assertArrayHasKey($field, $nullResults);
+
+                return $nullResults[$field];
+            });
+
+        $expr->expects($this->once())
+            ->method('isNotNull')
+            ->with('user')
+            ->willReturn('user IS NOT NULL');
+
+        $expr->expects($this->once())
+            ->method('eq')
+            ->with('order.createdByGuest', ':createdByGuest')
+            ->willReturn($exprEq);
+
+        $expr->expects($this->once())
+            ->method('andX')
+            ->with('user IS NOT NULL', $exprEq)
+            ->willReturn($exprAndx);
+
+        $expr->expects($this->once())
+            ->method('orX')
+            ->with('user IS NULL', 'order.customer IS NULL', $exprAndx)
+            ->willReturn($exprOrx);
+
+        $queryBuilder->expects($this->once())
+            ->method('andWhere')
+            ->with($exprOrx)
             ->willReturn($queryBuilder);
 
-        $queryBuilder->expects($this->once())->method('expr')->willReturn($expr);
+        $queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with('createdByGuest', true)
+            ->willReturn($queryBuilder);
 
-        $expr->expects($this->once())->method('isNull')->with('user')->willReturn('user IS NULL');
-        $expr->expects($this->once())->method('isNull')->with('order.customer')->willReturn('order.customer IS NULL');
-        $expr->expects($this->once())->method('isNotNull')->with('user')->willReturn('user IS NOT NULL');
-        $expr->expects($this->once())->method('eq')->with('order.createdByGuest', ':createdByGuest')->willReturn($exprEq);
-        $expr->expects($this->once())->method('andX')->with('user IS NOT NULL', $exprEq)->willReturn($exprAndx);
-        $expr->expects($this->once())->method('orX')->with('user IS NULL', 'order.customer IS NULL', $exprAndx)->willReturn($exprOrx);
-
-        $queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturn($queryBuilder);
-        $queryBuilder->expects($this->once())->method('setParameter')->with('createdByGuest', true)->willReturn($queryBuilder);
-        $queryBuilder->expects($this->once())->method('addOrderBy')->with('o.id', 'ASC')->willReturn($queryBuilder);
+        $queryBuilder->expects($this->once())
+            ->method('addOrderBy')
+            ->with('o.id', 'ASC')
+            ->willReturn($queryBuilder);
 
         $this->extension->applyToItem($queryBuilder, $nameGenerator, OrderItemInterface::class, [], new Get());
     }

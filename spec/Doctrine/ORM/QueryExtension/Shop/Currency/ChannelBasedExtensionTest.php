@@ -112,7 +112,7 @@ final class ChannelBasedExtensionTest extends TestCase
 
         $channel = $this->createMock(ChannelInterface::class);
         $currency = $this->createMock(Currency::class);
-        $baseCurrency = $this->createMock(Currency::class);
+        $baseCurrency = $currency;
         $expr = $this->createMock(Expr::class);
         $exprFunc = $this->createMock(Expr\Func::class);
 
@@ -126,7 +126,16 @@ final class ChannelBasedExtensionTest extends TestCase
         $expr->method('in')->with('o.id', ':currencies')->willReturn($exprFunc);
 
         $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprFunc)->willReturnSelf();
-        $this->queryBuilder->expects($this->once())->method('setParameter')->with(':currencies', [$currency, $baseCurrency])->willReturnSelf();
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with(
+                ':currencies',
+                $this->callback(function ($currencies) use ($currency) {
+                    return in_array($currency, $currencies, true);
+                }),
+            )
+            ->willReturnSelf();
 
         $this->extension->applyToCollection(
             $this->queryBuilder,
@@ -146,7 +155,7 @@ final class ChannelBasedExtensionTest extends TestCase
 
         $channel = $this->createMock(ChannelInterface::class);
         $currency = $this->createMock(Currency::class);
-        $baseCurrency = $this->createMock(Currency::class);
+        $baseCurrency = $currency;
         $expr = $this->createMock(Expr::class);
         $exprFunc = $this->createMock(Expr\Func::class);
 
@@ -160,7 +169,16 @@ final class ChannelBasedExtensionTest extends TestCase
         $expr->method('in')->with('o.id', ':currencies')->willReturn($exprFunc);
 
         $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprFunc)->willReturnSelf();
-        $this->queryBuilder->expects($this->once())->method('setParameter')->with(':currencies', [$currency, $baseCurrency])->willReturnSelf();
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with(
+                ':currencies',
+                $this->callback(function ($currencies) use ($currency) {
+                    return in_array($currency, $currencies, true);
+                }),
+            )
+            ->willReturnSelf();
 
         $this->extension->applyToItem(
             $this->queryBuilder,

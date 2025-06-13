@@ -123,8 +123,21 @@ final class ChannelBasedExtensionTest extends TestCase
         $this->nameGenerator->method('generateParameterName')->with(':currency')->willReturn(':currency');
         $this->queryBuilder->method('getRootAliases')->willReturn(['o']);
         $this->queryBuilder->method('expr')->willReturn($expr);
-        $expr->method('eq')->with('o.sourceCurrency', ':currency')->willReturn($exprComparison);
-        $expr->method('eq')->with('o.targetCurrency', ':currency')->willReturn($exprComparison);
+
+        $eqParameters = [
+            'o.sourceCurrency' => $exprComparison,
+            'o.targetCurrency' => $exprComparison,
+        ];
+
+        $expr->expects($this->exactly(2))
+            ->method('eq')
+            ->willReturnCallback(function ($field, $value) use ($eqParameters) {
+                $this->assertEquals(':currency', $value);
+                $this->assertArrayHasKey($field, $eqParameters);
+
+                return $eqParameters[$field];
+            });
+
         $expr->method('orX')->with($exprComparison, $exprComparison)->willReturn($exprOrx);
 
         $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturnSelf();
@@ -155,8 +168,21 @@ final class ChannelBasedExtensionTest extends TestCase
         $this->nameGenerator->method('generateParameterName')->with(':currency')->willReturn(':currency');
         $this->queryBuilder->method('getRootAliases')->willReturn(['o']);
         $this->queryBuilder->method('expr')->willReturn($expr);
-        $expr->method('eq')->with('o.sourceCurrency', ':currency')->willReturn($exprComparison);
-        $expr->method('eq')->with('o.targetCurrency', ':currency')->willReturn($exprComparison);
+
+        $eqParameters = [
+            'o.sourceCurrency' => $exprComparison,
+            'o.targetCurrency' => $exprComparison,
+        ];
+
+        $expr->expects($this->exactly(2))
+            ->method('eq')
+            ->willReturnCallback(function ($field, $value) use ($eqParameters) {
+                $this->assertEquals(':currency', $value);
+                $this->assertArrayHasKey($field, $eqParameters);
+
+                return $eqParameters[$field];
+            });
+
         $expr->method('orX')->with($exprComparison, $exprComparison)->willReturn($exprOrx);
 
         $this->queryBuilder->expects($this->once())->method('andWhere')->with($exprOrx)->willReturnSelf();

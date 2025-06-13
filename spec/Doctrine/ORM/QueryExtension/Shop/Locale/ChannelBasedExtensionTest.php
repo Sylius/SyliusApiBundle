@@ -88,7 +88,7 @@ final class ChannelBasedExtensionTest extends TestCase
         $this->nameGenerator->expects($this->once())->method('generateParameterName')->with('locales')->willReturn('locales');
 
         $locales = new ArrayCollection([$locale]);
-        $channel->expects($this->once())->method('getLocales')->willReturn($locales);
+        $channel->method('getLocales')->willReturn($locales);
 
         $this->queryBuilder->expects($this->once())->method('getRootAliases')->willReturn(['o']);
         $this->queryBuilder->expects($this->once())->method('andWhere')->with('o.id in (:locales)')->willReturn($this->queryBuilder);

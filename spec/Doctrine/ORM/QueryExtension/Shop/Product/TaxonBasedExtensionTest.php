@@ -96,15 +96,18 @@ final class TaxonBasedExtensionTest extends TestCase
             ->with('taxonCode')
             ->willReturn('taxonCode');
 
-        $queryNameGenerator->expects($this->once())
-            ->method('generateJoinAlias')
-            ->with('productTaxons')
-            ->willReturn('productTaxons');
+        $expectedJoinAliases = [
+            'productTaxons' => 'productTaxons',
+            'taxon' => 'taxon',
+        ];
 
-        $queryNameGenerator->expects($this->once())
+        $queryNameGenerator->expects($this->exactly(2))
             ->method('generateJoinAlias')
-            ->with('taxon')
-            ->willReturn('taxon');
+            ->willReturnCallback(function ($alias) use ($expectedJoinAliases) {
+                self::assertArrayHasKey($alias, $expectedJoinAliases);
+
+                return $expectedJoinAliases[$alias];
+            });
 
         $queryBuilder->expects($this->once())
             ->method('getRootAliases')
@@ -115,10 +118,23 @@ final class TaxonBasedExtensionTest extends TestCase
             ->with('productTaxons')
             ->willReturn($queryBuilder);
 
-        $queryBuilder->expects($this->once())
+        $queryBuilder->expects($this->exactly(2))
             ->method('leftJoin')
-            ->with('o.productTaxons', 'productTaxons', 'WITH', 'productTaxons.product = o.id')
-            ->willReturn($queryBuilder);
+            ->willReturnCallback(function ($join, $alias, $type = null, $condition = null) use ($queryBuilder, $exprAndx) {
+                if ($join === 'o.productTaxons') {
+                    self::assertEquals('productTaxons', $alias);
+                    self::assertEquals('WITH', $type);
+                    self::assertEquals('productTaxons.product = o.id', $condition);
+                } elseif ($join === 'productTaxons.taxon') {
+                    self::assertEquals('taxon', $alias);
+                    self::assertEquals('WITH', $type);
+                    self::assertSame($exprAndx, $condition);
+                } else {
+                    self::fail('Unexpected leftJoin call with join: ' . $join);
+                }
+
+                return $queryBuilder;
+            });
 
         $expr->expects($this->once())
             ->method('in')
@@ -135,14 +151,7 @@ final class TaxonBasedExtensionTest extends TestCase
             ->with($exprIn, $exprEq)
             ->willReturn($exprAndx);
 
-        $queryBuilder->expects($this->once())
-            ->method('expr')
-            ->willReturn($expr);
-
-        $queryBuilder->expects($this->once())
-            ->method('leftJoin')
-            ->with('productTaxons.taxon', 'taxon', 'WITH', $exprAndx)
-            ->willReturn($queryBuilder);
+        $queryBuilder->method('expr')->willReturn($expr);
 
         $queryBuilder->expects($this->once())
             ->method('orderBy')

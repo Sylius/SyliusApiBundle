@@ -99,7 +99,6 @@ final class VisitorBasedExtensionTest extends TestCase
 
         $queryBuilder->expects($this->once())->method('getRootAliases')->willReturn(['o']);
 
-        // Replace withConsecutive/willReturnOnConsecutiveCalls with a callback
         $nameGenerator->expects($this->exactly(2))
             ->method('generateJoinAlias')
             ->with($this->logicalOr('customer', 'user'))
@@ -116,10 +115,21 @@ final class VisitorBasedExtensionTest extends TestCase
             ->with($this->logicalOr('o.customer', 'customer.user'), $this->logicalOr('customer', 'user'))
             ->willReturn($queryBuilder);
 
-        $queryBuilder->expects($this->once())->method('expr')->willReturn($expr);
+        $queryBuilder->method('expr')->willReturn($expr);
 
-        $expr->expects($this->once())->method('isNull')->with('user')->willReturn('user IS NULL');
-        $expr->expects($this->once())->method('isNull')->with('o.customer')->willReturn('o.customer IS NULL');
+        $nullResults = [
+            'user' => 'user IS NULL',
+            'o.customer' => 'o.customer IS NULL',
+        ];
+
+        $expr->expects($this->exactly(2))
+            ->method('isNull')
+            ->willReturnCallback(function ($field) use ($nullResults) {
+                self::assertArrayHasKey($field, $nullResults);
+
+                return $nullResults[$field];
+            });
+
         $expr->expects($this->once())->method('isNotNull')->with('user')->willReturn('user IS NOT NULL');
         $expr->expects($this->once())->method('eq')->with('o.createdByGuest', ':createdByGuest')->willReturn($exprEq);
         $expr->expects($this->once())->method('andX')->with('user IS NOT NULL', $exprEq)->willReturn($exprAndx);

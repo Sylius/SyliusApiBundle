@@ -97,38 +97,27 @@ final class EnabledWithinProductAssociationExtensionTest extends TestCase
             ->method('getRootAliases')
             ->willReturn(['o']);
 
-        $this->queryBuilder
-            ->expects(self::once())
+        $this->queryBuilder->expects(self::exactly(2))
             ->method('addSelect')
-            ->with('o')
-            ->willReturnSelf();
+            ->willReturnCallback(function ($select) {
+                static $index = 0;
+                $expected = ['o', 'association'][$index++];
+                self::assertEquals($expected, $select);
 
-        $this->queryBuilder
-            ->expects(self::once())
-            ->method('addSelect')
-            ->with('association')
-            ->willReturnSelf();
-
-        $this->queryBuilder
-            ->expects(self::once())
-            ->method('leftJoin')
-            ->with('o.associations', 'association')
-            ->willReturnSelf();
+                return $this->queryBuilder;
+            });
 
         $expr = $this->createMock(Expr::class);
         $comparison1 = $this->createMock(Comparison::class);
         $comparison2 = $this->createMock(Comparison::class);
         $andx = $this->createMock(Andx::class);
 
-        $expr->expects(self::once())
+        $expr->expects(self::exactly(2))
             ->method('eq')
-            ->with('associatedProduct.enabled', 'true')
-            ->willReturn($comparison1);
-
-        $expr->expects(self::once())
-            ->method('eq')
-            ->with('association.owner', 'o')
-            ->willReturn($comparison2);
+            ->willReturnMap([
+                ['associatedProduct.enabled', 'true', $comparison1],
+                ['association.owner', 'o', $comparison2],
+            ]);
 
         $expr->expects(self::once())
             ->method('andX')
@@ -136,15 +125,26 @@ final class EnabledWithinProductAssociationExtensionTest extends TestCase
             ->willReturn($andx);
 
         $this->queryBuilder
-            ->expects(self::once())
             ->method('expr')
             ->willReturn($expr);
 
-        $this->queryBuilder
-            ->expects(self::once())
+        $expectedLeftJoins = [
+            ['o.associations', 'association', null, null],
+            ['association.associatedProducts', 'associatedProduct', 'WITH', $andx],
+        ];
+        $joinIndex = 0;
+
+        $this->queryBuilder->expects(self::exactly(2))
             ->method('leftJoin')
-            ->with('association.associatedProducts', 'associatedProduct', 'WITH', $andx)
-            ->willReturnSelf();
+            ->willReturnCallback(function ($join, $alias, $condType = null, $cond = null) use (&$joinIndex, $expectedLeftJoins) {
+                self::assertEquals($expectedLeftJoins[$joinIndex][0], $join);
+                self::assertEquals($expectedLeftJoins[$joinIndex][1], $alias);
+                self::assertEquals($expectedLeftJoins[$joinIndex][2], $condType);
+                self::assertEquals($expectedLeftJoins[$joinIndex][3], $cond);
+                ++$joinIndex;
+
+                return $this->queryBuilder;
+            });
 
         $this->queryBuilder
             ->expects(self::once())

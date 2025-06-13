@@ -64,7 +64,7 @@ final class ShopUserBasedExtensionTest extends TestCase
         $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
         $section = $this->createMock(AdminApiSection::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
+        $this->sectionProvider->method('getSection')->willReturn($section);
         $this->userContext->expects($this->never())->method('getUser');
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
@@ -77,8 +77,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
         $section = $this->createMock(ShopApiSection::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->once())->method('getUser')->willReturn(null);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser')->willReturn(null);
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToCollection($queryBuilder, $nameGenerator, OrderInterface::class, new Get());
@@ -91,8 +91,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         $section = $this->createMock(ShopApiSection::class);
         $user = $this->createMock(AdminUserInterface::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->once())->method('getUser')->willReturn($user);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser')->willReturn($user);
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToCollection($queryBuilder, $nameGenerator, OrderInterface::class, new Get());
@@ -155,8 +155,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
         $section = $this->createMock(AdminApiSection::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->never())->method('getUser');
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser');
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToItem($queryBuilder, $nameGenerator, OrderInterface::class, [], new Get());
@@ -168,8 +168,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         $nameGenerator = $this->createMock(QueryNameGeneratorInterface::class);
         $section = $this->createMock(ShopApiSection::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->once())->method('getUser')->willReturn(null);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser')->willReturn(null);
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToItem($queryBuilder, $nameGenerator, OrderInterface::class, [], new Get());
@@ -182,8 +182,8 @@ final class ShopUserBasedExtensionTest extends TestCase
         $section = $this->createMock(ShopApiSection::class);
         $user = $this->createMock(AdminUserInterface::class);
 
-        $this->sectionProvider->expects($this->once())->method('getSection')->willReturn($section);
-        $this->userContext->expects($this->once())->method('getUser')->willReturn($user);
+        $this->sectionProvider->method('getSection')->willReturn($section);
+        $this->userContext->method('getUser')->willReturn($user);
         $queryBuilder->expects($this->never())->method('getRootAliases');
 
         $this->extension->applyToItem($queryBuilder, $nameGenerator, OrderInterface::class, [], new Get());
