@@ -64,7 +64,6 @@
             "Sylius\\Bundle\\ApiBundle\\": ""
         },
         "exclude-from-classmap": [
-            "spec/",
             "tests/"
         ]
     },
