@@ -108,13 +108,6 @@ final class EnabledProductsExtensionTest extends TestCase
             ->with('associatedProduct.channels', 'channel', 'WITH', 'channel = :channel')
             ->willReturn($this->queryBuilder);
 
-        $this->queryBuilder->expects($this->exactly(2))
-            ->method('setParameter')
-            ->willReturnMap([
-                ['enabled', true, $this->queryBuilder],
-                ['channel', $channel, $this->queryBuilder],
-            ]);
-
         $this->extension->applyToItem(
             $this->queryBuilder,
             $this->queryNameGenerator,
