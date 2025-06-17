@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler\Account;
+namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Account;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Account\SendAccountRegistrationEmail;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\SendAccountRegistrationEmailHandler;
-use Sylius\Bundle\ApiBundle\Tests\CommandHandler\MessageHandlerAttributeTrait;
+use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\CoreBundle\Mailer\AccountRegistrationEmailManagerInterface;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Model\ChannelInterface;

@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler\Account;
+namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Account;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Changer\PaymentMethodChangerInterface;
 use Sylius\Bundle\ApiBundle\Command\Account\ChangePaymentMethod;
 use Sylius\Bundle\ApiBundle\CommandHandler\Account\ChangePaymentMethodHandler;
-use Sylius\Bundle\ApiBundle\Tests\CommandHandler\MessageHandlerAttributeTrait;
+use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
 

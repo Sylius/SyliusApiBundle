@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler\Cart;
+namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Cart;
 
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Cart\InformAboutCartRecalculation;
 use Sylius\Bundle\ApiBundle\CommandHandler\Cart\InformAboutCartRecalculationHandler;
 use Sylius\Bundle\ApiBundle\Exception\OrderNoLongerEligibleForPromotion;
-use Sylius\Bundle\ApiBundle\Tests\CommandHandler\MessageHandlerAttributeTrait;
+use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 
 final class InformAboutCartRecalculationHandlerTest extends TestCase
 {

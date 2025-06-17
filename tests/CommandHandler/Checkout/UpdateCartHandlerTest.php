@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler\Checkout;
+namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Checkout;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +19,7 @@ use Sylius\Bundle\ApiBundle\Assigner\OrderPromotionCodeAssignerInterface;
 use Sylius\Bundle\ApiBundle\Command\Checkout\UpdateCart;
 use Sylius\Bundle\ApiBundle\CommandHandler\Checkout\UpdateCartHandler;
 use Sylius\Bundle\ApiBundle\Modifier\OrderAddressModifierInterface;
-use Sylius\Bundle\ApiBundle\Tests\CommandHandler\MessageHandlerAttributeTrait;
+use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Bundle\CoreBundle\Resolver\CustomerResolverInterface;
 use Sylius\Component\Core\Model\AddressInterface;
 use Sylius\Component\Core\Model\CustomerInterface;

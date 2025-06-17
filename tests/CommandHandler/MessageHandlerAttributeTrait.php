@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler;
+namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler;
 
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 

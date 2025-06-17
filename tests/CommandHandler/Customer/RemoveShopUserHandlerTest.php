@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler\Customer;
+namespace Tests\Sylius\Bundle\ApiBundle\CommandHandler\Customer;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Customer\RemoveShopUser;
 use Sylius\Bundle\ApiBundle\CommandHandler\Customer\RemoveShopUserHandler;
 use Sylius\Bundle\ApiBundle\Exception\UserNotFoundException;
-use Sylius\Bundle\ApiBundle\Tests\CommandHandler\MessageHandlerAttributeTrait;
+use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\ShopUserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
 
