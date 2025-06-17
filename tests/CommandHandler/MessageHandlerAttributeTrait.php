@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\ApiBundle\Tests\CommandHandler;
 
-use Sylius\Bundle\ApiBundle\spec\CommandHandler\ObjectBehavior;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-/** @mixin ObjectBehavior */
 trait MessageHandlerAttributeTrait
 {
     public function testAMessageHandler(): void
