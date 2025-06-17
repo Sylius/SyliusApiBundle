@@ -36,7 +36,7 @@ use Sylius\Component\Core\Model\ImageInterface;
 
 final class ImageFilterAwareResourceMetadataCollectionFactoryTest extends TestCase
 {
-    private ResourceMetadataCollectionFactoryInterface&MockObject $decorated;
+    private MockObject&ResourceMetadataCollectionFactoryInterface $decorated;
 
     private ImageFilterAwareResourceMetadataCollectionFactory $factory;
 

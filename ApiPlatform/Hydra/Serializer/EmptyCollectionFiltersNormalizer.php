@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * @internal
+ *
  * @see CollectionFiltersNormalizer
  *
  * Decorates the default behavior of the CollectionFiltersNormalizer
@@ -46,7 +47,7 @@ final class EmptyCollectionFiltersNormalizer implements NormalizerInterface, Nor
         mixed $data,
         ?string $format = null,
         array $context = [],
-    ): array|string|int|float|bool|\ArrayObject|null {
+    ): array|\ArrayObject|bool|float|int|string|null {
         $data = $this->decorated->normalize($data, $format, $context);
         if (!is_array($data)) {
             return $data;

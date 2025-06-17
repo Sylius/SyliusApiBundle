@@ -72,7 +72,8 @@ final readonly class ImageFilterAwareResourceMetadataCollectionFactory implement
         return $resourceMetadataCollection;
     }
 
-    private function resolveImageFilterParameter(Operation $operation): Operation {
+    private function resolveImageFilterParameter(Operation $operation): Operation
+    {
         $filterParameterKey = $this->filterParameter->getKey();
         $parameters = $operation->getParameters() ?? [];
         if ([] !== $parameters) {
