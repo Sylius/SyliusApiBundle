@@ -48,7 +48,8 @@
     "conflict": {
         "api-platform/core": "2.7.17",
         "doctrine/doctrine-bundle": "2.3.0",
-        "lexik/jwt-authentication-bundle": "^2.18"
+        "lexik/jwt-authentication-bundle": "^2.18",
+        "symfony/serializer": "^6.4.23"
     },
     "config": {
         "allow-plugins": {
