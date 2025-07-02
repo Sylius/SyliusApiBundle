@@ -18,9 +18,9 @@ use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Customer\RemoveShopUser;
 use Sylius\Bundle\ApiBundle\CommandHandler\Customer\RemoveShopUserHandler;
 use Sylius\Bundle\ApiBundle\Exception\UserNotFoundException;
-use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\ShopUserInterface;
 use Sylius\Component\User\Repository\UserRepositoryInterface;
+use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 
 final class RemoveShopUserHandlerTest extends TestCase
 {

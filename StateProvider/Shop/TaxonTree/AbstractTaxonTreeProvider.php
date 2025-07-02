@@ -36,7 +36,7 @@ abstract class AbstractTaxonTreeProvider implements ProviderInterface
     ) {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|object|null
     {
         Assert::true(is_a($operation->getClass(), TaxonInterface::class, true));
         Assert::isInstanceOf($operation, Get::class);

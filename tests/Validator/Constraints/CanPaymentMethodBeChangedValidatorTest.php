@@ -26,13 +26,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class CanPaymentMethodBeChangedValidatorTest extends TestCase
 {
-    private OrderRepositoryInterface&MockObject $orderRepository;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
     private ExecutionContextInterface&MockObject $executionContext;
 
     private CanPaymentMethodBeChangedValidator $canPaymentMethodBeChangedValidator;
 
-    private OrderInterface&MockObject $order;
+    private MockObject&OrderInterface $order;
 
     protected function setUp(): void
     {
@@ -62,7 +62,7 @@ final class CanPaymentMethodBeChangedValidatorTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
         $this->canPaymentMethodBeChangedValidator->validate(
             new ChangePaymentMethod('code', 123, 'ORDER_TOKEN'),
-            $constraint
+            $constraint,
         );
     }
 

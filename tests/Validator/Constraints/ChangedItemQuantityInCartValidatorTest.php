@@ -35,9 +35,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ChangedItemQuantityInCartValidatorTest extends TestCase
 {
-    private OrderItemRepositoryInterface&MockObject $orderItemRepository;
+    private MockObject&OrderItemRepositoryInterface $orderItemRepository;
 
-    private OrderRepositoryInterface&MockObject $orderRepository;
+    private MockObject&OrderRepositoryInterface $orderRepository;
 
     private AvailabilityCheckerInterface&MockObject $availabilityChecker;
 
@@ -45,15 +45,15 @@ final class ChangedItemQuantityInCartValidatorTest extends TestCase
 
     private ExecutionContextInterface&MockObject $executionContext;
 
-    private OrderItemInterface&MockObject $orderItem;
+    private MockObject&OrderItemInterface $orderItem;
 
-    private ProductVariantInterface&MockObject $productVariant;
+    private MockObject&ProductVariantInterface $productVariant;
 
-    private ProductInterface&MockObject $product;
+    private MockObject&ProductInterface $product;
 
     private ChannelInterface&MockObject $channel;
 
-    private OrderInterface&MockObject $cart;
+    private MockObject&OrderInterface $cart;
 
     protected function setUp(): void
     {
@@ -64,7 +64,7 @@ final class ChangedItemQuantityInCartValidatorTest extends TestCase
         $this->changedItemQuantityInCartValidator = new ChangedItemQuantityInCartValidator(
             $this->orderItemRepository,
             $this->orderRepository,
-            $this->availabilityChecker
+            $this->availabilityChecker,
         );
         $this->executionContext = $this->createMock(ExecutionContextInterface::class);
         $this->orderItem = $this->createMock(OrderItemInterface::class);
@@ -84,7 +84,7 @@ final class ChangedItemQuantityInCartValidatorTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
         $this->changedItemQuantityInCartValidator->validate(
             new CompleteOrder('TOKEN'),
-            new AddingEligibleProductVariantToCart()
+            new AddingEligibleProductVariantToCart(),
         );
     }
 
@@ -106,7 +106,7 @@ final class ChangedItemQuantityInCartValidatorTest extends TestCase
         self::expectException(OrderItemNotFoundException::class);
         $this->changedItemQuantityInCartValidator->validate(
             new ChangeItemQuantityInCart(orderTokenValue: 'token', orderItemId: 11, quantity: 2),
-            new ChangedItemQuantityInCart()
+            new ChangedItemQuantityInCart(),
         );
     }
 
@@ -229,7 +229,7 @@ final class ChangedItemQuantityInCartValidatorTest extends TestCase
             ->willReturn(false);
         $this->executionContext->expects(self::once())
             ->method('addViolation')
-            ->with('sylius.product.not_exist', ['%productName%' => 'PRODUCT NAME'],);
+            ->with('sylius.product.not_exist', ['%productName%' => 'PRODUCT NAME'], );
         $this->changedItemQuantityInCartValidator->validate(
             new ChangeItemQuantityInCart(
                 orderTokenValue: 'token',
@@ -268,7 +268,7 @@ final class ChangedItemQuantityInCartValidatorTest extends TestCase
             ->willReturnMap([
                 ['sylius.product_variant.not_exist', ['%productVariantCode%' => 'productVariantCode']],
                 ['sylius.product.not_exist', ['%productName%' => 'PRODUCT NAME']],
-                ['sylius.product_variant.not_sufficient', ['%productVariantCode%' => 'productVariantCode']]
+                ['sylius.product_variant.not_sufficient', ['%productVariantCode%' => 'productVariantCode']],
             ]);
     }
 }

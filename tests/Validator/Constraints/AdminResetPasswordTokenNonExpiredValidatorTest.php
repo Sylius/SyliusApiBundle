@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class AdminResetPasswordTokenNonExpiredValidatorTest extends TestCase
 {
-    private UserRepositoryInterface&MockObject $userRepository;
+    private MockObject&UserRepositoryInterface $userRepository;
 
     private AdminUserInterface&MockObject $adminUser;
 
@@ -42,7 +42,7 @@ final class AdminResetPasswordTokenNonExpiredValidatorTest extends TestCase
         $this->executionContext = $this->createMock(ExecutionContextInterface::class);
         $this->adminResetPasswordTokenNonExpiredValidator = new AdminResetPasswordTokenNonExpiredValidator(
             $this->userRepository,
-            'P5D'
+            'P5D',
         );
     }
 

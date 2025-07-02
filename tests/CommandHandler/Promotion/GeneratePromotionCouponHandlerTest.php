@@ -18,11 +18,11 @@ use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\ApiBundle\Command\Promotion\GeneratePromotionCoupon;
 use Sylius\Bundle\ApiBundle\CommandHandler\Promotion\GeneratePromotionCouponHandler;
 use Sylius\Bundle\ApiBundle\Exception\PromotionNotFoundException;
-use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 use Sylius\Component\Core\Model\PromotionCouponInterface;
 use Sylius\Component\Core\Model\PromotionInterface;
 use Sylius\Component\Core\Repository\PromotionRepositoryInterface;
 use Sylius\Component\Promotion\Generator\PromotionCouponGeneratorInterface;
+use Tests\Sylius\Bundle\ApiBundle\CommandHandler\MessageHandlerAttributeTrait;
 
 final class GeneratePromotionCouponHandlerTest extends TestCase
 {
