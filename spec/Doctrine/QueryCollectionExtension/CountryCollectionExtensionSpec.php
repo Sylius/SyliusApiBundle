@@ -84,7 +84,7 @@ final class CountryCollectionExtensionSpec extends ObjectBehavior
 
         $countriesCollection = new ArrayCollection([$country]);
 
-        $channel->getCountries()->shouldBeCalled()->willReturn($countriesCollection);
+        $channel->getEnabledCountries()->shouldBeCalled()->willReturn($countriesCollection);
 
         $queryNameGenerator->generateParameterName('countries')->shouldBeCalled()->willReturn('countries');
 
