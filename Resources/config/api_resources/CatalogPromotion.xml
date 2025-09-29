@@ -192,6 +192,9 @@ Example configuration for `percentage_discount` action type:
                         <attribute name="description">string</attribute>
                     </attribute>
                 </attribute>
+                <attribute name="additionalProperties">
+                    <attribute name="type">object</attribute>
+                </attribute>
             </attribute>
         </property>
         <property name="scopes" writable="true" />

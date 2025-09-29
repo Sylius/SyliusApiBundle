@@ -182,6 +182,9 @@
                         <attribute name="slug">string</attribute>
                     </attribute>
                 </attribute>
+                <attribute name="additionalProperties">
+                    <attribute name="type">object</attribute>
+                </attribute>
             </attribute>
         </property>
         <property name="images" writable="false" required="false">

@@ -142,6 +142,9 @@
                         <attribute name="instructions">string</attribute>
                     </attribute>
                 </attribute>
+                <attribute name="additionalProperties">
+                    <attribute name="type">object</attribute>
+                </attribute>
             </attribute>
         </property>
     </resource>

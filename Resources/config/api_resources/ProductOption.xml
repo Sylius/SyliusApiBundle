@@ -120,6 +120,9 @@
                         <attribute name="name">string</attribute>
                     </attribute>
                 </attribute>
+                <attribute name="additionalProperties">
+                    <attribute name="type">object</attribute>
+                </attribute>
             </attribute>
         </property>
     </resource>

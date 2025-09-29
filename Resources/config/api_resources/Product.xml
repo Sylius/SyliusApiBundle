@@ -253,6 +253,9 @@
                         <attribute name="metaDescription">string</attribute>
                     </attribute>
                 </attribute>
+                <attribute name="additionalProperties">
+                    <attribute name="type">object</attribute>
+                </attribute>
             </attribute>
         </property>
         <property name="productTaxons" readable="true" writable="true" />

@@ -223,6 +223,9 @@ Example configuration for `order_fixed_discount` action type:
                         <attribute name="label">string</attribute>
                     </attribute>
                 </attribute>
+                <attribute name="additionalProperties">
+                    <attribute name="type">object</attribute>
+                </attribute>
             </attribute>
         </property>
     </resource>
